@@ -1,9 +1,9 @@
-name: Generate traversal PDFs
+name: Generate Voronoi diagrams
 
 on:
   workflow_dispatch:
   push:
-    # The workflow itself writes to this branch; ignoring it prevents a loop.
+    # This workflow writes to artifacts; ignoring it prevents a trigger loop.
     branches-ignore:
       - artifacts
   schedule:
@@ -12,6 +12,7 @@ on:
 permissions:
   contents: write
 
+# Shared with the traversal workflow: both publish to the same branch.
 concurrency:
   group: visualization-artifacts
   cancel-in-progress: false
@@ -20,7 +21,7 @@ jobs:
   generate-and-publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out tutorial source
+      - name: Check out source
         uses: actions/checkout@v4
         with:
           ref: master
@@ -30,25 +31,18 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Graphviz
-        run: sudo apt-get update && sudo apt-get install -y graphviz
-
-      - name: Generate a random graph walkthrough
+      - name: Generate SVG collection
         env:
-          ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/voronoi-diagrams
         run: |
           seed="$(date -u +%s)"
-          python3 2026-09-05/bfs_dfs_tutorial/bfs_dfs_visualizer.py \
-            --algorithm both \
-            --random-graph \
-            --nodes 10 \
-            --edge-probability 0.30 \
+          python3 2026-09-05/voronoi_diagram/voronoi_svg_generator.py \
             --seed "$seed" \
             --output "$ARTIFACT_DIRECTORY"
 
-      - name: Commit PDFs to the artifacts branch
+      - name: Commit SVGs to the artifacts branch
         env:
-          ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/voronoi-diagrams
         run: |
           git fetch origin artifacts || true
           if git show-ref --verify --quiet refs/remotes/origin/artifacts; then
@@ -57,11 +51,11 @@ jobs:
             git switch --orphan artifacts
             git rm -rf . || true
           fi
-          rm -rf generated
-          cp -R "$ARTIFACT_DIRECTORY" generated
-          git add generated
+          rm -rf voronoi
+          cp -R "$ARTIFACT_DIRECTORY" voronoi
+          git add voronoi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Generate traversal PDFs" \
-            -m "Random graph seed: $(jq -r .random_seed generated/graph.json)"
+          git commit -m "Generate Voronoi diagrams" \
+            -m "Voronoi seed: $(jq -r .seed voronoi/manifest.json)"
           git push origin HEAD:artifacts
