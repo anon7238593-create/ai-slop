@@ -2,8 +2,12 @@ name: Generate traversal PDFs
 
 on:
   workflow_dispatch:
+  push:
+    # The workflow itself writes to this branch; ignoring it prevents a loop.
+    branches-ignore:
+      - artifacts
   schedule:
-    - cron: "0 6 * * 1"
+    - cron: "0 12 * * *"
 
 permissions:
   contents: write
