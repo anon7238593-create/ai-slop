@@ -22,28 +22,32 @@ graph traversal {
   J [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   A -- B [color="#7C3AED", penwidth=3.8];
   A -- C [color="#7C3AED", penwidth=3.8];
-  A -- E [color="#7C3AED", penwidth=3.8];
   A -- F [color="#7C3AED", penwidth=3.8];
   A -- G [color="#7C3AED", penwidth=3.8];
   A -- I [color="#7C3AED", penwidth=3.8];
+  A -- J [color="#7C3AED", penwidth=3.8];
   B -- C;
   B -- D [color="#7C3AED", penwidth=3.8];
-  B -- E;
+  B -- E [color="#7C3AED", penwidth=3.8];
   B -- F;
   B -- G;
   B -- H [color="#7C3AED", penwidth=3.8];
-  B -- I;
-  B -- J [color="#7C3AED", penwidth=3.8];
-  C -- D;
-  C -- G;
+  B -- J;
+  C -- J;
+  D -- E;
+  D -- F;
   D -- G;
-  E -- F;
-  E -- I;
+  D -- J;
+  E -- J;
+  F -- G;
+  F -- H;
+  F -- I;
   F -- J;
-  G -- I;
+  G -- H;
+  G -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> I  |  G  |  F  |  E  |  C  |  J  |  H</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> J  |  I  |  G  |  F  |  C  |  H  |  E</TD></TR>
       <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, D</TD></TR>
     </TABLE>
   >];
