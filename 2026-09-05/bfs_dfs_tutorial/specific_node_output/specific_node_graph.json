@@ -1,0 +1,41 @@
+{
+  "graph": {
+    "A": [
+      "B",
+      "C"
+    ],
+    "B": [
+      "A",
+      "D",
+      "E"
+    ],
+    "C": [
+      "A",
+      "F"
+    ],
+    "D": [
+      "B",
+      "G"
+    ],
+    "E": [
+      "B",
+      "G",
+      "H"
+    ],
+    "F": [
+      "C",
+      "H"
+    ],
+    "G": [
+      "D",
+      "E"
+    ],
+    "H": [
+      "E",
+      "F"
+    ]
+  },
+  "start_node": "G",
+  "random_seed": null,
+  "edge_probability": null
+}

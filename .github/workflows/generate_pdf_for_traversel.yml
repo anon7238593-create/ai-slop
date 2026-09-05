@@ -45,6 +45,18 @@ jobs:
             --edge-probability 0.30 \
             --seed "$seed" \
             --output "$ARTIFACT_DIRECTORY"
+          python3 2026-09-05/bfs_dfs_tutorial/specific_node_traversal.py \
+            --algorithm both \
+            --node E \
+            --random-graph \
+            --nodes 10 \
+            --edge-probability 0.30 \
+            --seed "$seed" \
+            --output "$ARTIFACT_DIRECTORY/specific-node"
+          mkdir -p "$ARTIFACT_DIRECTORY/specific-node/code"
+          cp 2026-09-05/bfs_dfs_tutorial/bfs_dfs_visualizer.py \
+            2026-09-05/bfs_dfs_tutorial/specific_node_traversal.py \
+            "$ARTIFACT_DIRECTORY/specific-node/code/"
 
       - name: Combine all traversal steps into one PDF
         env:
@@ -54,6 +66,10 @@ jobs:
             "$ARTIFACT_DIRECTORY"/bfs/step_*.pdf \
             "$ARTIFACT_DIRECTORY"/dfs/step_*.pdf \
             "$ARTIFACT_DIRECTORY"/bfs_dfs_complete_walkthrough.pdf
+          pdfunite \
+            "$ARTIFACT_DIRECTORY"/specific-node/bfs/step_*.pdf \
+            "$ARTIFACT_DIRECTORY"/specific-node/dfs/step_*.pdf \
+            "$ARTIFACT_DIRECTORY"/specific-node/specific_node_bfs_dfs_walkthrough.pdf
 
       - name: Commit PDFs to the artifacts branch
         env:

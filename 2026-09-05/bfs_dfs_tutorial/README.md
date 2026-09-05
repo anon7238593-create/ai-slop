@@ -30,6 +30,16 @@ python3 bfs_dfs_visualizer.py --random-graph --nodes 10 --edge-probability 0.30 
 
 The repository workflow `.github/workflows/generate_pdf_for_traversel.yml` uses this mode and publishes the refreshed PDFs to the `artifacts` branch.
 
+## Start from one specific node
+
+`specific_node_traversal.py` is a dedicated entry point for demonstrating both traversals from one selected node (node `G` by default). It creates its own DOT files, individual PDFs, and graph metadata.
+
+```bash
+python3 specific_node_traversal.py --node G --algorithm both
+```
+
+Use `--random-graph --nodes 10 --seed 20260905` with it to reproduce the workflow's random graph. The workflow also creates a single `specific_node_bfs_dfs_walkthrough.pdf` for easier viewing.
+
 ## Customize the graph
 
 Edit `GRAPH` and `START_NODE` near the top of `bfs_dfs_visualizer.py`. The neighbour ordering is preserved, so it controls the exact teaching sequence. `GRAPH` is currently undirected: include both directions for every connection.

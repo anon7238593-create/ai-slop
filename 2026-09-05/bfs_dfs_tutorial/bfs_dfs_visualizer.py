@@ -171,6 +171,7 @@ def main() -> None:
     parser.add_argument("--nodes", type=int, default=10, help="number of nodes for --random-graph (3-26)")
     parser.add_argument("--edge-probability", type=float, default=0.30, help="chance of each extra edge in a random graph")
     parser.add_argument("--seed", type=int, help="seed for reproducible random graph generation")
+    parser.add_argument("--start-node", help="node from which to start the traversal")
     args = parser.parse_args()
     if not shutil.which("dot"):
         raise SystemExit("Graphviz is required. Install it, then ensure the 'dot' command is on PATH.")
@@ -185,6 +186,10 @@ def main() -> None:
             "edge_probability": args.edge_probability,
         }
         (args.output / "graph.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+    if args.start_node:
+        if args.start_node not in GRAPH:
+            raise SystemExit(f"Unknown start node {args.start_node!r}. Choose one of: {', '.join(GRAPH)}")
+        START_NODE = args.start_node
     for algorithm in (("bfs", "dfs") if args.algorithm == "both" else (args.algorithm,)):
         render(algorithm, args.output)
 
