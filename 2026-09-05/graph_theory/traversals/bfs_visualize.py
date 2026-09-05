@@ -31,10 +31,13 @@ def bfs_step_dot(graph: Graph, snapshot: BFSStep) -> str:
     vertices.update(snapshot.discovered)
     order = sorted(vertices, key=str)
     identifiers = {vertex: f"v{index}" for index, vertex in enumerate(order)}
+    title = f"BFS step {snapshot.step}: processing {snapshot.current}"
+    title = title.replace("\\", "\\\\").replace('"', '\\"')
+    queue_text = str(list(snapshot.queue)).replace("\\", "\\\\").replace('"', '\\"')
     lines = [
         "graph BFS {",
         '  graph [layout=dot, overlap=false, labelloc=t, '
-        f'label={_quote(f"BFS step {snapshot.step}: processing {snapshot.current}\\\\nqueue: {list(snapshot.queue)}")}, '
+        f'label="{title}\\nqueue: {queue_text}", '
         'fontsize=18];',
         '  node [shape=circle, style=filled, fontname="Helvetica"];',
         '  edge [fontname="Helvetica"];',
