@@ -265,7 +265,7 @@ expression: parser.c expression.c
 
 ```make
 parser.c parser.h: expression.y
-	yacc -d -o parser.c expression.y
+	yacc -d -o parser.c --defines=parser.h expression.y
 ```
 
 - Declares both generated files as outputs of `expression.y`.
