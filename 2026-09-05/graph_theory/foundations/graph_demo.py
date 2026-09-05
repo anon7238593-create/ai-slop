@@ -101,6 +101,41 @@ class Graph:
             return self.degree(vertex)
         return sum(edge.target == vertex for edge in self.edges)
 
+    def to_dot(self, *, name: str = "G") -> str:
+        """Return this graph in Graphviz DOT format.
+
+        Vertex values are used as labels rather than raw DOT identifiers, so
+        arbitrary hashable Python values remain safe to visualize.
+        """
+        keyword = "digraph" if self.directed else "graph"
+        connector = "->" if self.directed else "--"
+        order = sorted(self.vertices, key=str)
+        identifiers = {vertex: f"v{index}" for index, vertex in enumerate(order)}
+
+        def quote(value: object) -> str:
+            text = str(value).replace("\\", "\\\\").replace('"', '\\"')
+            return f'"{text}"'
+
+        lines = [f"{keyword} {quote(name)} {{", "  graph [overlap=false];"]
+        for vertex in order:
+            identifier = identifiers[vertex]
+            lines.append(f"  {identifier} [label={quote(vertex)}];")
+        for edge in self.edges:
+            attributes = [f"label={quote(edge.weight)}"]
+            if edge.key is not None:
+                attributes.append(f"tooltip={quote(edge.key)}")
+            lines.append(
+                f"  {identifiers[edge.source]} {connector} "
+                f"{identifiers[edge.target]} [{', '.join(attributes)}];"
+            )
+        lines.append("}")
+        return "\n".join(lines) + "\n"
+
+    def write_dot(self, path: str, *, name: str = "G") -> None:
+        """Write a Graphviz DOT representation to ``path``."""
+        with open(path, "w", encoding="utf-8") as output:
+            output.write(self.to_dot(name=name))
+
 
 def print_matrix(graph: Graph) -> None:
     order, matrix = graph.adjacency_matrix()
@@ -138,6 +173,8 @@ def demo() -> None:
     print("\nMultigraph")
     print("parallel edge list:", flights.edge_list())
     print("matrix keeps the minimum weight:", flights.adjacency_matrix()[1])
+    roads.write_dot("graph.dot", name="Roads")
+    print("\nWrote Graphviz representation to graph.dot")
 
 
 if __name__ == "__main__":

@@ -6,10 +6,22 @@ Vertices only need to be hashable.
 """
 
 from collections import deque
+from dataclasses import dataclass
 from typing import Hashable, Iterable, Mapping, TypeVar
 
 Vertex = TypeVar("Vertex", bound=Hashable)
 Graph = Mapping[Vertex, Iterable[Vertex]]
+
+
+@dataclass(frozen=True)
+class BFSStep:
+    """A snapshot of BFS immediately before processing one queue item."""
+
+    step: int
+    current: Vertex
+    queue: tuple[Vertex, ...]
+    discovered: frozenset[Vertex]
+    parent: dict[Vertex, Vertex | None]
 
 
 def _vertices(graph: Graph[Vertex]) -> set[Vertex]:
@@ -36,6 +48,44 @@ def bfs(graph: Graph[Vertex], start: Vertex) -> tuple[list[Vertex], dict[Vertex,
                 distance[neighbor] = distance[vertex] + 1
                 queue.append(neighbor)
     return order, parent, distance
+
+
+def bfs_trace(
+    graph: Graph[Vertex], start: Vertex
+) -> tuple[list[BFSStep], list[Vertex], dict[Vertex, Vertex | None], dict[Vertex, int]]:
+    """Return BFS snapshots as well as the ordinary BFS results.
+
+    Each snapshot is captured immediately before its ``current`` vertex is
+    expanded. The snapshot copies are safe for visualization or later
+    inspection and do not expose BFS's mutable internal state.
+    """
+    if start not in _vertices(graph):
+        raise KeyError(f"unknown start vertex: {start!r}")
+    steps: list[BFSStep] = []
+    order: list[Vertex] = []
+    parent: dict[Vertex, Vertex | None] = {start: None}
+    distance: dict[Vertex, int] = {start: 0}
+    queue = deque([start])
+    step_number = 0
+    while queue:
+        vertex = queue.popleft()
+        steps.append(
+            BFSStep(
+                step=step_number,
+                current=vertex,
+                queue=tuple(queue),
+                discovered=frozenset(parent),
+                parent=dict(parent),
+            )
+        )
+        step_number += 1
+        order.append(vertex)
+        for neighbor in graph.get(vertex, ()):
+            if neighbor not in parent:
+                parent[neighbor] = vertex
+                distance[neighbor] = distance[vertex] + 1
+                queue.append(neighbor)
+    return steps, order, parent, distance
 
 
 def dfs_iterative(graph: Graph[Vertex], start: Vertex) -> tuple[list[Vertex], dict[Vertex, Vertex | None]]:

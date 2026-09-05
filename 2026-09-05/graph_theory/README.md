@@ -17,7 +17,7 @@ connection between the mathematics and the implementation remains visible.
 | Topic | Main ideas | Python material |
 | --- | --- | --- |
 | [Foundations](foundations/) | Graph models, representations, degrees, neighborhoods, variants, complexity | `graph_demo.py` |
-| [Traversals](traversals/) | BFS, DFS, parent trees, timestamps, cycles, bipartiteness, components, topological sort | `traversals.py` |
+| [Traversals](traversals/) | BFS, DFS, parent trees, timestamps, cycles, bipartiteness, components, topological sort, visual traces | `traversals.py`, `bfs_visualize.py`, BFS PDFs |
 | [Shortest paths](shortest_paths/) | BFS paths, Dijkstra, Bellman-Ford, DAG paths, Floyd-Warshall, negative cycles | `shortest_paths.py` |
 | [Connectivity](connectivity/) | Components, SCCs, DSU, articulation points, bridges, biconnected blocks | `connectivity.py`, `test_connectivity.py` |
 | [Spanning trees](spanning_trees/) | Trees, forests, MSTs, cuts, cycles, Kruskal, Prim, DSU | `spanning_trees.py` |
@@ -52,6 +52,17 @@ python3 -m unittest -v
 Most scripts include assertions or demonstrations. They are intentionally
 small enough to edit interactively: change the vertices, add an edge, alter a
 weight, or construct a counterexample and observe what changes.
+
+The foundations example also writes `foundations/graph.dot`, a Graphviz DOT
+description of its sample road graph. With Graphviz installed, render it with:
+
+```sh
+cd foundations
+python3 graph_demo.py
+dot -Tpdf graph.dot -o graph.pdf
+```
+
+`graph.pdf` is a generated visualization and is intentionally not tracked.
 
 ## Shared conventions
 

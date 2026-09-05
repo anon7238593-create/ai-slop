@@ -1,0 +1,11 @@
+graph "Roads" {
+  graph [overlap=false];
+  v0 [label="A"];
+  v1 [label="B"];
+  v2 [label="C"];
+  v3 [label="D"];
+  v0 -- v1 [label="4"];
+  v0 -- v2 [label="2"];
+  v1 -- v3 [label="5"];
+  v2 -- v3 [label="1"];
+}

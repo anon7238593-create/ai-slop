@@ -209,3 +209,29 @@ For production callers, keep adjacency mappings explicit and decide whether
 missing isolated vertices should be represented as `{vertex: []}`. The
 implementation accepts isolated vertices that appear only as keys or only in
 neighbor lists, and it does not mutate the caller's graph.
+
+## 11. Visualizing every BFS step with Graphviz
+
+[`bfs_visualize.py`](bfs_visualize.py) turns a BFS run into a sequence of
+PDFs. It captures a snapshot immediately before each queue item is expanded:
+
+- the **gold** node is the current node;
+- **green** nodes have been discovered and are in the BFS frontier or have
+  already been processed;
+- the green thick edges are the parent-tree edges discovered by BFS;
+- gray nodes and edges have not yet been reached;
+- the title shows the step number and queue contents.
+
+Run it with:
+
+```bash
+python3 bfs_visualize.py
+```
+
+The script writes `bfs_pdfs/bfs_step_00.pdf`, `bfs_step_01.pdf`, and so on.
+It uses `dot -Tpdf`, so Graphviz must be installed and `dot` must be on
+`PATH`. The DOT files are deleted after rendering because the PDFs are the
+portable artifacts of interest. The implementation is intentionally separate
+from `bfs()` so the ordinary algorithm keeps its simple return value while
+`bfs_trace()` provides immutable snapshots for visualization, animation, or
+debugging.

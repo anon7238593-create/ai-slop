@@ -11,6 +11,9 @@ library-only implementation. It intentionally favors readable code over a
 feature-complete graph package; copy it and modify the examples at the bottom
 to experiment.
 
+It also exports the sample road graph as [`graph.dot`](graph.dot), a plain-text
+Graphviz file that can be rendered into an image or PDF.
+
 ## 1. What is a graph?
 
 A graph is a pair \(G=(V,E)\):
@@ -188,5 +191,23 @@ python3 graph_demo.py
 
 The script builds a weighted undirected graph, prints all three
 representations, reports degrees and neighborhoods, and demonstrates a
-directed graph and a multigraph. It uses only Python's standard library.
+directed graph and a multigraph. It uses only Python's standard library. At the
+end it calls `Graph.write_dot`, which serializes the road graph as DOT.
 
+### Rendering the DOT file
+
+Install Graphviz using your operating system's package manager, then run:
+
+```bash
+dot -Tpdf graph.dot -o graph.pdf
+dot -Tpng graph.dot -o graph.png
+```
+
+The generated `graph.pdf` or `graph.png` is not required to run the Python
+example. The DOT file is deliberately human-readable, so you can edit labels,
+add edges, or change Graphviz attributes before rendering it.
+
+`Graph.to_dot()` creates stable internal node IDs and puts the original Python
+vertex values in quoted labels. This handles spaces and punctuation without
+requiring vertex names to be valid DOT identifiers. Edge weights become labels;
+multigraph edge keys become tooltips.
