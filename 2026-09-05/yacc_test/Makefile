@@ -1,13 +1,13 @@
 CC ?= cc
 CFLAGS ?= -Wall -Wextra -std=c99
 
-expression: y.tab.c expression.c
-	$(CC) $(CFLAGS) -o $@ y.tab.c expression.c
+expression: parser.c expression.c
+	$(CC) $(CFLAGS) -o $@ parser.c expression.c
 
-y.tab.c y.tab.h: expression.y
-	yacc -d expression.y
+parser.c parser.h: expression.y
+	yacc -d -o parser.c expression.y
 
 clean:
-	rm -f expression y.tab.c y.tab.h
+	rm -f expression parser.c parser.h
 
 .PHONY: clean
