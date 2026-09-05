@@ -30,8 +30,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Graphviz
-        run: sudo apt-get update && sudo apt-get install -y graphviz
+      - name: Install PDF generation tools
+        run: sudo apt-get update && sudo apt-get install -y graphviz poppler-utils
 
       - name: Generate a random graph walkthrough
         env:
@@ -45,6 +45,15 @@ jobs:
             --edge-probability 0.30 \
             --seed "$seed" \
             --output "$ARTIFACT_DIRECTORY"
+
+      - name: Combine all traversal steps into one PDF
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
+        run: |
+          pdfunite \
+            "$ARTIFACT_DIRECTORY"/bfs/step_*.pdf \
+            "$ARTIFACT_DIRECTORY"/dfs/step_*.pdf \
+            "$ARTIFACT_DIRECTORY"/bfs_dfs_complete_walkthrough.pdf
 
       - name: Commit PDFs to the artifacts branch
         env:
