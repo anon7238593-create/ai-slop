@@ -8,6 +8,8 @@ Run:
 from __future__ import annotations
 
 import argparse
+import json
+import random
 import shutil
 import subprocess
 from collections import deque
@@ -39,6 +41,31 @@ COLORS = {
 def undirected_edges(graph: dict[str, list[str]]) -> list[tuple[str, str]]:
     """Return each undirected edge exactly once, in a stable order."""
     return [(node, neighbor) for node in graph for neighbor in graph[node] if node < neighbor]
+
+
+def random_connected_graph(nodes: int, edge_probability: float, seed: int | None) -> dict[str, list[str]]:
+    """Make a connected, undirected graph with a reproducible optional seed."""
+    if not 3 <= nodes <= 26:
+        raise ValueError("--nodes must be between 3 and 26")
+    if not 0 <= edge_probability <= 1:
+        raise ValueError("--edge-probability must be between 0 and 1")
+    generator = random.Random(seed)
+    labels = [chr(ord("A") + index) for index in range(nodes)]
+    connections = {label: set() for label in labels}
+
+    # First create a random spanning tree, guaranteeing every node is reachable.
+    for index in range(1, nodes):
+        parent = labels[generator.randrange(index)]
+        child = labels[index]
+        connections[parent].add(child)
+        connections[child].add(parent)
+    # Then add extra edges to make the demonstration graph more interesting.
+    for left_index, left in enumerate(labels):
+        for right in labels[left_index + 1 :]:
+            if right not in connections[left] and generator.random() < edge_probability:
+                connections[left].add(right)
+                connections[right].add(left)
+    return {label: sorted(neighbors) for label, neighbors in connections.items()}
 
 
 def dot_quote(value: str) -> str:
@@ -126,21 +153,38 @@ def render(algorithm: str, output_root: Path) -> None:
     """Write numbered .dot files and matching PDFs for an algorithm."""
     target = output_root / algorithm
     target.mkdir(parents=True, exist_ok=True)
-    for index, (action, current, frontier, done, edges) in enumerate(traversal_steps(algorithm), start=1):
+    steps = traversal_steps(algorithm)
+    for index, (action, current, frontier, done, edges) in enumerate(steps, start=1):
         dot_path = target / f"step_{index:02d}.dot"
         pdf_path = dot_path.with_suffix(".pdf")
         dot_path.write_text(make_dot(algorithm, index, action, current, frontier, done, edges), encoding="utf-8")
         subprocess.run(["dot", "-Tpdf", str(dot_path), "-o", str(pdf_path)], check=True)
-    print(f"Created {len(traversal_steps(algorithm))} DOT files and PDFs in {target}")
+    print(f"Created {len(steps)} DOT files and PDFs in {target}")
 
 
 def main() -> None:
+    global GRAPH, START_NODE
     parser = argparse.ArgumentParser(description="Create BFS/DFS Graphviz walkthrough PDFs.")
     parser.add_argument("--algorithm", choices=("bfs", "dfs", "both"), default="both")
     parser.add_argument("--output", type=Path, default=Path("output"), help="directory for generated files")
+    parser.add_argument("--random-graph", action="store_true", help="generate a random connected graph instead of the example graph")
+    parser.add_argument("--nodes", type=int, default=10, help="number of nodes for --random-graph (3-26)")
+    parser.add_argument("--edge-probability", type=float, default=0.30, help="chance of each extra edge in a random graph")
+    parser.add_argument("--seed", type=int, help="seed for reproducible random graph generation")
     args = parser.parse_args()
     if not shutil.which("dot"):
         raise SystemExit("Graphviz is required. Install it, then ensure the 'dot' command is on PATH.")
+    if args.random_graph:
+        GRAPH = random_connected_graph(args.nodes, args.edge_probability, args.seed)
+        START_NODE = next(iter(GRAPH))
+        args.output.mkdir(parents=True, exist_ok=True)
+        metadata = {
+            "graph": GRAPH,
+            "start_node": START_NODE,
+            "random_seed": args.seed,
+            "edge_probability": args.edge_probability,
+        }
+        (args.output / "graph.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
     for algorithm in (("bfs", "dfs") if args.algorithm == "both" else (args.algorithm,)):
         render(algorithm, args.output)
 

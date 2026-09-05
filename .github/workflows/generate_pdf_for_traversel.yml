@@ -1,0 +1,63 @@
+name: Generate traversal PDFs
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: traversal-pdf-artifacts
+  cancel-in-progress: false
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tutorial source
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Generate a random graph walkthrough
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
+        run: |
+          seed="$(date -u +%s)"
+          python3 2026-09-05/bfs_dfs_tutorial/bfs_dfs_visualizer.py \
+            --algorithm both \
+            --random-graph \
+            --nodes 10 \
+            --edge-probability 0.30 \
+            --seed "$seed" \
+            --output "$ARTIFACT_DIRECTORY"
+
+      - name: Commit PDFs to the artifacts branch
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
+        run: |
+          git fetch origin artifacts || true
+          if git show-ref --verify --quiet refs/remotes/origin/artifacts; then
+            git switch --force-create artifacts origin/artifacts
+          else
+            git switch --orphan artifacts
+            git rm -rf . || true
+          fi
+          rm -rf generated
+          cp -R "$ARTIFACT_DIRECTORY" generated
+          git add generated
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Generate traversal PDFs" \
+            -m "Random graph seed: $(jq -r .random_seed generated/graph.json)"
+          git push origin HEAD:artifacts
