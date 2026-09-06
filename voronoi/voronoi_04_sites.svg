@@ -1,24 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title description">
   <title id="title">Voronoi diagram with 4 sites</title>
-  <desc id="description">A clipped Voronoi diagram with 4 randomly generated sites. Seed: 1788761091.</desc>
+  <desc id="description">A clipped Voronoi diagram with 4 randomly generated sites. Seed: 1788761375.</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F8FAFC"/><stop offset="1" stop-color="#E0F2FE"/></linearGradient>
     <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#0F172A" flood-opacity=".12"/></filter>
   </defs>
   <rect width="1200" height="760" fill="url(#background)"/>
   <rect x="38" y="38" width="1124" height="684" rx="20" fill="#FFFFFF" filter="url(#shadow)"/>
-  <g font-family="Arial, sans-serif"><text x="72" y="94" font-size="32" font-weight="700" fill="#0F172A">Voronoi Diagram</text><text x="72" y="126" font-size="18" fill="#475569">4 sites · generated with seed 1788761091</text></g>
+  <g font-family="Arial, sans-serif"><text x="72" y="94" font-size="32" font-weight="700" fill="#0F172A">Voronoi Diagram</text><text x="72" y="126" font-size="18" fill="#475569">4 sites · generated with seed 1788761375</text></g>
   <g stroke="#FFFFFF" stroke-width="3" stroke-linejoin="round">
-    <polygon points="38.0,160.0 517.7,160.0 750.9,417.9 600.3,650.0 38.0,650.0" fill="#38BDF8" fill-opacity="0.60" />
-    <polygon points="750.9,417.9 785.2,407.6 1162.0,583.3 1162.0,650.0 600.3,650.0" fill="#A78BFA" fill-opacity="0.60" />
-    <polygon points="785.2,407.6 750.9,417.9 517.7,160.0 933.7,160.0" fill="#F472B6" fill-opacity="0.60" />
-    <polygon points="785.2,407.6 933.7,160.0 1162.0,160.0 1162.0,583.3" fill="#FB923C" fill-opacity="0.60" />
+    <polygon points="554.5,207.3 289.8,394.6 79.9,160.0 569.9,160.0" fill="#38BDF8" fill-opacity="0.60" />
+    <polygon points="289.8,394.6 554.5,207.3 575.2,650.0 218.3,650.0" fill="#A78BFA" fill-opacity="0.60" />
+    <polygon points="554.5,207.3 569.9,160.0 1162.0,160.0 1162.0,650.0 575.2,650.0" fill="#F472B6" fill-opacity="0.60" />
+    <polygon points="38.0,160.0 79.9,160.0 289.8,394.6 218.3,650.0 38.0,650.0" fill="#FB923C" fill-opacity="0.60" />
   </g>
   <g>
-    <circle cx="524.1" cy="387.5" r="8" fill="#0F172A" stroke="#FFFFFF" stroke-width="3" />
-    <circle cx="871.0" cy="612.6" r="8" fill="#0F172A" stroke="#FFFFFF" stroke-width="3" />
-    <circle cx="743.5" cy="189.2" r="8" fill="#0F172A" stroke="#FFFFFF" stroke-width="3" />
-    <circle cx="997.5" cy="341.5" r="8" fill="#0F172A" stroke="#FFFFFF" stroke-width="3" />
+    <circle cx="284.2" cy="277.7" r="8" fill="#0F172A" stroke="#FFFFFF" stroke-width="3" />
+    <circle cx="398.2" cy="438.8" r="8" fill="#0F172A" stroke="#FFFFFF" stroke-width="3" />
+    <circle cx="731.7" cy="423.1" r="8" fill="#0F172A" stroke="#FFFFFF" stroke-width="3" />
+    <circle cx="174.2" cy="376.1" r="8" fill="#0F172A" stroke="#FFFFFF" stroke-width="3" />
   </g>
   <g font-family="Arial, sans-serif" font-size="15" fill="#64748B"><text x="72" y="698">Each region contains all points closest to its dark site marker.</text><text x="998" y="698">sites: 04</text></g>
 </svg>
