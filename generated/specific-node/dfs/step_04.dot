@@ -2,7 +2,7 @@ graph traversal {
   graph [layout=dot, rankdir=TB, bgcolor="#FFFFFF", pad="0.35", nodesep="0.65", ranksep="0.8", fontname="Arial"];
   node [shape=circle, style="filled", fontname="Arial Bold", fontsize=18, width=0.72, fixedsize=true, penwidth=2.4];
   edge [color="#94A3B8", penwidth=2.0];
-  label=<<B>DFS Traversal</B><BR/><FONT POINT-SIZE="16">Step 4: Process node B</FONT>>; labelloc="t"; fontsize=26; fontname="Arial"; fontcolor="#0F172A";
+  label=<<B>DFS Traversal</B><BR/><FONT POINT-SIZE="16">Step 4: Process node D</FONT>>; labelloc="t"; fontsize=26; fontname="Arial"; fontcolor="#0F172A";
   subgraph cluster_legend { label="Legend"; color="#CBD5E1"; penwidth=1.2; style="rounded"; fontsize=14; fontname="Arial Bold";
     key_unseen [label="Unseen", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", fontsize=12, width=0.82];
     key_frontier [label="Discovered", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", fontsize=12, width=0.95];
@@ -11,43 +11,38 @@ graph traversal {
     { rank=same; key_unseen; key_frontier; key_current; key_done; }
   }
   A [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
-  B [fillcolor="#FFEDD5", color="#EA580C", fontcolor="#9A3412"];
+  B [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   C [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
-  D [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  D [fillcolor="#FFEDD5", color="#EA580C", fontcolor="#9A3412"];
   E [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  F [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
+  F [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   G [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   H [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   I [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   J [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   A -- B;
   A -- C;
-  A -- F;
-  A -- G;
+  A -- H;
   A -- I;
   A -- J;
   B -- C;
-  B -- D;
-  B -- E [color="#7C3AED", penwidth=3.8];
-  B -- F;
   B -- G;
-  B -- H;
-  B -- J;
-  C -- J;
+  B -- I;
+  C -- D;
+  C -- G;
+  C -- H;
+  C -- I;
   D -- E [color="#7C3AED", penwidth=3.8];
   D -- F;
   D -- G;
   D -- J;
+  E -- F [color="#7C3AED", penwidth=3.8];
   E -- J [color="#7C3AED", penwidth=3.8];
   F -- G;
-  F -- H;
-  F -- I;
-  F -- J;
-  G -- H;
-  G -- J;
+  I -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> J  |  D</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> J  |  F</TD></TR>
       <TR><TD ALIGN="LEFT"><B>Visited:</B> E</TD></TR>
     </TABLE>
   >];
