@@ -15,8 +15,18 @@ Each size level has its own color and a legend below the grid.
 
 ## Run
 
+Omit the dimensions to get a **new random pair on every run**. The program
+prints the seed it used so you can recreate a pair you liked:
+
 ```bash
 cd 2026-09-08/gcd_python
+python3 gcd_grid.py --open
+```
+
+Pass `--seed` for a reproducible random pair, or give both numbers explicitly:
+
+```bash
+python3 gcd_grid.py --seed 20260908 --open
 python3 gcd_grid.py 84 60 --open
 ```
 

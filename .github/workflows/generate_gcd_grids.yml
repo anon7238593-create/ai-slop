@@ -5,6 +5,8 @@ on:
   push:
     branches-ignore:
       - artifacts
+  schedule:
+    - cron: "0 12 * * *"
 
 permissions:
   contents: write
@@ -23,27 +25,94 @@ jobs:
         with:
           ref: master
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch artifacts branch
+        run: |
+          git fetch origin artifacts || true
+
       - name: Generate colored GCD grids
         env:
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/gcd-grids
         run: |
           mkdir -p "$ARTIFACT_DIRECTORY"
-          while IFS=' ' read -r a b name; do
-            python3 2026-09-08/gcd_python/gcd_grid.py "$a" "$b" \
-              --save "$ARTIFACT_DIRECTORY/$name.svg"
-          done <<'PAIRS'
-          84 60 gcd-84-60
-          48 36 gcd-48-36
-          49 35 gcd-49-35
-          144 96 gcd-144-96
-          105 70 gcd-105-70
-          PAIRS
-          cat > "$ARTIFACT_DIRECTORY/README.md" <<'EOF'
-          # GCD Grid Visualizations
+          python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+          import sys
+          from datetime import datetime, timezone
+          from pathlib import Path
 
-          Generated colored SVGs. Each rectangle is completely tiled by squares
-          whose side length is the GCD of the two displayed dimensions.
-          EOF
+          sys.path.insert(0, "2026-09-08/gcd_python")
+          from gcd_grid import fresh_seed, random_dimensions, svg_visualization
+
+          out = Path(os.environ["ARTIFACT_DIRECTORY"])
+
+          # Avoid pairs used in the previous run on the artifacts branch
+          used: set[tuple[int, int]] = set()
+          try:
+              proc = subprocess.run(
+                  ["git", "show", "origin/artifacts:gcd-grids/manifest.json"],
+                  capture_output=True,
+                  text=True,
+              )
+              if proc.returncode == 0:
+                  prev_data = json.loads(proc.stdout)
+                  for grid in prev_data.get("grids", []):
+                      a, b = int(grid["a"]), int(grid["b"])
+                      used.add((min(a, b), max(a, b)))
+                  print(f"Loaded {len(used)} existing pair(s) from artifacts branch to avoid repeats.")
+          except Exception as e:
+              print(f"Notice: could not load previous manifest: {e}")
+
+          grids = []
+          for _ in range(5):
+              while True:
+                  seed = fresh_seed()
+                  width, height = random_dimensions(seed)
+                  pair_key = (min(width, height), max(width, height))
+                  if pair_key not in used:
+                      break
+              used.add(pair_key)
+              svg, divisor, steps, squares = svg_visualization(width, height, seed)
+              name = f"gcd-{width}-{height}.svg"
+              (out / name).write_text(svg, encoding="utf-8")
+              grids.append(
+                  {
+                      "file": name,
+                      "a": width,
+                      "b": height,
+                      "gcd": divisor,
+                      "seed": seed,
+                      "steps": steps,
+                      "squares": squares,
+                  }
+              )
+              print(f"Random pair seed={seed}: {width} × {height} -> {name}")
+
+          generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          (out / "manifest.json").write_text(
+              json.dumps({"generated_at": generated_at, "grids": grids}, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          rows = "\n".join(
+              f"| `{grid['file']}` | {grid['a']} | {grid['b']} | {grid['gcd']} | {grid['seed']} |"
+              for grid in grids
+          )
+          (out / "README.md").write_text(
+              "# GCD Grid Visualizations\n\n"
+              "Each GitHub Actions run generates random seeds for a and b to tile new random rectangles with Euclidean squares.\n"
+              f"Generated at: {generated_at}\n\n"
+              "| File | a | b | gcd | seed |\n"
+              "| --- | --- | --- | --- | --- |\n"
+              f"{rows}\n",
+              encoding="utf-8",
+          )
+          PY
 
       - name: Commit grids to the artifacts branch
         env:
@@ -61,9 +130,10 @@ jobs:
           git add gcd-grids
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if ! git diff --cached --quiet; then
-            git commit -m "Generate GCD grid visualizations"
+          git commit -m "Generate GCD grid visualizations" \
+            -m "Random pairs: $(jq -c '[.grids[] | {a,b,gcd,seed}]' gcd-grids/manifest.json)"
+          if ! git push origin HEAD:artifacts; then
+            git fetch origin artifacts
+            git rebase origin/artifacts
             git push origin HEAD:artifacts
-          else
-            echo "GCD grids are already current; no commit needed."
           fi

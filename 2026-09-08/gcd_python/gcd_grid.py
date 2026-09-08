@@ -11,11 +11,17 @@ from __future__ import annotations
 import argparse
 import html
 import math
+import random
+import secrets
 import webbrowser
 from dataclasses import dataclass
 from pathlib import Path
 
 PALETTE = ("#ff6b6b", "#4dabf7", "#51cf66", "#ffd43b", "#cc5de8", "#ff922b", "#20c997", "#f06595")
+MIN_MULTIPLIER = 2
+MAX_MULTIPLIER = 12
+MIN_DIVISOR = 2
+MAX_DIVISOR = 18
 
 
 @dataclass(frozen=True)
@@ -36,6 +42,40 @@ def positive_integer(value: str) -> int:
     if number <= 0:
         raise argparse.ArgumentTypeError("numbers must be positive")
     return number
+
+
+def fresh_seed() -> int:
+    """Return a new 32-bit seed from OS entropy so each run can differ."""
+    return secrets.randbits(32)
+
+
+def random_dimensions(seed: int) -> tuple[int, int]:
+    """Build a seeded Euclidean example whose GCD is greater than 1.
+
+    Multipliers stay coprime so the chosen divisor is the true GCD, and the
+    sides stay unequal so the visualization is more than a single square.
+    """
+    rng = random.Random(seed)
+    divisor = rng.randint(MIN_DIVISOR, MAX_DIVISOR)
+    first = rng.randint(MIN_MULTIPLIER, MAX_MULTIPLIER)
+    second = rng.randint(MIN_MULTIPLIER, MAX_MULTIPLIER)
+    while second == first or math.gcd(first, second) != 1:
+        second = rng.randint(MIN_MULTIPLIER, MAX_MULTIPLIER)
+    width, height = divisor * first, divisor * second
+    if rng.choice((True, False)):
+        width, height = height, width
+    return width, height
+
+
+def choose_dimensions(a: int | None, b: int | None, seed: int | None = None) -> tuple[int, int, int | None]:
+    """Return width, height, and the seed used when the pair was generated."""
+    if a is None and b is None:
+        used_seed = seed if seed is not None else fresh_seed()
+        width, height = random_dimensions(used_seed)
+        return width, height, used_seed
+    if a is None or b is None:
+        raise ValueError("provide both dimensions, or neither for a random pair")
+    return a, b, None
 
 
 def euclidean_square_tiling(a: int, b: int) -> list[Tile]:
@@ -66,14 +106,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Visualize the Euclidean algorithm with progressively smaller squares."
     )
-    parser.add_argument("a", nargs="?", type=positive_integer, default=84, help="rectangle width (default: 84)")
-    parser.add_argument("b", nargs="?", type=positive_integer, default=60, help="rectangle height (default: 60)")
+    parser.add_argument("a", nargs="?", type=positive_integer, help="rectangle width (random if omitted)")
+    parser.add_argument("b", nargs="?", type=positive_integer, help="rectangle height (random if omitted)")
+    parser.add_argument("--seed", type=int, default=None, help="seed for a reproducible random pair; ignored when a and b are given")
     parser.add_argument("--save", metavar="FILE", type=Path, default=Path("gcd_visualization.svg"), help="SVG destination")
     parser.add_argument("--open", action="store_true", help="open the created SVG in the default browser")
     return parser
 
 
-def svg_visualization(a: int, b: int) -> tuple[str, int, int, int]:
+def svg_visualization(a: int, b: int, seed: int | None = None) -> tuple[str, int, int, int]:
     """Return an SVG plus GCD, number of Euclidean steps, and number of squares."""
     tiles = euclidean_square_tiling(a, b)
     divisor = math.gcd(a, b)
@@ -83,10 +124,13 @@ def svg_visualization(a: int, b: int) -> tuple[str, int, int, int]:
     left, top, bottom = 100, 115, 120
     canvas_width, canvas_height = width + left + 45, height + top + bottom
     title = f"Euclidean algorithm: gcd({a}, {b}) = {divisor}"
+    subtitle = "Take the biggest squares first; each remaining strip creates a smaller square size."
+    if seed is not None:
+        subtitle += f" Seed {seed}."
     parts = [f'''<svg xmlns="http://www.w3.org/2000/svg" width="{canvas_width:.0f}" height="{canvas_height:.0f}" viewBox="0 0 {canvas_width:.0f} {canvas_height:.0f}">
   <rect width="100%" height="100%" fill="#f8fafc"/>
   <text x="{canvas_width / 2:.1f}" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="bold" fill="#172033">{html.escape(title)}</text>
-  <text x="{canvas_width / 2:.1f}" y="68" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#475569">Take the biggest squares first; each remaining strip creates a smaller square size.</text>
+  <text x="{canvas_width / 2:.1f}" y="68" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#475569">{html.escape(subtitle)}</text>
   <g>''']
 
     for tile in tiles:
@@ -112,11 +156,18 @@ def svg_visualization(a: int, b: int) -> tuple[str, int, int, int]:
 
 
 def main() -> None:
-    args = build_parser().parse_args()
-    svg, divisor, steps, squares = svg_visualization(args.a, args.b)
+    parser = build_parser()
+    args = parser.parse_args()
+    try:
+        width, height, seed = choose_dimensions(args.a, args.b, args.seed)
+    except ValueError as error:
+        parser.error(str(error))
+    svg, divisor, steps, squares = svg_visualization(width, height, seed)
     args.save.parent.mkdir(parents=True, exist_ok=True)
     args.save.write_text(svg, encoding="utf-8")
-    print(f"gcd({args.a}, {args.b}) = {divisor}")
+    if seed is not None:
+        print(f"Random pair seed={seed}: {width} × {height}")
+    print(f"gcd({width}, {height}) = {divisor}")
     print(f"Euclidean breakdown: {steps} colored size levels, {squares} total squares")
     print(f"Saved visualization to: {args.save.resolve()}")
     if args.open:
