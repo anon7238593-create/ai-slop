@@ -1,21 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="740" height="598" viewBox="0 0 740 598">
+<svg xmlns="http://www.w3.org/2000/svg" width="765" height="648" viewBox="0 0 765 648">
   <rect width="100%" height="100%" fill="#f8fafc"/>
-  <text x="370.0" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="bold" fill="#172033">gcd(144, 96) = 48 — 3 × 2 squares fill the rectangle</text>
-  <text x="370.0" y="68" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#475569">Every colored tile is 48 × 48; no gaps remain.</text>
-  <g transform="translate(85,100)">
-    <rect x="0.00" y="206.67" width="206.67" height="206.67" fill="#ff6b6b" stroke="#18202a" stroke-width="1.5"/>
-    <text x="103.33" y="315.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#172033">48²</text>
-    <rect x="206.67" y="206.67" width="206.67" height="206.67" fill="#feca57" stroke="#18202a" stroke-width="1.5"/>
-    <text x="310.00" y="315.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#172033">48²</text>
-    <rect x="413.33" y="206.67" width="206.67" height="206.67" fill="#48dbfb" stroke="#18202a" stroke-width="1.5"/>
-    <text x="516.67" y="315.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#172033">48²</text>
-    <rect x="0.00" y="0.00" width="206.67" height="206.67" fill="#1dd1a1" stroke="#18202a" stroke-width="1.5"/>
-    <text x="103.33" y="108.33" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#172033">48²</text>
-    <rect x="206.67" y="0.00" width="206.67" height="206.67" fill="#a29bfe" stroke="#18202a" stroke-width="1.5"/>
-    <text x="310.00" y="108.33" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#172033">48²</text>
-    <rect x="413.33" y="0.00" width="206.67" height="206.67" fill="#ff9ff3" stroke="#18202a" stroke-width="1.5"/>
-    <text x="516.67" y="108.33" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#172033">48²</text>
+  <text x="382.5" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="bold" fill="#172033">Euclidean algorithm: gcd(144, 96) = 48</text>
+  <text x="382.5" y="68" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#475569">Take the biggest squares first; each remaining strip creates a smaller square size.</text>
+  <g>
+    <rect x="100.00" y="115.00" width="413.33" height="413.33" fill="#ff6b6b" stroke="#172033" stroke-width="2"/>
+    <text x="306.67" y="326.67" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#172033">96×96</text>
+    <rect x="513.33" y="321.67" width="206.67" height="206.67" fill="#4dabf7" stroke="#172033" stroke-width="2"/>
+    <text x="616.67" y="430.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#172033">48×48</text>
+    <rect x="513.33" y="115.00" width="206.67" height="206.67" fill="#4dabf7" stroke="#172033" stroke-width="2"/>
+    <text x="616.67" y="223.33" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#172033">48×48</text>
   </g>
-  <text x="395.0" y="546.3" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="bold" fill="#172033">Width = 144</text>
-  <text x="27" y="306.7" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="bold" fill="#172033" transform="rotate(-90 27 306.7)">Height = 96</text>
+  <rect x="100" y="550.3" width="15" height="15" fill="#ff6b6b" stroke="#172033"/>
+  <text x="122" y="563.3" font-family="Arial, sans-serif" font-size="14" fill="#172033">Step 1: 1 square(s) of 96×96</text>
+  <rect x="305" y="550.3" width="15" height="15" fill="#4dabf7" stroke="#172033"/>
+  <text x="327" y="563.3" font-family="Arial, sans-serif" font-size="14" fill="#172033">Step 2: 2 square(s) of 48×48</text>
+  <text x="410.0" y="628.3" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="bold" fill="#172033">Width = 144</text>
+  <text x="30" y="321.7" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="bold" fill="#172033" transform="rotate(-90 30 321.7)">Height = 96</text>
 </svg>
