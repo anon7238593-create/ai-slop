@@ -120,24 +120,32 @@ def svg_visualization(a: int, b: int, seed: int | None = None) -> tuple[str, int
     divisor = math.gcd(a, b)
     step_count = max(tile.step for tile in tiles) + 1
 
-    # Generous presentation scale: target grid size of ~1200x850 for prominent demonstration
-    scale = min(1200 / a, 850 / b)
+    # Guarantee every square, down to the smallest gcd square, has plenty of room
+    # for its dimension label (minimum 110px).
+    min_tile_px = 110
+    scale = max(min_tile_px / divisor, min(1600 / a, 1100 / b))
     width, height = a * scale, b * scale
 
-    left = 130
-    top = 130
-    right = 70
+    left = 150
+    right = 80
     min_canvas_width = 1400
     canvas_width = max(width + left + right, min_canvas_width)
     grid_x = left + (canvas_width - left - right - width) / 2
 
-    width_label_y = top + height + 45
-    legend_start_y = width_label_y + 45
+    title_font_size = min(42, max(28, int(canvas_width / 50)))
+    subtitle_font_size = min(24, max(16, int(canvas_width / 80)))
+    top = title_font_size + subtitle_font_size + 60
 
-    # Columns of legend
-    cols = max(1, min(3, int((canvas_width - 160) // 320)))
+    width_label_y = top + height + 50
+    legend_start_y = width_label_y + 55
+
+    legend_font_size = min(24, max(16, int(canvas_width / 80)))
+    swatch_size = legend_font_size + 4
+    row_height = legend_font_size + 16
+    col_width = max(320, int(canvas_width / 4))
+    cols = max(1, min(4, int((canvas_width - left - right) // col_width)))
     total_legend_rows = math.ceil(step_count / cols)
-    canvas_height = legend_start_y + total_legend_rows * 36 + 45
+    canvas_height = legend_start_y + total_legend_rows * row_height + 50
 
     title = f"Euclidean algorithm: gcd({a}, {b}) = {divisor}"
     subtitle = "Take the biggest squares first; each remaining strip creates a smaller square size."
@@ -146,8 +154,8 @@ def svg_visualization(a: int, b: int, seed: int | None = None) -> tuple[str, int
 
     parts = [f'''<svg xmlns="http://www.w3.org/2000/svg" width="{canvas_width:.0f}" height="{canvas_height:.0f}" viewBox="0 0 {canvas_width:.0f} {canvas_height:.0f}" style="max-width: 100%; height: auto;">
   <rect width="100%" height="100%" fill="#f8fafc"/>
-  <text x="{canvas_width / 2:.1f}" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#172033">{html.escape(title)}</text>
-  <text x="{canvas_width / 2:.1f}" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#475569">{html.escape(subtitle)}</text>
+  <text x="{canvas_width / 2:.1f}" y="{title_font_size + 15}" text-anchor="middle" font-family="Arial, sans-serif" font-size="{title_font_size}" font-weight="bold" fill="#172033">{html.escape(title)}</text>
+  <text x="{canvas_width / 2:.1f}" y="{title_font_size + subtitle_font_size + 30}" text-anchor="middle" font-family="Arial, sans-serif" font-size="{subtitle_font_size}" fill="#475569">{html.escape(subtitle)}</text>
   <g>''']
 
     for tile in tiles:
@@ -156,33 +164,33 @@ def svg_visualization(a: int, b: int, seed: int | None = None) -> tuple[str, int
         tile_px = tile.side * scale
         color = PALETTE[tile.step % len(PALETTE)]
         parts.append(f'    <rect x="{x:.2f}" y="{y:.2f}" width="{tile_px:.2f}" height="{tile_px:.2f}" fill="{color}" stroke="#172033" stroke-width="2.5"/>')
-        if tile_px >= 24:
-            text = f"{tile.side}×{tile.side}"
-            max_font = min(26, int(tile_px / 5.5))
-            font_size = min(max_font, int((tile_px - 8) / (len(text) * 0.65)))
-            if font_size >= 10:
-                parts.append(
-                    f'    <text x="{x + tile_px / 2:.2f}" y="{y + tile_px / 2 + font_size / 3:.2f}" '
-                    f'text-anchor="middle" font-family="Arial, sans-serif" font-size="{font_size}" '
-                    f'font-weight="bold" fill="#172033">{text}</text>'
-                )
+        
+        text = f"{tile.side}×{tile.side}"
+        max_font = min(48, max(14, int(tile_px / 6)))
+        font_size = min(max_font, max(12, int((tile_px - 10) / (len(text) * 0.65))))
+        parts.append(
+            f'    <text x="{x + tile_px / 2:.2f}" y="{y + tile_px / 2 + font_size / 3:.2f}" '
+            f'text-anchor="middle" font-family="Arial, sans-serif" font-size="{font_size}" '
+            f'font-weight="bold" fill="#172033">{text}</text>'
+        )
 
     parts.append("  </g>")
 
-    col_width = (canvas_width - left - right) / cols
+    actual_col_width = (canvas_width - left - right) / cols
     for step in range(step_count):
         side = next(tile.side for tile in tiles if tile.step == step)
         count = sum(tile.step == step for tile in tiles)
         legend_col = step % cols
         legend_row = step // cols
-        legend_x = left + legend_col * col_width
-        legend_y = legend_start_y + legend_row * 36
-        parts.append(f'  <rect x="{legend_x:.1f}" y="{legend_y - 18:.1f}" width="22" height="22" fill="{PALETTE[step % len(PALETTE)]}" stroke="#172033" stroke-width="1.5"/>')
-        parts.append(f'  <text x="{legend_x + 32:.1f}" y="{legend_y:.1f}" font-family="Arial, sans-serif" font-size="18" fill="#172033">Step {step + 1}: {count} square(s) of {side}×{side}</text>')
+        legend_x = left + legend_col * actual_col_width
+        legend_y = legend_start_y + legend_row * row_height
+        parts.append(f'  <rect x="{legend_x:.1f}" y="{legend_y - swatch_size + 4:.1f}" width="{swatch_size}" height="{swatch_size}" fill="{PALETTE[step % len(PALETTE)]}" stroke="#172033" stroke-width="1.5"/>')
+        parts.append(f'  <text x="{legend_x + swatch_size + 10:.1f}" y="{legend_y:.1f}" font-family="Arial, sans-serif" font-size="{legend_font_size}" fill="#172033">Step {step + 1}: {count} square(s) of {side}×{side}</text>')
 
+    axis_font_size = min(36, max(22, int(canvas_width / 60)))
     parts.extend([
-        f'  <text x="{grid_x + width / 2:.1f}" y="{width_label_y:.1f}" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#172033">Width = {a}</text>',
-        f'  <text x="{grid_x - 40:.1f}" y="{top + height / 2:.1f}" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#172033" transform="rotate(-90 {grid_x - 40:.1f} {top + height / 2:.1f})">Height = {b}</text>',
+        f'  <text x="{grid_x + width / 2:.1f}" y="{width_label_y:.1f}" text-anchor="middle" font-family="Arial, sans-serif" font-size="{axis_font_size}" font-weight="bold" fill="#172033">Width = {a}</text>',
+        f'  <text x="{grid_x - 45:.1f}" y="{top + height / 2:.1f}" text-anchor="middle" font-family="Arial, sans-serif" font-size="{axis_font_size}" font-weight="bold" fill="#172033" transform="rotate(-90 {grid_x - 45:.1f} {top + height / 2:.1f})">Height = {b}</text>',
         '</svg>',
     ])
     return "\n".join(parts), divisor, step_count, len(tiles)
