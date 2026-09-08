@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1020" viewBox="0 0 1400 1020" style="max-width: 100%; height: auto;">
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+  <text x="700.0" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#172033">Euclidean algorithm: gcd(8932, 5082) = 154</text>
+  <text x="700.0" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#475569">Take the biggest squares first; each remaining strip creates a smaller square size. Seed 1926632949.</text>
+  <g>
+    <rect x="130.00" y="130.00" width="682.76" height="682.76" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="471.38" y="480.05" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#172033">5082×5082</text>
+    <rect x="812.76" y="295.52" width="517.24" height="517.24" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="1071.38" y="562.80" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#172033">3850×3850</text>
+    <rect x="812.76" y="130.00" width="165.52" height="165.52" fill="#51cf66" stroke="#172033" stroke-width="2.5"/>
+    <text x="895.52" y="221.43" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#172033">1232×1232</text>
+    <rect x="978.28" y="130.00" width="165.52" height="165.52" fill="#51cf66" stroke="#172033" stroke-width="2.5"/>
+    <text x="1061.03" y="221.43" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#172033">1232×1232</text>
+    <rect x="1143.79" y="130.00" width="165.52" height="165.52" fill="#51cf66" stroke="#172033" stroke-width="2.5"/>
+    <text x="1226.55" y="221.43" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#172033">1232×1232</text>
+    <rect x="1309.31" y="274.83" width="20.69" height="20.69" fill="#ffd43b" stroke="#172033" stroke-width="2.5"/>
+    <rect x="1309.31" y="254.14" width="20.69" height="20.69" fill="#ffd43b" stroke="#172033" stroke-width="2.5"/>
+    <rect x="1309.31" y="233.45" width="20.69" height="20.69" fill="#ffd43b" stroke="#172033" stroke-width="2.5"/>
+    <rect x="1309.31" y="212.76" width="20.69" height="20.69" fill="#ffd43b" stroke="#172033" stroke-width="2.5"/>
+    <rect x="1309.31" y="192.07" width="20.69" height="20.69" fill="#ffd43b" stroke="#172033" stroke-width="2.5"/>
+    <rect x="1309.31" y="171.38" width="20.69" height="20.69" fill="#ffd43b" stroke="#172033" stroke-width="2.5"/>
+    <rect x="1309.31" y="150.69" width="20.69" height="20.69" fill="#ffd43b" stroke="#172033" stroke-width="2.5"/>
+    <rect x="1309.31" y="130.00" width="20.69" height="20.69" fill="#ffd43b" stroke="#172033" stroke-width="2.5"/>
+  </g>
+  <rect x="130.0" y="884.8" width="22" height="22" fill="#ff6b6b" stroke="#172033" stroke-width="1.5"/>
+  <text x="162.0" y="902.8" font-family="Arial, sans-serif" font-size="18" fill="#172033">Step 1: 1 square(s) of 5082×5082</text>
+  <rect x="530.0" y="884.8" width="22" height="22" fill="#4dabf7" stroke="#172033" stroke-width="1.5"/>
+  <text x="562.0" y="902.8" font-family="Arial, sans-serif" font-size="18" fill="#172033">Step 2: 1 square(s) of 3850×3850</text>
+  <rect x="930.0" y="884.8" width="22" height="22" fill="#51cf66" stroke="#172033" stroke-width="1.5"/>
+  <text x="962.0" y="902.8" font-family="Arial, sans-serif" font-size="18" fill="#172033">Step 3: 3 square(s) of 1232×1232</text>
+  <rect x="130.0" y="920.8" width="22" height="22" fill="#ffd43b" stroke="#172033" stroke-width="1.5"/>
+  <text x="162.0" y="938.8" font-family="Arial, sans-serif" font-size="18" fill="#172033">Step 4: 8 square(s) of 154×154</text>
+  <text x="730.0" y="857.8" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#172033">Width = 8932</text>
+  <text x="90.0" y="471.4" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#172033" transform="rotate(-90 90.0 471.4)">Height = 5082</text>
+</svg>
