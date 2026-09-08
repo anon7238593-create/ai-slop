@@ -69,8 +69,9 @@ jobs:
           except Exception as e:
               print(f"Notice: could not load previous manifest: {e}")
 
+          TOTAL_GRIDS = 100
           grids = []
-          for _ in range(5):
+          for index in range(TOTAL_GRIDS):
               while True:
                   seed = fresh_seed()
                   width, height = random_dimensions(seed)
@@ -92,11 +93,12 @@ jobs:
                       "squares": squares,
                   }
               )
-              print(f"Random pair seed={seed}: {width} × {height} -> {name}")
+              if (index + 1) % 20 == 0 or index == TOTAL_GRIDS - 1:
+                  print(f"Generated {index + 1}/{TOTAL_GRIDS}: {width} × {height} (gcd={divisor}, seed={seed})")
 
           generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
           (out / "manifest.json").write_text(
-              json.dumps({"generated_at": generated_at, "grids": grids}, indent=2) + "\n",
+              json.dumps({"generated_at": generated_at, "total": len(grids), "grids": grids}, indent=2) + "\n",
               encoding="utf-8",
           )
           rows = "\n".join(
@@ -130,8 +132,8 @@ jobs:
           git add gcd-grids
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Generate GCD grid visualizations" \
-            -m "Random pairs: $(jq -c '[.grids[] | {a,b,gcd,seed}]' gcd-grids/manifest.json)"
+          git commit -m "Generate 100 GCD grid visualizations" \
+            -m "Generated $(jq -r '.total // (.grids | length)' gcd-grids/manifest.json) unique random GCD grid visualizations with diverse dimensions."
           if ! git push origin HEAD:artifacts; then
             git fetch origin artifacts
             git rebase origin/artifacts

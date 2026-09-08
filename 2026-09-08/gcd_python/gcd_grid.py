@@ -18,10 +18,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 PALETTE = ("#ff6b6b", "#4dabf7", "#51cf66", "#ffd43b", "#cc5de8", "#ff922b", "#20c997", "#f06595")
-MIN_MULTIPLIER = 2
-MAX_MULTIPLIER = 12
-MIN_DIVISOR = 2
-MAX_DIVISOR = 18
+MIN_MULTIPLIER = 3
+MAX_MULTIPLIER = 60
+MIN_DIVISOR = 10
+MAX_DIVISOR = 250
 
 
 @dataclass(frozen=True)
@@ -156,9 +156,16 @@ def svg_visualization(a: int, b: int, seed: int | None = None) -> tuple[str, int
         tile_px = tile.side * scale
         color = PALETTE[tile.step % len(PALETTE)]
         parts.append(f'    <rect x="{x:.2f}" y="{y:.2f}" width="{tile_px:.2f}" height="{tile_px:.2f}" fill="{color}" stroke="#172033" stroke-width="2.5"/>')
-        if tile_px >= 36:
-            font_size = min(26, max(14, int(tile_px / 5)))
-            parts.append(f'    <text x="{x + tile_px / 2:.2f}" y="{y + tile_px / 2 + font_size / 3:.2f}" text-anchor="middle" font-family="Arial, sans-serif" font-size="{font_size}" font-weight="bold" fill="#172033">{tile.side}×{tile.side}</text>')
+        if tile_px >= 24:
+            text = f"{tile.side}×{tile.side}"
+            max_font = min(26, int(tile_px / 5.5))
+            font_size = min(max_font, int((tile_px - 8) / (len(text) * 0.65)))
+            if font_size >= 10:
+                parts.append(
+                    f'    <text x="{x + tile_px / 2:.2f}" y="{y + tile_px / 2 + font_size / 3:.2f}" '
+                    f'text-anchor="middle" font-family="Arial, sans-serif" font-size="{font_size}" '
+                    f'font-weight="bold" fill="#172033">{text}</text>'
+                )
 
     parts.append("  </g>")
 
