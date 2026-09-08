@@ -1,0 +1,69 @@
+name: Generate GCD grid visualizations
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - artifacts
+
+permissions:
+  contents: write
+
+# This and the other visualization jobs all update the shared artifacts branch.
+concurrency:
+  group: visualization-artifacts
+  cancel-in-progress: false
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Generate colored GCD grids
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/gcd-grids
+        run: |
+          mkdir -p "$ARTIFACT_DIRECTORY"
+          while IFS=' ' read -r a b name; do
+            python3 2026-09-08/gcd_python/gcd_grid.py "$a" "$b" \
+              --save "$ARTIFACT_DIRECTORY/$name.svg"
+          done <<'PAIRS'
+          84 60 gcd-84-60
+          48 36 gcd-48-36
+          49 35 gcd-49-35
+          144 96 gcd-144-96
+          105 70 gcd-105-70
+          PAIRS
+          cat > "$ARTIFACT_DIRECTORY/README.md" <<'EOF'
+          # GCD Grid Visualizations
+
+          Generated colored SVGs. Each rectangle is completely tiled by squares
+          whose side length is the GCD of the two displayed dimensions.
+          EOF
+
+      - name: Commit grids to the artifacts branch
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/gcd-grids
+        run: |
+          git fetch origin artifacts || true
+          if git show-ref --verify --quiet refs/remotes/origin/artifacts; then
+            git switch --force-create artifacts origin/artifacts
+          else
+            git switch --orphan artifacts
+            git rm -rf . || true
+          fi
+          rm -rf gcd-grids
+          cp -R "$ARTIFACT_DIRECTORY" gcd-grids
+          git add gcd-grids
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "Generate GCD grid visualizations"
+            git push origin HEAD:artifacts
+          else
+            echo "GCD grids are already current; no commit needed."
+          fi
