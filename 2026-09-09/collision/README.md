@@ -1,24 +1,25 @@
-# 90-Degree Ball Collision Spawner Simulation
+# Random Angle Ball Collision Spawner Simulation
 
 A high-performance, visually captivating 2D physics simulation and video generator built in Python.
 
-A ball starts bouncing inside an expansive canvas. Whenever any ball collides with an arena boundary, it reflects elastically and immediately spawns a new ball with the **exact same speed** and its direction **rotated by 90 degrees** into the arena. Balls continue to multiply upon boundary impacts until a target count of $N$ balls is reached.
+A ball starts bouncing inside an expansive canvas with a gentle, slow speed designed for easy human tracking and trajectory analysis. Whenever any ball collides with an arena boundary, it reflects elastically and immediately spawns a new ball with the **exact same speed** and a **random inward angle** directed into the arena interior. Balls continue to multiply upon boundary impacts until a target count of $N$ balls is reached, creating organic, mesmerizing geometric webs and dynamic color-burst patterns.
 
 ---
 
 ## Visual & Acoustic Highlights
 
+- **Slow, Analytical Pacing**: Default speed of $240$ px/s (batch range $160 - 260$ px/s) gives viewers ample time to visually follow and analyze every single bounce, wall flash, and spawn.
+- **Organic Random Inward Spawning**: Rather than rigid 90-degree grids, each spawned ball launches at a random inward angle (sampled across a generous $150^\circ$ fan facing into the arena), yielding diverse, complex, and beautiful trajectory paths.
 - **Expansive High-Resolution Canvas**: Default Full HD ($1920 \times 1080$), with built-in presets for $720p$, $1080p$ Square, $9:16$ Vertical Shorts/Reels/TikTok, and $4K$.
 - **Strict Conservation of Speed**: Every spawned ball travels at the exact same scalar velocity as its parent ($\|\vec{v}_{spawn}\| = \|\vec{v}_{parent}\|$).
-- **True $90^\circ$ Inward Deflection**: Spawned velocities are computed via orthogonal rotation vectors $(\mp v_y, \pm v_x)$ projected into the interior half-plane of the collided border, ensuring balls freely disperse across the entire canvas without corner trapping.
-- **Sub-Step Continuous Physics**: Multiple physics substeps per frame prevent tunneling or clipping even at high velocities.
+- **Sub-Step Continuous Physics**: Multiple physics substeps per frame prevent tunneling or clipping even near corners.
 - **Neon Golden-Angle Color Wheel**: Each ball is assigned a distinct, vibrant color via golden-angle hue distribution ($H = (H_0 + i \cdot 0.6180339887) \pmod 1$).
 - **Visual FX**:
   - 3D sphere specular highlights and outer glow.
   - Smooth fading motion trails.
   - Expanding collision shockwave ripples.
   - Dynamic border illumination flashes upon impact.
-- **Live Glassmorphism HUD**: Real-time ball counter, animated progress bar, timestamp, resolution, and speed.
+- **Live Glassmorphism HUD**: Real-time ball counter, animated progress bar, timestamp, resolution, speed, and angle mode.
 - **Spatial Pentatonic Audio**: Synthesized multi-octave pentatonic chimes with continuous stereo panning based on horizontal collision coordinates ($x / W$).
 
 ---
@@ -86,18 +87,18 @@ python3 ball_collision.py -n 60 --speed 800 --duration-after 4.0 -o fast_sim.mp4
 
 | Flag | Type | Default | Description |
 |---|---|---|---|
-| `-n`, `--balls` | `int` | `50` | Target number of balls to reach |
+| `-n`, `--balls` | `int` | `35` | Target number of balls to reach |
 | `--preset` | `str` | `1080p` | Resolution preset: `1080p`, `720p`, `square`, `vertical`, `4k` |
 | `--width` | `int` | `None` | Custom canvas width in pixels (overrides preset) |
 | `--height` | `int` | `None` | Custom canvas height in pixels (overrides preset) |
 | `--margin` | `int` | `40` | Arena border margin in pixels |
 | `--fps` | `int` | `60` | Output video frames per second |
-| `--speed` | `float` | `650.0` | Ball speed in pixels per second |
+| `--speed` | `float` | `240.0` | Ball speed in pixels per second (slow, analytical motion) |
 | `--radius` | `float` | `14.0` | Ball radius in pixels |
-| `--turn-angle` | `float` | `90.0` | Spawn deflection angle in degrees |
+| `--turn-angle` | `str` | `random` | Spawn deflection angle: `random` (default) or numeric degrees (e.g. `90.0`) |
 | `--spawn-reference` | `str` | `incident` | Reference vector for deflection (`incident` or `reflected`) |
 | `--duration-after` | `float` | `3.5` | Seconds to continue recording after reaching $N$ balls |
-| `--max-duration` | `float` | `60.0` | Maximum video duration cutoff in seconds |
+| `--max-duration` | `float` | `45.0` | Maximum video duration cutoff in seconds |
 | `--seed` | `int` | `42` | Random seed for deterministic trajectories |
 | `-o`, `--output` | `str` | `None` | Output video path (defaults to `ball_collision_n{N}.mp4`) |
 | `--no-audio` | `flag` | `False` | Disable spatial audio synthesis |

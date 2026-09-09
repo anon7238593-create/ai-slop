@@ -84,18 +84,19 @@ class CollisionEvent:
 @dataclass
 class SimulationConfig:
     """Configuration settings for the simulation and video renderer."""
-    n_target: int = 50
+    n_target: int = 35
     width: int = 1920
     height: int = 1080
     margin: int = 40
     fps: int = 60
-    speed: float = 650.0  # pixels per second
+    speed: float = 240.0  # pixels per second (slow and easy to analyze)
     radius: float = 14.0
-    turn_angle_deg: float = 90.0
+    turn_angle_mode: str = "random"  # 'random' (default) or 'fixed'
+    turn_angle_deg: Optional[float] = None  # None for random inward angle; or float for fixed angle
     spawn_reference: str = "incident"  # 'incident' or 'reflected'
     initial_angle_deg: Optional[float] = None  # custom starting ball launch angle
     duration_after: float = 3.5  # seconds to keep simulating after reaching N balls
-    max_duration: float = 60.0  # safety cutoff in seconds
+    max_duration: float = 45.0  # safety cutoff in seconds
     substeps: int = 6  # physics substeps per frame
     enable_trails: bool = True
     enable_hud: bool = True
@@ -126,19 +127,28 @@ def generate_palette(n: int, seed: int = 42) -> List[Tuple[int, int, int]]:
     return colors
 
 
-def calculate_90_degree_spawn_velocity(
+def calculate_spawn_velocity(
     vx_base: float = 0.0,
     vy_base: float = 0.0,
     wall_normal: Tuple[float, float] = (0.0, 0.0),
     speed: float = 0.0,
-    turn_angle_deg: float = 90.0,
+    turn_angle_deg: Optional[float] = None,
+    angle_mode: str = "random",
+    rng: Optional[np.random.Generator] = None,
     *,
     vx_refl: Optional[float] = None,
     vy_refl: Optional[float] = None,
 ) -> Tuple[float, float]:
     """
-    Compute the spawned ball's velocity with identical speed and direction
-    rotated by turn_angle_deg (default 90 deg) directed into the arena.
+    Compute the spawned ball's velocity with identical scalar speed.
+
+    When angle_mode is 'random' (or turn_angle_deg is None), the direction is
+    chosen randomly within an inward-pointing fan facing the arena interior
+    (up to ±75° from the inward wall normal), producing diverse, organic,
+    and aesthetically captivating trajectories.
+
+    When angle_mode is 'fixed' (or turn_angle_deg is explicitly given), the base
+    velocity is rotated by turn_angle_deg directed into the arena.
 
     wall_normal is the inward-pointing unit normal of the collided wall.
     """
@@ -147,21 +157,45 @@ def calculate_90_degree_spawn_velocity(
     if vy_refl is not None:
         vy_base = vy_refl
 
+    nx, ny = wall_normal
+    n_mag = math.hypot(nx, ny)
+    if n_mag > 1e-6:
+        nx /= n_mag
+        ny /= n_mag
+    else:
+        nx, ny = 1.0, 0.0
+
+    if angle_mode == "random" or turn_angle_deg is None:
+        # Choose a random angle inside the inward-pointing hemisphere.
+        # Wall normal angle:
+        normal_angle = math.atan2(ny, nx)
+        # Inward fan: ±75 degrees (±1.309 rad) to avoid grazing parallel to the border
+        max_deviation = math.radians(75.0)
+        if rng is not None:
+            deviation = float(rng.uniform(-max_deviation, max_deviation))
+        else:
+            deviation = float(np.random.uniform(-max_deviation, max_deviation))
+
+        spawn_angle = normal_angle + deviation
+        chosen_vx = speed * math.cos(spawn_angle)
+        chosen_vy = speed * math.sin(spawn_angle)
+        return chosen_vx, chosen_vy
+
+    # Fixed turn angle rotation (e.g. 90.0 degrees)
     rad = math.radians(turn_angle_deg)
     cos_a = math.cos(rad)
     sin_a = math.sin(rad)
 
-    # Option 1: +90 degree rotation
+    # Option 1: +turn_angle_deg rotation
     vx1 = vx_base * cos_a - vy_base * sin_a
     vy1 = vx_base * sin_a + vy_base * cos_a
 
-    # Option 2: -90 degree rotation
+    # Option 2: -turn_angle_deg rotation
     cos_b = math.cos(-rad)
     sin_b = math.sin(-rad)
     vx2 = vx_base * cos_b - vy_base * sin_b
     vy2 = vx_base * sin_b + vy_base * cos_b
 
-    nx, ny = wall_normal
     dot1 = vx1 * nx + vy1 * ny
     dot2 = vx2 * nx + vy2 * ny
 
@@ -191,6 +225,29 @@ def calculate_90_degree_spawn_velocity(
     return chosen_vx, chosen_vy
 
 
+def calculate_90_degree_spawn_velocity(
+    vx_base: float = 0.0,
+    vy_base: float = 0.0,
+    wall_normal: Tuple[float, float] = (0.0, 0.0),
+    speed: float = 0.0,
+    turn_angle_deg: float = 90.0,
+    *,
+    vx_refl: Optional[float] = None,
+    vy_refl: Optional[float] = None,
+) -> Tuple[float, float]:
+    """Backward compatibility helper for fixed 90-degree inward deflection."""
+    return calculate_spawn_velocity(
+        vx_base=vx_base,
+        vy_base=vy_base,
+        wall_normal=wall_normal,
+        speed=speed,
+        turn_angle_deg=turn_angle_deg,
+        angle_mode="fixed",
+        vx_refl=vx_refl,
+        vy_refl=vy_refl,
+    )
+
+
 # ==============================================================================
 # Simulation Core
 # ==============================================================================
@@ -207,6 +264,7 @@ class BallSimulation:
         self.target_reached_time: Optional[float] = None
         self.colors = generate_palette(max(config.n_target + 50, 100), config.seed)
         self.spawn_counter: int = 0
+        self.rng = np.random.default_rng(self.cfg.seed + 777)
 
         # Wall impact flash tracking: intensity (0.0 to 1.0) and color
         self.wall_flashes: Dict[str, Tuple[float, Tuple[int, int, int]]] = {
@@ -360,12 +418,14 @@ class BallSimulation:
                     base_vx = vin_x if self.cfg.spawn_reference == "incident" else b.vx
                     base_vy = vin_y if self.cfg.spawn_reference == "incident" else b.vy
 
-                    new_vx, new_vy = calculate_90_degree_spawn_velocity(
+                    new_vx, new_vy = calculate_spawn_velocity(
                         vx_base=base_vx,
                         vy_base=base_vy,
                         wall_normal=wall_normal,
                         speed=b.speed,
                         turn_angle_deg=self.cfg.turn_angle_deg,
+                        angle_mode=self.cfg.turn_angle_mode,
+                        rng=self.rng,
                     )
 
                     color_idx = (self.spawn_counter - 1) % len(self.colors)
@@ -589,12 +649,13 @@ class SimulationRenderer:
         cv2.rectangle(frame, (hud_x, hud_y), (hud_x + hud_w, hud_y + hud_h), (120, 100, 60), 1, cv2.LINE_AA)
 
         # Title
+        title_label = "RANDOM ANGLE COLLISION SPAWNER" if self.cfg.turn_angle_mode == "random" else "90 DEGREE COLLISION SPAWNER"
         cv2.putText(
             frame,
-            "90 DEGREE COLLISION SPAWNER",
+            title_label,
             (hud_x + 14, hud_y + 24),
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.52,
+            0.50,
             (180, 210, 255),
             1,
             cv2.LINE_AA,
@@ -631,7 +692,7 @@ class SimulationRenderer:
             cv2.rectangle(frame, (bar_x, bar_y), (bar_x + fill_w, bar_y + bar_h), bar_col, -1)
 
         # Top-right metrics HUD (Time, Resolution, Speed)
-        info_w, info_h = 340, 64
+        info_w, info_h = 360, 64
         info_x = w - m - info_w - 20
         info_y = m + 16
 
@@ -655,7 +716,8 @@ class SimulationRenderer:
             cv2.LINE_AA,
         )
 
-        arena_str = f"CANVAS: {w}x{h} | SPEED: {int(self.cfg.speed)} px/s"
+        angle_lbl = "RANDOM" if self.cfg.turn_angle_mode == "random" else f"{int(self.cfg.turn_angle_deg or 90)}°"
+        arena_str = f"SPEED: {int(self.cfg.speed)} px/s (Slow) | ANGLE: {angle_lbl}"
         cv2.putText(
             frame,
             arena_str,
@@ -752,9 +814,10 @@ def generate_video(config: SimulationConfig) -> str:
     print("BALL COLLISION VIDEO GENERATOR")
     print(f"Target Balls:    {config.n_target}")
     print(f"Canvas Size:     {config.width}x{config.height}")
-    print(f"Turn Angle:      {config.turn_angle_deg} degrees")
+    angle_display = f"{config.turn_angle_deg}°" if config.turn_angle_mode == "fixed" else "Random Inward Angle"
+    print(f"Spawn Angle:     {angle_display}")
     print(f"Spawn Reference: {config.spawn_reference}")
-    print(f"Speed:           {config.speed} px/s")
+    print(f"Speed:           {config.speed} px/s (Slow & Analytical)")
     print(f"FPS:             {config.fps}")
     print(f"Output File:     {config.output_path}")
     print("=" * 60)
@@ -917,8 +980,8 @@ def parse_args() -> SimulationConfig:
     parser.add_argument(
         "-n", "--balls",
         type=int,
-        default=50,
-        help="Target number of balls to reach (default: 50)"
+        default=35,
+        help="Target number of balls to reach (default: 35)"
     )
     parser.add_argument(
         "--preset",
@@ -954,8 +1017,8 @@ def parse_args() -> SimulationConfig:
     parser.add_argument(
         "--speed",
         type=float,
-        default=650.0,
-        help="Ball speed in pixels per second (default: 650.0)"
+        default=240.0,
+        help="Ball speed in pixels per second (default: 240.0 for slow, analytical tracking)"
     )
     parser.add_argument(
         "--radius",
@@ -965,9 +1028,9 @@ def parse_args() -> SimulationConfig:
     )
     parser.add_argument(
         "--turn-angle",
-        type=float,
-        default=90.0,
-        help="Deflection angle change for spawned ball in degrees (default: 90.0)"
+        type=str,
+        default="random",
+        help="Deflection angle for spawned ball: 'random' (default) or degrees (e.g. 90.0)"
     )
     parser.add_argument(
         "--spawn-reference",
@@ -1039,6 +1102,18 @@ def parse_args() -> SimulationConfig:
     if output_path is None:
         output_path = f"ball_collision_n{args.balls}.mp4"
 
+    turn_raw = str(args.turn_angle).strip().lower()
+    if turn_raw in ("random", "none", "rand"):
+        turn_angle_mode = "random"
+        turn_angle_deg = None
+    else:
+        turn_angle_mode = "fixed"
+        try:
+            turn_angle_deg = float(args.turn_angle)
+        except ValueError:
+            turn_angle_mode = "random"
+            turn_angle_deg = None
+
     return SimulationConfig(
         n_target=args.balls,
         width=w,
@@ -1047,7 +1122,8 @@ def parse_args() -> SimulationConfig:
         fps=args.fps,
         speed=args.speed,
         radius=args.radius,
-        turn_angle_deg=args.turn_angle,
+        turn_angle_mode=turn_angle_mode,
+        turn_angle_deg=turn_angle_deg,
         spawn_reference=args.spawn_reference,
         initial_angle_deg=args.initial_angle,
         duration_after=args.duration_after,

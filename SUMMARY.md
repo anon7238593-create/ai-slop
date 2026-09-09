@@ -26,25 +26,25 @@ This document provides a comprehensive summary of all code, algorithms, visualiz
 
 ---
 
-## 90-Degree Ball Collision Spawner Simulation (`2026-09-09/collision`)
+## Random Angle Ball Collision Spawner Simulation (`2026-09-09/collision`)
 
 Location: [`2026-09-09/collision/`](2026-09-09/collision/)
 
 ### Overview
-A high-performance 2D physics simulation and video generator in Python. A ball begins bouncing within a spacious arena (default 1080p Full HD: $1920 \times 1080$). Upon every boundary collision, the ball reflects elastically and immediately spawns a new ball with the **exact same scalar speed** and direction **rotated by 90 degrees** into the arena interior. Balls duplicate continuously on each border collision until a target count of $N$ balls is reached.
+A high-performance 2D physics simulation and video generator in Python. A ball begins bouncing within a spacious arena (default 1080p Full HD: $1920 \times 1080$) at a calm, slow pace ($240$ px/s, batch range $160 - 260$ px/s) allowing viewers to clearly track, observe, and analyze each trajectory. Upon every boundary collision, the ball reflects elastically and immediately spawns a new ball with the **exact same scalar speed** and a **random inward angle** (across a $150^\circ$ inward fan) directed into the arena interior. Balls duplicate continuously on each border collision until a target count of $N$ balls is reached, creating organic, dynamic geometric webs and vivid neon color-burst patterns.
 
 ### Key Components
 - **[`ball_collision.py`](2026-09-09/collision/ball_collision.py)**:
-  - `calculate_90_degree_spawn_velocity(vx_base, vy_base, wall_normal, speed)`: Exact orthogonal 90-degree inward deflection preserving scalar speed $\|\vec{v}_{spawn}\| = s$.
+  - `calculate_spawn_velocity(vx_base, vy_base, wall_normal, speed, angle_mode='random', ...)`: Random inward deflection preserving exact scalar speed $\|\vec{v}_{spawn}\| = s$, with backward compatibility for fixed deflection angles.
   - `BallSimulation`: Sub-step continuous collision physics engine preventing tunneling at high velocities.
   - `SimulationRenderer`: Full HD 60 FPS renderer with 3D sphere highlights, neon golden-angle palette, fading motion trails, expanding shockwave rings, and impact wall flashes.
   - `synthesize_audio_track()`: Spatial stereo audio synthesizer generating multi-octave pentatonic collision chimes with horizontal position panning ($x / W$).
   - Dual encoder: Direct H.264 pipe via FFmpeg (`libx264` / `aac`) with seamless fallback to OpenCV `VideoWriter`.
 - **[`generate_batch.py`](2026-09-09/collision/generate_batch.py)**:
-  - Parallel batch generator that creates 100 randomized ball collision simulations with different ball counts ($12 \le N \le 60$), starting launch angles ($10^\circ \dots 350^\circ$), video lengths, and speed profiles.
+  - Parallel batch generator that creates 100 randomized ball collision simulations with different ball counts ($12 \le N \le 36$), starting launch angles ($10^\circ \dots 350^\circ$), video lengths, slow analytical speeds ($160 - 260$ px/s), and organic random spawn directions.
   - Automatically compiles a comprehensive `manifest.json` and formatted `README.md` cataloging each video's metadata.
 - **[`test_ball_collision.py`](2026-09-09/collision/test_ball_collision.py)**:
-  - Comprehensive unit test suite validating strict speed conservation, velocity orthogonality ($\vec{u} \cdot \vec{v} = 0$), inward wall normal projection ($\vec{u} \cdot \hat{n} \ge 0$), termination on $N$ balls, palette generation, audio synthesis, frame rendering, and batch spec randomization.
+  - Comprehensive unit test suite validating strict speed conservation, random inward projection ($\vec{u} \cdot \hat{n} > 0$), angle diversity, 90-degree backward compatibility, termination on $N$ balls, palette generation, audio synthesis, frame rendering, and batch spec randomization.
 - **[`README.md`](2026-09-09/collision/README.md)**:
   - Complete documentation, mathematical derivations, resolution presets, and CLI usage.
 
@@ -225,3 +225,7 @@ artifacts
 6. **Zero-Cancellation FIFO Workflow Serializer**:
    - Resolved GitHub Actions cancellation issue (`Canceling since a higher priority waiting request for visualization-artifacts exists`) by replacing GitHub's built-in single-slot pending concurrency groups with an intelligent FIFO queue serializer (`.github/scripts/wait_for_turn.py`).
    - Workflows now run sequentially one by one in true order of dispatch, eliminating race conditions on the `artifacts` branch while preventing any premature run terminations.
+
+7. **Slow-Speed Analytical Tracking & Organic Random Inward Spawning**:
+   - Reduced simulation speeds from $650$ px/s to a calm, trackable $240$ px/s (batch: $160 - 260$ px/s), enabling human viewers to effortlessly analyze ball trajectories, elastic wall bounces, and spawn dynamics.
+   - Replaced fixed 90-degree orthogonal deflection with organic random inward angles sampled across a $150^\circ$ interior fan ($-\pm 75^\circ$ from wall normal), producing diverse, kaleidoscopic geometric webs and visual aesthetics.

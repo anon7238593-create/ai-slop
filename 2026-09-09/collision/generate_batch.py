@@ -49,16 +49,16 @@ def build_random_video_spec(index: int, base_seed: int) -> Dict[str, Any]:
     # Deterministic per-index randomness using base_seed
     rng = random.Random(base_seed + index * 1013)
 
-    # 1. Random number of balls: varied between 12 and 60
-    n_balls = rng.randint(12, 60)
+    # 1. Random number of balls: varied between 12 and 36 (optimal for clear viewer analysis)
+    n_balls = rng.randint(12, 36)
 
     # 2. Random starting ball launch direction (angle in degrees)
     initial_angle = get_random_valid_angle(rng)
 
-    # 3. Random speed & duration (varies length of video)
-    speed = round(rng.uniform(550.0, 850.0), 1)
-    duration_after = round(rng.uniform(1.8, 3.8), 1)
-    max_duration = round(rng.uniform(6.0, 14.0), 1)
+    # 3. Random speed & duration (slow and easy for viewers to track and analyze)
+    speed = round(rng.uniform(160.0, 260.0), 1)
+    duration_after = round(rng.uniform(2.5, 4.0), 1)
+    max_duration = round(rng.uniform(12.0, 22.0), 1)
 
     # 4. Canvas resolution preset
     # Defaulting mainly to 720p landscape (1280x720) for batch efficiency,
@@ -106,6 +106,7 @@ def render_worker(spec: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
         fps=30,  # 30 fps for batch speed and compact artifact storage
         speed=spec["speed"],
         radius=12.0 if spec["width"] <= 1280 else 14.0,
+        turn_angle_mode="random",
         initial_angle_deg=spec["initial_angle"],
         duration_after=spec["duration_after"],
         max_duration=spec["max_duration"],
@@ -189,7 +190,7 @@ def generate_batch(count: int, output_dir: str, workers: int = 2) -> None:
 
     readme_content = f"""# Collision Video Visualizations
 
-Collection of {len(results)} distinct, randomized 90-degree ball collision simulations generated automatically.
+Collection of {len(results)} distinct, randomized ball collision simulations with slow, analytical speeds and organic random inward deflection angles.
 
 - **Generated at**: `{generated_at}`
 - **Total Videos**: {len(results)}
@@ -197,10 +198,11 @@ Collection of {len(results)} distinct, randomized 90-degree ball collision simul
 - **Base Entropy Seed**: `{base_seed}`
 
 Each simulation varies randomly across:
-1. **Target Balls ($N$)**: Randomly sampled between 12 and 60 balls.
+1. **Target Balls ($N$)**: Varied between 12 and 36 balls for optimal visual tracking.
 2. **Initial Launch Angle**: Unique heading in [10°, 350°].
-3. **Video Length / Pacing**: Dynamic simulation durations and speed variations ($550 - 850$ px/s).
-4. **Spatial Audio & Color**: Multi-octave pentatonic stereo audio with golden-angle rainbow palettes.
+3. **Random Inward Deflections**: Every border collision spawns a new ball at a fresh random inward angle into the arena.
+4. **Analytical Slow Speed**: Paced at $160 - 260$ px/s so viewers can clearly follow each bounce and spawn trajectory.
+5. **Spatial Audio & Color**: Multi-octave pentatonic stereo audio with golden-angle rainbow palettes.
 
 | File | Balls ($N$) | Starting Angle | Canvas | Speed | File Size |
 |---|---|---|---|---|---|

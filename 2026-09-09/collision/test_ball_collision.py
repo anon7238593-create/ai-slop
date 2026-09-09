@@ -5,13 +5,19 @@ Unit tests for Ball Collision Simulation
 
 import math
 import os
+import sys
 import unittest
 import numpy as np
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
 from ball_collision import (
     Ball,
     BallSimulation,
     SimulationConfig,
+    calculate_spawn_velocity,
     calculate_90_degree_spawn_velocity,
     generate_palette,
     synthesize_audio_track,
@@ -20,6 +26,70 @@ from ball_collision import (
 
 
 class TestBallCollision(unittest.TestCase):
+    def test_calculate_spawn_velocity_random_speed_preserved(self):
+        """Verify speed is strictly preserved across random spawn velocity generation."""
+        speed = 240.0
+        wall_normal = (-1.0, 0.0)  # right wall
+        rng = np.random.default_rng(42)
+
+        for _ in range(30):
+            vx, vy = calculate_spawn_velocity(
+                vx_base=-200.0,
+                vy_base=132.0,
+                wall_normal=wall_normal,
+                speed=speed,
+                angle_mode="random",
+                rng=rng,
+            )
+            calc_speed = math.hypot(vx, vy)
+            self.assertAlmostEqual(calc_speed, speed, places=4)
+
+    def test_calculate_spawn_velocity_random_points_inward(self):
+        """Verify that randomly spawned velocities always point inward into the arena."""
+        speed = 220.0
+        walls = [
+            ((-1.0, 0.0), (-200.0, 91.0)),   # right wall (inward is -x)
+            ((1.0, 0.0), (200.0, 91.0)),     # left wall (inward is +x)
+            ((0.0, 1.0), (91.0, 200.0)),     # top wall (inward is +y)
+            ((0.0, -1.0), (91.0, -200.0)),   # bottom wall (inward is -y)
+        ]
+        rng = np.random.default_rng(123)
+
+        for normal, (vx_base, vy_base) in walls:
+            for _ in range(25):
+                vx, vy = calculate_spawn_velocity(
+                    vx_base=vx_base,
+                    vy_base=vy_base,
+                    wall_normal=normal,
+                    speed=speed,
+                    angle_mode="random",
+                    rng=rng,
+                )
+                inward_dot = vx * normal[0] + vy * normal[1]
+                self.assertGreater(inward_dot, 0.0, "Spawned velocity must point inward")
+
+    def test_calculate_spawn_velocity_random_angle_diversity(self):
+        """Verify that random spawn velocities cover diverse angles."""
+        speed = 200.0
+        wall_normal = (1.0, 0.0)  # left wall, inward normal is +x (angle 0)
+        rng = np.random.default_rng(999)
+        angles = set()
+
+        for _ in range(40):
+            vx, vy = calculate_spawn_velocity(
+                vx_base=180.0,
+                vy_base=87.0,
+                wall_normal=wall_normal,
+                speed=speed,
+                angle_mode="random",
+                rng=rng,
+            )
+            angle_deg = round(math.degrees(math.atan2(vy, vx)), 1)
+            angles.add(angle_deg)
+
+        # Diverse angles within inward arc
+        self.assertGreater(len(angles), 25)
+
     def test_calculate_90_degree_spawn_velocity_speed_preserved(self):
         """Verify speed is strictly preserved across 90-degree deflection."""
         speed = 500.0
@@ -158,6 +228,8 @@ class TestBallCollision(unittest.TestCase):
         angles = {s["initial_angle"] for s in specs}
         self.assertGreater(len(ball_counts), 5)
         self.assertGreater(len(angles), 15)
+        self.assertTrue(all(160.0 <= s["speed"] <= 260.0 for s in specs))
+        self.assertTrue(all(12 <= s["n_balls"] <= 36 for s in specs))
 
 
 if __name__ == '__main__':
