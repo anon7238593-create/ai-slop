@@ -3,26 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Slop — Artifacts & Algorithmic Media Explorer</title>
-  <meta name="description" content="Interactive browser for automated ball collision videos, Euclidean GCD grid SVGs, Voronoi diagrams, and graph traversal PDFs.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+  <title>ai-slop &middot; media artifacts</title>
+  <meta name="description" content="Generated media browser: ball collision videos, Euclidean GCD square tilings, Voronoi diagrams, and graph traversal walkthroughs.">
   <style>
     :root {
-      --bg-main: #0a0e17;
-      --bg-card: #121826;
-      --bg-card-hover: #182235;
-      --border-color: #222f47;
-      --border-highlight: #3b82f6;
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --accent-blue: #38bdf8;
-      --accent-green: #34d399;
-      --accent-amber: #fbbf24;
-      --accent-purple: #a78bfa;
-      --accent-pink: #f43f5e;
-      --radius: 12px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      --bg: #ffffff;
+      --bg-subtle: #f6f8fa;
+      --bg-hover: #f3f4f6;
+      --text: #1f2328;
+      --text-muted: #656d76;
+      --border: #d0d7de;
+      --border-muted: #e1e4e8;
+      --accent: #0969da;
+      --accent-hover: #0550ae;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1117;
+        --bg-subtle: #161b22;
+        --bg-hover: #21262d;
+        --text: #e6edf3;
+        --text-muted: #8b949e;
+        --border: #30363d;
+        --border-muted: #21262d;
+        --accent: #4493f8;
+        --accent-hover: #58a6ff;
+      }
     }
 
     * {
@@ -32,905 +40,656 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-main);
-      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+      font-size: 14px;
       line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
     }
 
     a {
-      color: var(--accent-blue);
+      color: var(--accent);
       text-decoration: none;
-      transition: color 0.2s;
     }
     a:hover {
-      color: #7dd3fc;
       text-decoration: underline;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
+      width: 100%;
     }
 
     /* Header */
     header {
-      background: rgba(18, 24, 38, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-color);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-subtle);
+      padding: 12px 0;
     }
 
-    .header-content {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 1rem 1.5rem;
+    .header-inner {
       display: flex;
-      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 1rem;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
-    .brand-title {
+    .brand {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      font-size: 1.35rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .brand-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(52, 211, 153, 0.12);
-      color: var(--accent-green);
-      border: 1px solid rgba(52, 211, 153, 0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
+      gap: 6px;
+      font-size: 15px;
       font-weight: 600;
     }
 
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      background-color: var(--accent-green);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-green);
-      animation: pulse 2s infinite;
+    .brand a {
+      color: var(--text);
+    }
+    .brand a:hover {
+      text-decoration: none;
+      color: var(--accent);
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
+    .brand-sep {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .brand-sub {
+      color: var(--text-muted);
+      font-weight: 400;
     }
 
     .header-links {
       display: flex;
-      align-items: center;
-      gap: 1rem;
-      font-size: 0.875rem;
+      gap: 14px;
+      font-size: 13px;
     }
 
-    .header-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      padding: 0.4rem 0.85rem;
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-    .header-btn:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-highlight);
-      text-decoration: none;
+    /* Main Navigation Tabs */
+    .tabs-wrapper {
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      margin-bottom: 24px;
     }
 
-    /* Main Container */
-    main {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem;
-      flex: 1;
-      width: 100%;
-    }
-
-    /* Hero intro */
-    .hero {
-      margin-bottom: 2rem;
-      text-align: center;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .hero h1 {
-      font-size: 2.2rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-bottom: 0.5rem;
-      background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero p {
-      color: var(--text-secondary);
-      font-size: 1.05rem;
-    }
-
-    /* Navigation Tabs */
-    .tabs-nav {
+    .nav-tabs {
       display: flex;
-      justify-content: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 2.5rem;
-      padding: 0.4rem;
-      background: rgba(18, 24, 38, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      max-width: 820px;
-      margin-left: auto;
-      margin-right: auto;
+      gap: 4px;
+      overflow-x: auto;
     }
 
-    .tab-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.65rem 1.25rem;
-      background: transparent;
-      border: 1px solid transparent;
-      border-radius: 10px;
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      font-weight: 600;
+    .tab-link {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.2s ease;
+      white-space: nowrap;
+      transition: color 0.1s, border-color 0.1s;
     }
 
-    .tab-btn:hover {
-      color: var(--text-primary);
-      background: rgba(255, 255, 255, 0.05);
+    .tab-link:hover {
+      color: var(--text);
     }
 
-    .tab-btn.active {
-      background: var(--border-highlight);
-      color: #ffffff;
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    .tab-link.active {
+      color: var(--text);
+      font-weight: 600;
+      border-bottom-color: var(--accent);
     }
 
-    .tab-badge {
-      font-size: 0.75rem;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 0.15rem 0.45rem;
-      border-radius: 9999px;
+    .count-tag {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1px 6px;
+      margin-left: 6px;
     }
 
-    /* Tab Panels */
-    .tab-panel {
+    /* Content Area */
+    main {
+      flex: 1;
+      padding-bottom: 40px;
+    }
+
+    .tab-content {
       display: none;
-      animation: fadeIn 0.3s ease;
     }
-    .tab-panel.active {
+    .tab-content.active {
       display: block;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    .section-intro {
+      margin-bottom: 20px;
     }
 
-    /* Section Header */
-    .section-header {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .section-info h2 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 0.35rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .section-info p {
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      max-width: 800px;
-    }
-
-    /* Filter Controls */
-    .filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: center;
-      width: 100%;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .search-input {
-      background: var(--bg-main);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 0.55rem 1rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      flex: 1;
-      min-width: 220px;
-    }
-    .search-input:focus {
-      outline: none;
-      border-color: var(--border-highlight);
-    }
-
-    .filter-select {
-      background: var(--bg-main);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 0.55rem 1rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    /* Spotlight Media Viewer */
-    .spotlight-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 2.5rem;
-      box-shadow: var(--shadow);
-    }
-
-    .spotlight-header {
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-    }
-
-    .spotlight-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .badges-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.2rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
+    .section-intro h2 {
+      font-size: 18px;
       font-weight: 600;
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-secondary);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 4px;
     }
-    .badge.blue { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border-color: rgba(56, 189, 248, 0.3); }
-    .badge.green { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); border-color: rgba(52, 211, 153, 0.3); }
-    .badge.amber { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.3); }
-    .badge.purple { background: rgba(167, 139, 250, 0.15); color: var(--accent-purple); border-color: rgba(167, 139, 250, 0.3); }
 
-    .spotlight-media-wrap {
-      background: #000;
+    .section-intro p {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Toolbar / Filters */
+    .toolbar {
       display: flex;
-      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
       align-items: center;
-      min-height: 380px;
-      max-height: 650px;
-      position: relative;
+      margin-bottom: 16px;
+      padding: 10px 12px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .input, .select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      outline: none;
+    }
+    .input:focus, .select:focus {
+      border-color: var(--accent);
+    }
+    .input {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    /* Viewer Box */
+    .viewer {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 20px;
       overflow: hidden;
     }
 
-    .spotlight-media-wrap video {
+    .viewer-display {
+      background: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 320px;
+      max-height: 540px;
+      overflow: hidden;
+    }
+
+    .viewer-display video {
       max-width: 100%;
-      max-height: 600px;
+      max-height: 520px;
       outline: none;
     }
 
-    .spotlight-media-wrap svg,
-    .spotlight-media-wrap img {
+    .viewer-display.light-display {
+      background: var(--bg);
+      min-height: 320px;
+      max-height: 540px;
+    }
+
+    .viewer-display.light-display img {
       max-width: 100%;
-      max-height: 580px;
+      max-height: 500px;
       object-fit: contain;
-      padding: 1rem;
+      padding: 12px;
     }
 
-    /* Media Grid */
-    .media-grid {
+    .viewer-info {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .viewer-title {
+      font-weight: 600;
+    }
+
+    .viewer-meta {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    /* Grid & Cards */
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
-    .item-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      overflow: hidden;
+    .card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
       cursor: pointer;
-      transition: all 0.2s ease;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+      transition: border-color 0.1s;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+    }
+    .card.selected {
+      border-color: var(--accent);
+      background: var(--bg-subtle);
     }
 
-    .item-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--border-highlight);
-      background: var(--bg-card-hover);
-      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
-    }
-
-    .item-card.active {
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.4);
-    }
-
-    .card-preview {
-      height: 160px;
-      background: #080c14;
+    .card-thumb {
+      height: 120px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-muted);
+      border-radius: 4px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      position: relative;
-      border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 12px;
     }
-
-    .card-preview img,
-    .card-preview svg {
+    .card-thumb img {
       max-width: 90%;
       max-height: 90%;
       object-fit: contain;
-      transition: transform 0.2s;
-    }
-
-    .item-card:hover .card-preview img,
-    .item-card:hover .card-preview svg {
-      transform: scale(1.05);
-    }
-
-    .play-icon-overlay {
-      width: 44px;
-      height: 44px;
-      background: rgba(56, 189, 248, 0.85);
-      color: #000;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-      transition: transform 0.2s;
-    }
-
-    .item-card:hover .play-icon-overlay {
-      transform: scale(1.15);
-      background: var(--accent-blue);
-    }
-
-    .card-body {
-      padding: 1rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 0.5rem;
     }
 
     .card-title {
       font-weight: 600;
-      font-size: 0.95rem;
-      color: var(--text-primary);
+      font-size: 13px;
     }
 
     .card-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      font-size: 0.78rem;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
     }
 
     /* Pagination */
-    .pagination-bar {
+    .pagination {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 0.5rem;
-      margin: 2rem 0;
-      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+      font-size: 13px;
     }
 
-    .page-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 0.5rem 0.9rem;
-      border-radius: 8px;
+    .btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 13px;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 0.85rem;
-      transition: all 0.2s;
     }
-    .page-btn:hover:not(:disabled) {
-      border-color: var(--border-highlight);
-      background: var(--bg-card-hover);
+    .btn:hover:not(:disabled) {
+      background: var(--bg-hover);
     }
-    .page-btn.active {
-      background: var(--border-highlight);
-      border-color: var(--border-highlight);
-      color: #fff;
-    }
-    .page-btn:disabled {
+    .btn:disabled {
       opacity: 0.4;
       cursor: not-allowed;
     }
 
-    /* Voronoi Slider Widget */
-    .voronoi-slider-box {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+    /* Voronoi Quick Jump Buttons */
+    .num-bar {
       display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    .slider-row {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
       flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 16px;
     }
-
-    .slider-row input[type="range"] {
-      flex: 1;
-      height: 8px;
-      background: var(--border-color);
+    .num-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 10px;
       border-radius: 4px;
-      outline: none;
-      -webkit-appearance: none;
+      font-size: 12px;
       cursor: pointer;
+      font-family: var(--font-mono);
     }
-    .slider-row input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--accent-blue);
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+    .num-btn:hover {
+      background: var(--bg-hover);
+    }
+    .num-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
     }
 
-    /* PDF Cards */
-    .pdf-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .pdf-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 1.75rem;
+    /* Traversal Table */
+    .doc-list {
       display: flex;
       flex-direction: column;
+      gap: 12px;
+    }
+
+    .doc-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+      display: flex;
       justify-content: space-between;
-      gap: 1.25rem;
-      transition: all 0.2s;
-    }
-    .pdf-card:hover {
-      border-color: var(--border-highlight);
-      transform: translateY(-2px);
-    }
-
-    .pdf-card-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      display: flex;
       align-items: center;
-      gap: 0.5rem;
-    }
-
-    .pdf-card p {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-
-    .pdf-btn-row {
-      display: flex;
-      gap: 0.75rem;
       flex-wrap: wrap;
+      gap: 16px;
     }
 
-    .primary-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: var(--border-highlight);
-      color: #fff;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
+    .doc-title {
       font-weight: 600;
-      font-size: 0.9rem;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .primary-btn:hover {
-      opacity: 0.9;
-      text-decoration: none;
-      color: #fff;
+      font-size: 15px;
+      margin-bottom: 4px;
     }
 
-    .secondary-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-primary);
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      border: 1px solid var(--border-color);
-      cursor: pointer;
-      transition: background 0.2s;
+    .doc-desc {
+      color: var(--text-muted);
+      font-size: 13px;
+      max-width: 700px;
     }
-    .secondary-btn:hover {
-      background: rgba(255, 255, 255, 0.14);
-      text-decoration: none;
+
+    .doc-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 4px;
+    }
+
+    .doc-actions {
+      display: flex;
+      gap: 8px;
     }
 
     /* Footer */
     footer {
-      background: rgba(18, 24, 38, 0.95);
-      border-top: 1px solid var(--border-color);
-      padding: 2rem 1.5rem;
-      font-size: 0.875rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg-subtle);
+      padding: 16px 0;
+      font-size: 13px;
       color: var(--text-muted);
       margin-top: auto;
     }
 
-    .footer-content {
-      max-width: 1400px;
-      margin: 0 auto;
+    .footer-inner {
       display: flex;
-      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 1rem;
+      flex-wrap: wrap;
+      gap: 8px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Header -->
   <header>
-    <div class="header-content">
-      <div class="brand-title">
-        <span>✨ AI Slop Media Explorer</span>
-        <span class="brand-badge">
-          <span class="pulse-dot"></span>
-          Live Artifacts
-        </span>
+    <div class="container header-inner">
+      <div class="brand">
+        <a href="./">ai-slop</a>
+        <span class="brand-sep">/</span>
+        <span class="brand-sub">artifacts</span>
       </div>
       <div class="header-links">
-        <a href="https://github.com/anon7238593-create/ai-slop" class="header-btn" target="_blank" rel="noopener">
-          <span>GitHub Repository</span>
-          <span>↗</span>
-        </a>
-        <a href="https://github.com/anon7238593-create/ai-slop/tree/artifacts" class="header-btn" target="_blank" rel="noopener">
-          <span>artifacts branch</span>
-          <span>↗</span>
-        </a>
+        <a href="https://github.com/anon7238593-create/ai-slop" target="_blank" rel="noopener">Repository &rarr;</a>
+        <a href="https://github.com/anon7238593-create/ai-slop/tree/artifacts" target="_blank" rel="noopener">artifacts branch &rarr;</a>
       </div>
     </div>
   </header>
 
-  <main>
-    <!-- Hero description -->
-    <section class="hero">
-      <h1>Algorithmic Media & Visualizations</h1>
-      <p>
-        A browsable gallery of autonomous 2D physics simulations, Euclidean square tilings, Voronoi diagrams, and graph algorithms continuously updated from GitHub Actions.
-      </p>
-    </section>
+  <div class="tabs-wrapper">
+    <div class="container">
+      <nav class="nav-tabs">
+        <button class="tab-link active" data-tab="collision">
+          Collision Videos
+          <span class="count-tag" id="badge-collision">__COLLISION_TOTAL__</span>
+        </button>
+        <button class="tab-link" data-tab="gcd">
+          GCD Grids
+          <span class="count-tag" id="badge-gcd">__GCD_TOTAL__</span>
+        </button>
+        <button class="tab-link" data-tab="voronoi">
+          Voronoi Diagrams
+          <span class="count-tag" id="badge-voronoi">__VORONOI_TOTAL__</span>
+        </button>
+        <button class="tab-link" data-tab="traversal">
+          Graph Traversals
+          <span class="count-tag" id="badge-traversal">__TRAVERSAL_TOTAL__</span>
+        </button>
+      </nav>
+    </div>
+  </div>
 
-    <!-- Navigation Tabs -->
-    <nav class="tabs-nav" aria-label="Media Tabs">
-      <button class="tab-btn active" data-tab="collision">
-        <span>🎾 Collision Videos</span>
-        <span class="tab-badge" id="badge-collision">__COLLISION_TOTAL__</span>
-      </button>
-      <button class="tab-btn" data-tab="gcd">
-        <span>📐 GCD Grids</span>
-        <span class="tab-badge" id="badge-gcd">__GCD_TOTAL__</span>
-      </button>
-      <button class="tab-btn" data-tab="voronoi">
-        <span>💠 Voronoi Diagrams</span>
-        <span class="tab-badge" id="badge-voronoi">__VORONOI_TOTAL__</span>
-      </button>
-      <button class="tab-btn" data-tab="traversal">
-        <span>🕸️ Graph Traversals</span>
-        <span class="tab-badge" id="badge-traversal">__TRAVERSAL_TOTAL__</span>
-      </button>
-    </nav>
+  <main class="container">
 
-    <!-- 1. Collision Videos Tab -->
-    <section id="tab-collision" class="tab-panel active">
-      <div class="section-header">
-        <div class="section-info">
-          <h2>🎾 Random Angle Ball Collision Videos</h2>
-          <p>
-            2D continuous physics simulation with slow, analytical speeds (160–260 px/s) and organic random inward angles (&plusmn;75&deg; fan). Balls duplicate upon border impacts until reaching N balls, followed by a 30-second floating ensemble showcase with spatial pentatonic stereo audio.
-          </p>
-        </div>
-        <div class="badges-row">
-          <span class="badge blue">100 Randomized Simulations</span>
-          <span class="badge green">Slow 160-260 px/s</span>
-          <span class="badge amber">Random Inward Deflection</span>
-          <span class="badge purple">30s Post-Max Floating</span>
-        </div>
-        <div class="filter-bar">
-          <input type="text" id="collision-search" class="search-input" placeholder="Search by ball count (e.g. 25), speed, angle...">
-          <select id="collision-aspect" class="filter-select">
-            <option value="all">All Canvas Formats</option>
-            <option value="landscape_720p">Landscape 720p (1280x720)</option>
-            <option value="square_720p">Square 720p (720x720)</option>
-            <option value="vertical_720p">Vertical 720p (720x1280)</option>
-            <option value="landscape_1080p">Landscape 1080p (1920x1080)</option>
-          </select>
-          <select id="collision-sort" class="filter-select">
-            <option value="index">Default Order</option>
-            <option value="balls-desc">Balls: High to Low</option>
-            <option value="balls-asc">Balls: Low to High</option>
-            <option value="speed-asc">Speed: Slowest First</option>
-            <option value="speed-desc">Speed: Fastest First</option>
-            <option value="size-desc">File Size: Largest</option>
-          </select>
-        </div>
+    <!-- 1. Collision Videos -->
+    <section id="tab-collision" class="tab-content active">
+      <div class="section-intro">
+        <h2>Collision Videos</h2>
+        <p>
+          2D ball collisions with slow speeds (160–260 px/s). On wall impact, an elastically reflected ball duplicates by spawning an additional ball at a random inward angle. Once the target ball count N is reached, the simulation continues for 30 more seconds.
+        </p>
       </div>
 
-      <!-- Spotlight Player -->
-      <div class="spotlight-card" id="video-spotlight">
-        <div class="spotlight-header">
-          <div class="spotlight-title" id="spotlight-video-title">collision_001.mp4</div>
-          <div class="badges-row" id="spotlight-video-badges"></div>
-        </div>
-        <div class="spotlight-media-wrap">
+      <div class="viewer" id="video-viewer">
+        <div class="viewer-display">
           <video id="main-video-player" controls preload="metadata">
             <source src="" type="video/mp4">
-            Your browser does not support HTML5 video.
           </video>
         </div>
-      </div>
-
-      <!-- Video Grid -->
-      <div class="media-grid" id="collision-grid"></div>
-      <div class="pagination-bar" id="collision-pagination"></div>
-    </section>
-
-    <!-- 2. GCD Grids Tab -->
-    <section id="tab-gcd" class="tab-panel">
-      <div class="section-header">
-        <div class="section-info">
-          <h2>📐 Euclidean Algorithm GCD Grid Visualizations</h2>
-          <p>
-            Geometric Euclidean square tiling of a &times; b rectangles down to gcd(a, b) &times; gcd(a, b) squares. Rendered with demonstration-scale typography and guaranteed minimum 110 &times; 110 px tile boxes so all dimensions are clearly legible.
-          </p>
-        </div>
-        <div class="badges-row">
-          <span class="badge blue">100 Unique Pairs</span>
-          <span class="badge amber">Dimensions up to 15,000</span>
-          <span class="badge green">Min 110px Tile Labels</span>
-        </div>
-        <div class="filter-bar">
-          <input type="text" id="gcd-search" class="search-input" placeholder="Search by dimension or GCD (e.g. 12, 48, gcd:25)...">
-          <select id="gcd-filter" class="filter-select">
-            <option value="all">All GCD Values</option>
-            <option value="small">Small GCD (&le; 10)</option>
-            <option value="medium">Medium GCD (11 - 50)</option>
-            <option value="large">Large GCD (&gt; 50)</option>
-          </select>
-          <select id="gcd-sort" class="filter-select">
-            <option value="index">Default Order</option>
-            <option value="gcd-desc">GCD: Largest First</option>
-            <option value="gcd-asc">GCD: Smallest First</option>
-            <option value="a-desc">Width (a): Largest First</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Spotlight GCD Preview -->
-      <div class="spotlight-card" id="gcd-spotlight">
-        <div class="spotlight-header">
-          <div class="spotlight-title" id="spotlight-gcd-title">GCD Visualization</div>
-          <div class="badges-row" id="spotlight-gcd-badges"></div>
-        </div>
-        <div class="spotlight-media-wrap" id="spotlight-gcd-wrap">
-          <img id="main-gcd-img" src="" alt="GCD Grid SVG">
-        </div>
-      </div>
-
-      <!-- GCD Grid -->
-      <div class="media-grid" id="gcd-grid"></div>
-      <div class="pagination-bar" id="gcd-pagination"></div>
-    </section>
-
-    <!-- 3. Voronoi Diagrams Tab -->
-    <section id="tab-voronoi" class="tab-panel">
-      <div class="section-header">
-        <div class="section-info">
-          <h2>💠 Geometric Voronoi Diagrams</h2>
-          <p>
-            2D spatial partitioning via polygon half-plane clipping against perpendicular bisectors of site pairs. Demonstrates nearest-neighbor cellular growth from 2 to 20 sites.
-          </p>
-        </div>
-        <div class="badges-row">
-          <span class="badge blue">2 to 20 Seed Sites</span>
-          <span class="badge purple">Geometric Half-Plane Clipping</span>
-          <span class="badge green">Clean SVG Partitions</span>
-        </div>
-      </div>
-
-      <div class="voronoi-slider-box">
-        <div class="slider-row">
-          <label for="voronoi-range" style="font-weight: 700; font-size: 1.1rem; min-width: 140px;">
-            Sites: <span id="voronoi-site-val" style="color: var(--accent-blue);">10</span>
-          </label>
-          <input type="range" id="voronoi-range" min="2" max="20" value="10" step="1">
-          <a id="voronoi-raw-link" class="secondary-btn" href="#" target="_blank" download>Open Raw SVG ↗</a>
-        </div>
-      </div>
-
-      <div class="spotlight-card">
-        <div class="spotlight-header">
-          <div class="spotlight-title" id="voronoi-title">Voronoi Diagram (10 Sites)</div>
-          <div class="badges-row">
-            <span class="badge blue" id="voronoi-badge-sites">10 Sites</span>
-            <span class="badge green" id="voronoi-badge-seed">Deterministic Seed</span>
+        <div class="viewer-info">
+          <div>
+            <div class="viewer-title" id="spotlight-video-title">collision_001.mp4</div>
+            <div class="viewer-meta" id="spotlight-video-meta"></div>
+          </div>
+          <div>
+            <a id="spotlight-video-link" href="#" target="_blank" class="btn">Open file &rarr;</a>
           </div>
         </div>
-        <div class="spotlight-media-wrap" style="background: #080c14; min-height: 460px;">
+      </div>
+
+      <div class="toolbar">
+        <input type="text" id="collision-search" class="input" placeholder="Filter by ball count, speed, angle, or filename...">
+        <select id="collision-aspect" class="select">
+          <option value="all">All sizes</option>
+          <option value="landscape_720p">Landscape 720p (1280&times;720)</option>
+          <option value="square_720p">Square 720p (720&times;720)</option>
+          <option value="vertical_720p">Vertical 720p (720&times;1280)</option>
+          <option value="landscape_1080p">Landscape 1080p (1920&times;1080)</option>
+        </select>
+        <select id="collision-sort" class="select">
+          <option value="index">Default order</option>
+          <option value="balls-desc">Balls: High to Low</option>
+          <option value="balls-asc">Balls: Low to High</option>
+          <option value="speed-asc">Speed: Slowest</option>
+          <option value="speed-desc">Speed: Fastest</option>
+          <option value="size-desc">File size: Largest</option>
+        </select>
+      </div>
+
+      <div class="grid" id="collision-grid"></div>
+      <div class="pagination" id="collision-pagination"></div>
+    </section>
+
+    <!-- 2. GCD Grids -->
+    <section id="tab-gcd" class="tab-content">
+      <div class="section-intro">
+        <h2>Euclidean GCD Grids</h2>
+        <p>
+          Geometric visualizations of the Euclidean algorithm tiling a &times; b rectangles with decreasing squares down to gcd(a, b) &times; gcd(a, b).
+        </p>
+      </div>
+
+      <div class="viewer" id="gcd-viewer">
+        <div class="viewer-display light-display">
+          <img id="main-gcd-img" src="" alt="GCD Grid SVG">
+        </div>
+        <div class="viewer-info">
+          <div>
+            <div class="viewer-title" id="spotlight-gcd-title">GCD Visualization</div>
+            <div class="viewer-meta" id="spotlight-gcd-meta"></div>
+          </div>
+          <div>
+            <a id="spotlight-gcd-link" href="#" target="_blank" class="btn">Open raw SVG &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input type="text" id="gcd-search" class="input" placeholder="Filter by dimension or GCD (e.g. 48, 12, 120)...">
+        <select id="gcd-filter" class="select">
+          <option value="all">All GCD values</option>
+          <option value="small">GCD &le; 10</option>
+          <option value="medium">GCD 11 &ndash; 50</option>
+          <option value="large">GCD &gt; 50</option>
+        </select>
+        <select id="gcd-sort" class="select">
+          <option value="index">Default order</option>
+          <option value="gcd-desc">GCD: Largest first</option>
+          <option value="gcd-asc">GCD: Smallest first</option>
+          <option value="a-desc">Width (a): Largest first</option>
+        </select>
+      </div>
+
+      <div class="grid" id="gcd-grid"></div>
+      <div class="pagination" id="gcd-pagination"></div>
+    </section>
+
+    <!-- 3. Voronoi Diagrams -->
+    <section id="tab-voronoi" class="tab-content">
+      <div class="section-intro">
+        <h2>Voronoi Diagrams</h2>
+        <p>
+          2D geometric Voronoi partitions for 2 to 20 site points generated by half-plane clipping.
+        </p>
+      </div>
+
+      <div class="num-bar">
+        <span style="font-size: 13px; font-weight: 500; margin-right: 4px;">Sites:</span>
+        <div id="voronoi-buttons" style="display: flex; flex-wrap: wrap; gap: 4px;"></div>
+      </div>
+
+      <div class="viewer">
+        <div class="viewer-display light-display">
           <img id="voronoi-main-img" src="" alt="Voronoi Diagram SVG">
         </div>
-      </div>
-
-      <div class="media-grid" id="voronoi-strip" style="grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));"></div>
-    </section>
-
-    <!-- 4. Graph Traversals Tab -->
-    <section id="tab-traversal" class="tab-panel">
-      <div class="section-header">
-        <div class="section-info">
-          <h2>🕸️ Graph Traversal Walkthroughs (BFS & DFS)</h2>
-          <p>
-            Step-by-step Graphviz visualizer comparing Breadth-First Search and Depth-First Search exploration trees, active frontiers, stack/queue memory, and visited node ordering.
-          </p>
-        </div>
-        <div class="badges-row">
-          <span class="badge blue">Breadth-First Search</span>
-          <span class="badge purple">Depth-First Search</span>
-          <span class="badge amber">Unified Slide Walkthroughs</span>
+        <div class="viewer-info">
+          <div>
+            <div class="viewer-title" id="voronoi-title">Voronoi Diagram (10 Sites)</div>
+            <div class="viewer-meta" id="voronoi-meta">voronoi_10_sites.svg</div>
+          </div>
+          <div>
+            <a id="voronoi-raw-link" href="#" target="_blank" class="btn">Open raw SVG &rarr;</a>
+          </div>
         </div>
       </div>
-
-      <div class="pdf-grid" id="pdf-container"></div>
     </section>
+
+    <!-- 4. Graph Traversals -->
+    <section id="tab-traversal" class="tab-content">
+      <div class="section-intro">
+        <h2>Graph Traversal Walkthroughs</h2>
+        <p>
+          Comparative step-by-step PDF slide walkthroughs illustrating Breadth-First Search and Depth-First Search exploration trees, active queue/stack memory, and discovery orders.
+        </p>
+      </div>
+
+      <div class="doc-list" id="pdf-container"></div>
+    </section>
+
   </main>
 
   <footer>
-    <div class="footer-content">
-      <div>
-        <strong>AI Slop</strong> · Algorithmic Media Generator & Artifacts Showcase
-      </div>
-      <div>
-        Last Updated: <code>__NOW_STR__</code> · Total Assets: <strong>__TOTAL_MEDIA__</strong>
-      </div>
+    <div class="container footer-inner">
+      <span>ai-slop &middot; media artifacts</span>
+      <span>Updated __NOW_STR__ &middot; __TOTAL_MEDIA__ assets</span>
     </div>
   </footer>
 
-  <!-- Embedded Manifest Data -->
   <script>
     const DATA = __DATA_JSON__;
   </script>
 
-  <!-- Interactive Explorer Logic -->
   <script>
-    // Tab Switching
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabPanels = document.querySelectorAll('.tab-panel');
+    // Tab Navigation
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
 
-    function switchTab(tabId) {
-      tabButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+    function selectTab(tabId) {
+      tabLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('data-tab') === tabId);
       });
-      tabPanels.forEach(panel => {
-        panel.classList.toggle('active', panel.id === `tab-${tabId}`);
+      tabContents.forEach(content => {
+        content.classList.toggle('active', content.id === `tab-${tabId}`);
       });
       window.location.hash = tabId;
     }
 
-    tabButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tabId = btn.getAttribute('data-tab');
-        switchTab(tabId);
+    tabLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        selectTab(link.getAttribute('data-tab'));
       });
     });
 
-    // Check hash on load
     if (window.location.hash) {
       const hash = window.location.hash.replace('#', '');
       if (['collision', 'gcd', 'voronoi', 'traversal'].includes(hash)) {
-        switchTab(hash);
+        selectTab(hash);
       }
     }
 
     // =========================================================================
     // 1. Collision Videos
     // =========================================================================
-    let collisionVideos = DATA.collision.videos || [];
-    let currentCollisionPage = 1;
+    const collisionVideos = DATA.collision.videos || [];
+    let collisionPage = 1;
     const collisionPageSize = 12;
-    let selectedVideoIndex = 0;
+    let currentVideoIndex = 1;
 
-    function renderCollisionSpotlight(item) {
+    function showCollisionSpotlight(item) {
       if (!item) return;
       document.getElementById('spotlight-video-title').textContent = item.filename;
-      const badgesContainer = document.getElementById('spotlight-video-badges');
-      badgesContainer.innerHTML = `
-        <span class="badge green">Balls: ${item.n_balls}</span>
-        <span class="badge blue">Angle: ${item.initial_angle}&deg;</span>
-        <span class="badge amber">Speed: ${item.speed} px/s (Slow)</span>
-        <span class="badge purple">Canvas: ${item.width}&times;${item.height}</span>
-        <span class="badge">${item.file_size_mb || 0} MB</span>
-      `;
+      document.getElementById('spotlight-video-meta').textContent =
+        `Balls: ${item.n_balls} | Initial Angle: ${item.initial_angle}\u00B0 | Speed: ${item.speed} px/s | Canvas: ${item.width}\u00D7${item.height} | Size: ${item.file_size_mb || 0} MB`;
+
       const player = document.getElementById('main-video-player');
       const src = `collision-videos/${item.filename}`;
-      if (player.src !== src) {
-        player.src = src;
+      if (player.getAttribute('src') !== src) {
+        player.setAttribute('src', src);
         player.load();
       }
+      document.getElementById('spotlight-video-link').href = src;
     }
 
     function getFilteredCollisionVideos() {
@@ -938,79 +697,67 @@
       const aspect = document.getElementById('collision-aspect').value;
       const sort = document.getElementById('collision-sort').value;
 
-      let filtered = collisionVideos.filter(v => {
+      let list = collisionVideos.filter(v => {
         if (aspect !== 'all' && v.aspect_choice !== aspect) return false;
         if (search) {
-          const matchBalls = v.n_balls.toString().includes(search);
-          const matchSpeed = v.speed.toString().includes(search);
-          const matchAngle = v.initial_angle.toString().includes(search);
-          const matchFile = v.filename.toLowerCase().includes(search);
-          if (!matchBalls && !matchSpeed && !matchAngle && !matchFile) return false;
+          const m1 = v.n_balls.toString().includes(search);
+          const m2 = v.speed.toString().includes(search);
+          const m3 = v.initial_angle.toString().includes(search);
+          const m4 = v.filename.toLowerCase().includes(search);
+          if (!m1 && !m2 && !m3 && !m4) return false;
         }
         return true;
       });
 
-      if (sort === 'balls-desc') filtered.sort((a, b) => b.n_balls - a.n_balls);
-      else if (sort === 'balls-asc') filtered.sort((a, b) => a.n_balls - b.n_balls);
-      else if (sort === 'speed-asc') filtered.sort((a, b) => a.speed - b.speed);
-      else if (sort === 'speed-desc') filtered.sort((a, b) => b.speed - a.speed);
-      else if (sort === 'size-desc') filtered.sort((a, b) => (b.file_size_mb || 0) - (a.file_size_mb || 0));
-      else filtered.sort((a, b) => a.index - b.index);
+      if (sort === 'balls-desc') list.sort((a, b) => b.n_balls - a.n_balls);
+      else if (sort === 'balls-asc') list.sort((a, b) => a.n_balls - b.n_balls);
+      else if (sort === 'speed-asc') list.sort((a, b) => a.speed - b.speed);
+      else if (sort === 'speed-desc') list.sort((a, b) => b.speed - a.speed);
+      else if (sort === 'size-desc') list.sort((a, b) => (b.file_size_mb || 0) - (a.file_size_mb || 0));
+      else list.sort((a, b) => a.index - b.index);
 
-      return filtered;
+      return list;
     }
 
     function renderCollisionGrid() {
       const filtered = getFilteredCollisionVideos();
       const totalPages = Math.ceil(filtered.length / collisionPageSize) || 1;
-      if (currentCollisionPage > totalPages) currentCollisionPage = 1;
+      if (collisionPage > totalPages) collisionPage = 1;
 
-      const start = (currentCollisionPage - 1) * collisionPageSize;
+      const start = (collisionPage - 1) * collisionPageSize;
       const pageItems = filtered.slice(start, start + collisionPageSize);
 
       const grid = document.getElementById('collision-grid');
       grid.innerHTML = '';
 
       if (pageItems.length === 0) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">No collision videos match the search criteria.</div>';
+        grid.innerHTML = '<div style="grid-column: 1/-1; color: var(--text-muted); padding: 20px 0;">No matching collision videos found.</div>';
         document.getElementById('collision-pagination').innerHTML = '';
         return;
       }
 
       pageItems.forEach(item => {
         const card = document.createElement('div');
-        card.className = 'item-card';
-        if (item.index === selectedVideoIndex) card.classList.add('active');
-
+        card.className = 'card' + (item.index === currentVideoIndex ? ' selected' : '');
         card.innerHTML = `
-          <div class="card-preview">
-            <div class="play-icon-overlay">&#9654;</div>
-          </div>
-          <div class="card-body">
-            <div class="card-title">${item.filename}</div>
-            <div class="card-meta">
-              <span class="badge green">N = ${item.n_balls}</span>
-              <span class="badge blue">${item.initial_angle}&deg;</span>
-              <span class="badge amber">${item.speed} px/s</span>
-              <span class="badge">${item.width}&times;${item.height}</span>
-            </div>
+          <div class="card-thumb">&#9654; Play ${item.width}&times;${item.height}</div>
+          <div class="card-title">${item.filename}</div>
+          <div class="card-meta">
+            ${item.n_balls} balls &middot; ${item.initial_angle}&deg; &middot; ${item.speed} px/s
           </div>
         `;
-
         card.addEventListener('click', () => {
-          selectedVideoIndex = item.index;
-          document.querySelectorAll('#collision-grid .item-card').forEach(c => c.classList.remove('active'));
-          card.classList.add('active');
-          renderCollisionSpotlight(item);
-          document.getElementById('video-spotlight').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          currentVideoIndex = item.index;
+          document.querySelectorAll('#collision-grid .card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          showCollisionSpotlight(item);
+          document.getElementById('video-viewer').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
-
         grid.appendChild(card);
       });
 
-      // Render Pagination
-      renderPagination('collision-pagination', currentCollisionPage, totalPages, (page) => {
-        currentCollisionPage = page;
+      renderPagination('collision-pagination', collisionPage, totalPages, (p) => {
+        collisionPage = p;
         renderCollisionGrid();
       });
     }
@@ -1018,25 +765,22 @@
     // =========================================================================
     // 2. GCD Grids
     // =========================================================================
-    let gcdGrids = DATA.gcd.grids || [];
-    let currentGcdPage = 1;
+    const gcdGrids = DATA.gcd.grids || [];
+    let gcdPage = 1;
     const gcdPageSize = 12;
-    let selectedGcdIndex = 0;
+    let currentGcdFile = '';
 
-    function renderGcdSpotlight(item) {
+    function showGcdSpotlight(item) {
       if (!item) return;
+      currentGcdFile = item.file;
       document.getElementById('spotlight-gcd-title').textContent = `${item.a} \u00D7 ${item.b} (GCD = ${item.gcd})`;
-      const badgesContainer = document.getElementById('spotlight-gcd-badges');
-      badgesContainer.innerHTML = `
-        <span class="badge green">GCD: ${item.gcd}</span>
-        <span class="badge blue">a = ${item.a}, b = ${item.b}</span>
-        <span class="badge amber">Steps: ${item.steps || 1}</span>
-        <span class="badge purple">Squares: ${item.squares || 1}</span>
-        <span class="badge">Seed: #${item.seed || 0}</span>
-        <a href="gcd-grids/${item.file}" class="header-btn" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" target="_blank">Open Raw SVG &nearr;</a>
-      `;
+      document.getElementById('spotlight-gcd-meta').textContent =
+        `GCD: ${item.gcd} | Steps: ${item.steps || 1} | Squares: ${item.squares || 1} | Seed: #${item.seed || 0}`;
+
       const img = document.getElementById('main-gcd-img');
-      img.src = `gcd-grids/${item.file}`;
+      const src = `gcd-grids/${item.file}`;
+      img.src = src;
+      document.getElementById('spotlight-gcd-link').href = src;
     }
 
     function getFilteredGcdGrids() {
@@ -1044,74 +788,66 @@
       const filter = document.getElementById('gcd-filter').value;
       const sort = document.getElementById('gcd-sort').value;
 
-      let filtered = gcdGrids.filter(g => {
+      let list = gcdGrids.filter(g => {
         if (filter === 'small' && g.gcd > 10) return false;
         if (filter === 'medium' && (g.gcd <= 10 || g.gcd > 50)) return false;
         if (filter === 'large' && g.gcd <= 50) return false;
 
         if (search) {
-          const matchA = g.a.toString().includes(search);
-          const matchB = g.b.toString().includes(search);
-          const matchGcd = g.gcd.toString().includes(search);
-          const matchPair = `${g.a}x${g.b}`.includes(search) || `${g.b}x${g.a}`.includes(search);
-          if (!matchA && !matchB && !matchGcd && !matchPair) return false;
+          const m1 = g.a.toString().includes(search);
+          const m2 = g.b.toString().includes(search);
+          const m3 = g.gcd.toString().includes(search);
+          const m4 = `${g.a}x${g.b}`.includes(search) || `${g.b}x${g.a}`.includes(search);
+          if (!m1 && !m2 && !m3 && !m4) return false;
         }
         return true;
       });
 
-      if (sort === 'gcd-desc') filtered.sort((a, b) => b.gcd - a.gcd);
-      else if (sort === 'gcd-asc') filtered.sort((a, b) => a.gcd - b.gcd);
-      else if (sort === 'a-desc') filtered.sort((a, b) => Math.max(b.a, b.b) - Math.max(a.a, a.b));
+      if (sort === 'gcd-desc') list.sort((a, b) => b.gcd - a.gcd);
+      else if (sort === 'gcd-asc') list.sort((a, b) => a.gcd - b.gcd);
+      else if (sort === 'a-desc') list.sort((a, b) => Math.max(b.a, b.b) - Math.max(a.a, a.b));
 
-      return filtered;
+      return list;
     }
 
     function renderGcdGrid() {
       const filtered = getFilteredGcdGrids();
       const totalPages = Math.ceil(filtered.length / gcdPageSize) || 1;
-      if (currentGcdPage > totalPages) currentGcdPage = 1;
+      if (gcdPage > totalPages) gcdPage = 1;
 
-      const start = (currentGcdPage - 1) * gcdPageSize;
+      const start = (gcdPage - 1) * gcdPageSize;
       const pageItems = filtered.slice(start, start + gcdPageSize);
 
       const grid = document.getElementById('gcd-grid');
       grid.innerHTML = '';
 
       if (pageItems.length === 0) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">No GCD grids match the filter.</div>';
+        grid.innerHTML = '<div style="grid-column: 1/-1; color: var(--text-muted); padding: 20px 0;">No matching GCD grids found.</div>';
         document.getElementById('gcd-pagination').innerHTML = '';
         return;
       }
 
-      pageItems.forEach((item, i) => {
+      pageItems.forEach(item => {
         const card = document.createElement('div');
-        card.className = 'item-card';
+        card.className = 'card' + (item.file === currentGcdFile ? ' selected' : '');
         card.innerHTML = `
-          <div class="card-preview">
+          <div class="card-thumb">
             <img src="gcd-grids/${item.file}" alt="${item.file}" loading="lazy">
           </div>
-          <div class="card-body">
-            <div class="card-title">${item.a} &times; ${item.b}</div>
-            <div class="card-meta">
-              <span class="badge green">GCD = ${item.gcd}</span>
-              <span class="badge amber">${item.steps || 1} steps</span>
-              <span class="badge purple">${item.squares || 1} squares</span>
-            </div>
-          </div>
+          <div class="card-title">${item.a} &times; ${item.b}</div>
+          <div class="card-meta">GCD ${item.gcd} &middot; ${item.steps || 1} steps</div>
         `;
-
         card.addEventListener('click', () => {
-          document.querySelectorAll('#gcd-grid .item-card').forEach(c => c.classList.remove('active'));
-          card.classList.add('active');
-          renderGcdSpotlight(item);
-          document.getElementById('gcd-spotlight').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('#gcd-grid .card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          showGcdSpotlight(item);
+          document.getElementById('gcd-viewer').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
-
         grid.appendChild(card);
       });
 
-      renderPagination('gcd-pagination', currentGcdPage, totalPages, (page) => {
-        currentGcdPage = page;
+      renderPagination('gcd-pagination', gcdPage, totalPages, (p) => {
+        gcdPage = p;
         renderGcdGrid();
       });
     }
@@ -1119,149 +855,125 @@
     // =========================================================================
     // 3. Voronoi Diagrams
     // =========================================================================
-    const voronoiDiagrams = DATA.voronoi.diagrams || [];
-
-    function updateVoronoi(sites) {
-      document.getElementById('voronoi-site-val').textContent = sites;
+    function setVoronoiSites(sites) {
       document.getElementById('voronoi-title').textContent = `Voronoi Diagram (${sites} Sites)`;
-      document.getElementById('voronoi-badge-sites').textContent = `${sites} Sites`;
-
       const numStr = sites.toString().padStart(2, '0');
       const filename = `voronoi_${numStr}_sites.svg`;
       const svgPath = `voronoi/${filename}`;
 
+      document.getElementById('voronoi-meta').textContent = `${filename} | ${sites} random seed sites`;
       document.getElementById('voronoi-main-img').src = svgPath;
-      const rawLink = document.getElementById('voronoi-raw-link');
-      rawLink.href = svgPath;
-    }
+      document.getElementById('voronoi-raw-link').href = svgPath;
 
-    function renderVoronoiStrip() {
-      const strip = document.getElementById('voronoi-strip');
-      strip.innerHTML = '';
-      voronoiDiagrams.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'item-card';
-        card.innerHTML = `
-          <div class="card-preview" style="height: 120px;">
-            <img src="voronoi/${item.file}" alt="${item.file}" loading="lazy">
-          </div>
-          <div class="card-body" style="padding: 0.6rem;">
-            <div class="card-title" style="font-size: 0.85rem; text-align: center;">${item.sites} Sites</div>
-          </div>
-        `;
-        card.addEventListener('click', () => {
-          document.getElementById('voronoi-range').value = item.sites;
-          updateVoronoi(item.sites);
-        });
-        strip.appendChild(card);
+      document.querySelectorAll('.num-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.textContent) === sites);
       });
     }
 
+    function initVoronoiButtons() {
+      const btnContainer = document.getElementById('voronoi-buttons');
+      btnContainer.innerHTML = '';
+      for (let s = 2; s <= 20; s++) {
+        const b = document.createElement('button');
+        b.className = 'num-btn' + (s === 10 ? ' active' : '');
+        b.textContent = s;
+        b.addEventListener('click', () => setVoronoiSites(s));
+        btnContainer.appendChild(b);
+      }
+    }
+
     // =========================================================================
-    // 4. Graph Traversal PDFs
+    // 4. Graph Traversals
     // =========================================================================
     function renderTraversals() {
       const container = document.getElementById('pdf-container');
       container.innerHTML = '';
-
       const files = DATA.traversal.files || [];
+
       if (files.length === 0) {
-        container.innerHTML = `
-          <div class="pdf-card">
-            <div class="pdf-card-title">📄 BFS & DFS Walkthrough</div>
-            <p>Comprehensive step-by-step PDF slide walkthrough comparing Breadth-First Search and Depth-First Search exploration trees.</p>
-            <div class="pdf-btn-row">
-              <a href="generated/bfs_dfs_complete_walkthrough.pdf" class="primary-btn" target="_blank">Open Complete Walkthrough &nearr;</a>
-              <a href="generated/specific-node/specific_node_bfs_dfs_walkthrough.pdf" class="secondary-btn" target="_blank">Open Target Node Search &nearr;</a>
-            </div>
-          </div>
-        `;
-        return;
+        files.push(
+          {
+            title: "Complete BFS & DFS Walkthrough",
+            filename: "generated/bfs_dfs_complete_walkthrough.pdf",
+            description: "Step-by-step PDF slide deck comparing Breadth-First Search and Depth-First Search exploration trees, active queue/stack memory, and node discovery order.",
+            size_kb: 2100
+          },
+          {
+            title: "Specific Node Search Walkthrough",
+            filename: "generated/specific-node/specific_node_bfs_dfs_walkthrough.pdf",
+            description: "Targeted step-by-step exploration tracking discovery order from a designated start node.",
+            size_kb: 850
+          }
+        );
       }
 
       files.forEach(f => {
-        const card = document.createElement('div');
-        card.className = 'pdf-card';
-        card.innerHTML = `
+        const item = document.createElement('div');
+        item.className = 'doc-item';
+        item.innerHTML = `
           <div>
-            <div class="pdf-card-title">📄 ${f.title}</div>
-            <p style="margin-top: 0.75rem;">${f.description}</p>
+            <div class="doc-title">${f.title}</div>
+            <div class="doc-desc">${f.description}</div>
+            <div class="doc-meta">${f.filename} (${f.size_kb} KB)</div>
           </div>
-          <div style="margin-top: 1rem;">
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">File: <code>${f.filename}</code> (${f.size_kb} KB)</div>
-            <div class="pdf-btn-row">
-              <a href="${f.filename}" class="primary-btn" target="_blank">View PDF in Browser &nearr;</a>
-              <a href="${f.filename}" class="secondary-btn" download>Download PDF &darr;</a>
-            </div>
+          <div class="doc-actions">
+            <a href="${f.filename}" class="btn" target="_blank">View PDF &rarr;</a>
+            <a href="${f.filename}" class="btn" download>Download</a>
           </div>
         `;
-        container.appendChild(card);
+        container.appendChild(item);
       });
     }
 
-    // Generic Pagination Component
-    function renderPagination(containerId, currentPage, totalPages, onPageSelect) {
+    // Generic Pagination Helper
+    function renderPagination(containerId, currentPage, totalPages, onSelect) {
       const container = document.getElementById(containerId);
       if (!container) return;
       container.innerHTML = '';
       if (totalPages <= 1) return;
 
       const prevBtn = document.createElement('button');
-      prevBtn.className = 'page-btn';
-      prevBtn.textContent = '\u2190 Prev';
+      prevBtn.className = 'btn';
+      prevBtn.textContent = '\u2190 Previous';
       prevBtn.disabled = currentPage === 1;
-      prevBtn.addEventListener('click', () => onPageSelect(currentPage - 1));
+      prevBtn.addEventListener('click', () => onSelect(currentPage - 1));
       container.appendChild(prevBtn);
 
-      const maxButtons = 7;
-      let startPage = Math.max(1, currentPage - 3);
-      let endPage = Math.min(totalPages, startPage + maxButtons - 1);
-      if (endPage - startPage < maxButtons - 1) {
-        startPage = Math.max(1, endPage - maxButtons + 1);
-      }
-
-      for (let p = startPage; p <= endPage; p++) {
-        const btn = document.createElement('button');
-        btn.className = 'page-btn' + (p === currentPage ? ' active' : '');
-        btn.textContent = p;
-        btn.addEventListener('click', () => onPageSelect(p));
-        container.appendChild(btn);
-      }
+      const label = document.createElement('span');
+      label.style.padding = '0 8px';
+      label.style.color = 'var(--text-muted)';
+      label.textContent = `Page ${currentPage} of ${totalPages}`;
+      container.appendChild(label);
 
       const nextBtn = document.createElement('button');
-      nextBtn.className = 'page-btn';
+      nextBtn.className = 'btn';
       nextBtn.textContent = 'Next \u2192';
       nextBtn.disabled = currentPage === totalPages;
-      nextBtn.addEventListener('click', () => onPageSelect(currentPage + 1));
+      nextBtn.addEventListener('click', () => onSelect(currentPage + 1));
       container.appendChild(nextBtn);
     }
 
-    // Event Listeners
-    document.getElementById('collision-search').addEventListener('input', () => { currentCollisionPage = 1; renderCollisionGrid(); });
-    document.getElementById('collision-aspect').addEventListener('change', () => { currentCollisionPage = 1; renderCollisionGrid(); });
-    document.getElementById('collision-sort').addEventListener('change', () => { currentCollisionPage = 1; renderCollisionGrid(); });
+    // Input Listeners
+    document.getElementById('collision-search').addEventListener('input', () => { collisionPage = 1; renderCollisionGrid(); });
+    document.getElementById('collision-aspect').addEventListener('change', () => { collisionPage = 1; renderCollisionGrid(); });
+    document.getElementById('collision-sort').addEventListener('change', () => { collisionPage = 1; renderCollisionGrid(); });
 
-    document.getElementById('gcd-search').addEventListener('input', () => { currentGcdPage = 1; renderGcdGrid(); });
-    document.getElementById('gcd-filter').addEventListener('change', () => { currentGcdPage = 1; renderGcdGrid(); });
-    document.getElementById('gcd-sort').addEventListener('change', () => { currentGcdPage = 1; renderGcdGrid(); });
+    document.getElementById('gcd-search').addEventListener('input', () => { gcdPage = 1; renderGcdGrid(); });
+    document.getElementById('gcd-filter').addEventListener('change', () => { gcdPage = 1; renderGcdGrid(); });
+    document.getElementById('gcd-sort').addEventListener('change', () => { gcdPage = 1; renderGcdGrid(); });
 
-    const voronoiRange = document.getElementById('voronoi-range');
-    voronoiRange.addEventListener('input', (e) => {
-      updateVoronoi(parseInt(e.target.value));
-    });
-
-    // Initialize Viewers
+    // Initialize on DOM load
     window.addEventListener('DOMContentLoaded', () => {
       if (collisionVideos.length > 0) {
-        renderCollisionSpotlight(collisionVideos[0]);
+        showCollisionSpotlight(collisionVideos[0]);
         renderCollisionGrid();
       }
       if (gcdGrids.length > 0) {
-        renderGcdSpotlight(gcdGrids[0]);
+        showGcdSpotlight(gcdGrids[0]);
         renderGcdGrid();
       }
-      updateVoronoi(10);
-      renderVoronoiStrip();
+      initVoronoiButtons();
+      setVoronoiSites(10);
       renderTraversals();
     });
   </script>
