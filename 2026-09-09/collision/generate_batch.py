@@ -54,6 +54,8 @@ def build_random_video_spec(
     base_seed: int,
     min_balls: int = DEFAULT_MIN_BALLS,
     max_balls: int = DEFAULT_MAX_BALLS,
+    width: int = 1920,
+    height: int = 1080,
 ) -> Dict[str, Any]:
     """Construct randomized specification for video number index."""
     # Deterministic per-index randomness using base_seed
@@ -70,23 +72,18 @@ def build_random_video_spec(
     duration_after = round(rng.uniform(28.0, 32.0), 1)  # ~30 seconds post-max floating
     max_duration = round(rng.uniform(75.0, 95.0), 1)
 
-    # 4. Canvas resolution preset
-    # Defaulting mainly to 720p landscape (1280x720) for batch efficiency,
-    # with variations for vertical (720x1280) and square (720x720).
-    aspect_choice = rng.choices(
-        ["landscape_720p", "square_720p", "vertical_720p", "landscape_1080p"],
-        weights=[0.60, 0.15, 0.15, 0.10],
-        k=1,
-    )[0]
-
-    if aspect_choice == "landscape_720p":
-        w, h = 1280, 720
-    elif aspect_choice == "square_720p":
-        w, h = 720, 720
-    elif aspect_choice == "vertical_720p":
-        w, h = 720, 1280
+    # 4. Canvas resolution preset (defaults to 1920x1080 Full HD)
+    w, h = width, height
+    if w == 1920 and h == 1080:
+        aspect_choice = "landscape_1080p"
+    elif w == 1280 and h == 720:
+        aspect_choice = "landscape_720p"
+    elif w == 720 and h == 720:
+        aspect_choice = "square_720p"
+    elif w == 720 and h == 1280:
+        aspect_choice = "vertical_720p"
     else:
-        w, h = 1920, 1080
+        aspect_choice = f"{w}x{h}"
 
     filename = f"collision_{index:03d}.mp4"
     video_seed = rng.randint(1, 1000000)
@@ -142,12 +139,17 @@ def render_worker(spec: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     }
 
 
+DEFAULT_COUNT: int = 20
+
+
 def generate_batch(
-    count: int,
-    output_dir: str,
+    count: int = DEFAULT_COUNT,
+    output_dir: str = "./collision-videos",
     workers: int = 2,
     min_balls: int = DEFAULT_MIN_BALLS,
     max_balls: int = DEFAULT_MAX_BALLS,
+    width: int = 1920,
+    height: int = 1080,
 ) -> None:
     """Generate count videos in parallel and produce manifest.json and README.md."""
     os.makedirs(output_dir, exist_ok=True)
@@ -156,13 +158,21 @@ def generate_batch(
     print("=" * 65)
     print(f"BATCH VIDEO GENERATOR: {count} RANDOM VIDEOS")
     print(f"Output Directory: {output_dir}")
+    print(f"Resolution:       {width}x{height}")
     print(f"Base Seed:        {base_seed}")
     print(f"Worker Processes: {workers}")
     print(f"Ball Count Range: {min_balls} to {max_balls} (upper limit: {MAX_BALLS})")
     print("=" * 65)
 
     specs = [
-        build_random_video_spec(i + 1, base_seed, min_balls=min_balls, max_balls=max_balls)
+        build_random_video_spec(
+            i + 1,
+            base_seed,
+            min_balls=min_balls,
+            max_balls=max_balls,
+            width=width,
+            height=height,
+        )
         for i in range(count)
     ]
     results: List[Dict[str, Any]] = []
@@ -197,6 +207,8 @@ def generate_batch(
         "base_seed": base_seed,
         "min_balls": min_balls,
         "max_balls": max_balls,
+        "width": width,
+        "height": height,
         "videos": results,
     }
     manifest_path = os.path.join(output_dir, "manifest.json")
@@ -212,10 +224,11 @@ def generate_batch(
 
     readme_content = f"""# Collision Video Visualizations
 
-Collection of {len(results)} distinct, randomized ball collision simulations with slow, analytical speeds and organic random inward deflection angles.
+Collection of {len(results)} distinct, randomized 1920x1080 Full HD ball collision simulations with slow, analytical speeds and organic random inward deflection angles.
 
 - **Generated at**: `{generated_at}`
 - **Total Videos**: {len(results)}
+- **Resolution**: {width}×{height} Full HD
 - **Total Storage**: {total_size_mb:.2f} MB
 - **Base Entropy Seed**: `{base_seed}`
 
@@ -226,6 +239,7 @@ Each simulation varies randomly across:
 4. **Analytical Slow Speed**: Paced at $160 - 260$ px/s so viewers can clearly follow each bounce and spawn trajectory.
 5. **30-Second Post-Max Floating**: Runs for ~30 seconds after target balls are reached to showcase the full floating ensemble.
 6. **Spatial Audio & Color**: Multi-octave pentatonic stereo audio with golden-angle rainbow palettes.
+7. **Resolution**: High-definition ({width}×{height}) canvas across all videos.
 
 | File | Balls ($N$) | Starting Angle | Canvas | Speed | File Size |
 |---|---|---|---|---|---|
@@ -250,8 +264,20 @@ def main():
     parser.add_argument(
         "--count",
         type=int,
-        default=100,
-        help="Number of videos to generate (default: 100)",
+        default=DEFAULT_COUNT,
+        help=f"Number of videos to generate (default: {DEFAULT_COUNT})",
+    )
+    parser.add_argument(
+        "--width",
+        type=int,
+        default=1920,
+        help="Canvas width in pixels (default: 1920)",
+    )
+    parser.add_argument(
+        "--height",
+        type=int,
+        default=1080,
+        help="Canvas height in pixels (default: 1080)",
     )
     parser.add_argument(
         "--min-balls",
@@ -288,11 +314,13 @@ def main():
         parser.error(f"--min-balls ({args.min_balls}) cannot be greater than --max-balls ({args.max_balls}).")
 
     generate_batch(
-        args.count,
-        args.output_dir,
-        args.workers,
+        count=args.count,
+        output_dir=args.output_dir,
+        workers=args.workers,
         min_balls=args.min_balls,
         max_balls=args.max_balls,
+        width=args.width,
+        height=args.height,
     )
 
 

@@ -231,6 +231,8 @@ class TestBallCollision(unittest.TestCase):
         self.assertTrue(all(160.0 <= s["speed"] <= 260.0 for s in specs))
         self.assertTrue(all(12 <= s["n_balls"] <= 1000 for s in specs))
         self.assertTrue(all(28.0 <= s["duration_after"] <= 32.0 for s in specs))
+        self.assertTrue(all(s["width"] == 1920 and s["height"] == 1080 for s in specs))
+        self.assertTrue(all(s["aspect_choice"] == "landscape_1080p" for s in specs))
 
     def test_post_max_floating_duration(self):
         """Verify simulation continues running for duration_after seconds after reaching target balls."""

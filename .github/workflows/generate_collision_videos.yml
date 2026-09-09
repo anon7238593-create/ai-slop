@@ -6,7 +6,7 @@ on:
       count:
         description: "Number of randomized collision videos to generate"
         required: false
-        default: "100"
+        default: "20"
         type: string
       max_balls:
         description: "Maximum number of balls per video (up to 1000)"
@@ -48,15 +48,17 @@ jobs:
         run: |
           pip install numpy opencv-python-headless
 
-      - name: Generate 100 randomized ball collision videos
+      - name: Generate 20 randomized ball collision videos (1920x1080)
         env:
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/collision-videos
-          VIDEO_COUNT: ${{ inputs.count || 100 }}
+          VIDEO_COUNT: ${{ inputs.count || 20 }}
         run: |
           mkdir -p "$ARTIFACT_DIRECTORY"
           python3 2026-09-09/collision/generate_batch.py \
             --count "$VIDEO_COUNT" \
             --max-balls "${{ inputs.max_balls || 1000 }}" \
+            --width 1920 \
+            --height 1080 \
             --output-dir "$ARTIFACT_DIRECTORY" \
             --workers 2
 
@@ -64,7 +66,7 @@ jobs:
         env:
           TARGET_DIR: collision-videos
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/collision-videos
-          COMMIT_TITLE: "Generate 100 random ball collision videos"
+          COMMIT_TITLE: "Generate 20 random ball collision videos (1920x1080)"
         run: |
-          export COMMIT_DESCRIPTION="Generated $(jq -r '.total_videos // (.videos | length)' "$ARTIFACT_DIRECTORY"/manifest.json) distinct randomized ball collision videos with slow analytical speeds and random inward angles."
+          export COMMIT_DESCRIPTION="Generated $(jq -r '.total_videos // (.videos | length)' "$ARTIFACT_DIRECTORY"/manifest.json) distinct randomized 1920x1080 ball collision videos with slow analytical speeds and random inward angles."
           bash .github/scripts/push_artifacts.sh

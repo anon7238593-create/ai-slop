@@ -43,7 +43,7 @@ A high-performance 2D physics simulation and video generator in Python. A ball b
   - `synthesize_audio_track()`: Spatial stereo audio synthesizer generating multi-octave pentatonic collision chimes with horizontal position panning ($x / W$).
   - Dual encoder: Direct H.264 pipe via FFmpeg (`libx264` / `aac`) with seamless fallback to OpenCV `VideoWriter`.
 - **[`generate_batch.py`](2026-09-09/collision/generate_batch.py)**:
-  - Parallel batch generator that creates 100 randomized ball collision simulations with different ball counts ($12 \le N \le 1000$), starting launch angles ($10^\circ \dots 350^\circ$), video lengths, slow analytical speeds ($160 - 260$ px/s), and organic random spawn directions.
+  - Parallel batch generator that creates 20 randomized 1920x1080 Full HD ball collision simulations with different ball counts ($12 \le N \le 1000$), starting launch angles ($10^\circ \dots 350^\circ$), video lengths, slow analytical speeds ($160 - 260$ px/s), and organic random spawn directions.
   - Automatically compiles a comprehensive `manifest.json` and formatted `README.md` cataloging each video's metadata.
 - **[`test_ball_collision.py`](2026-09-09/collision/test_ball_collision.py)**:
   - Comprehensive unit test suite validating strict speed conservation, random inward projection ($\vec{u} \cdot \hat{n} > 0$), angle diversity, 90-degree backward compatibility, termination on $N$ balls, palette generation, audio synthesis, frame rendering, and batch spec randomization.
@@ -61,8 +61,8 @@ python3 ball_collision.py -n 50
 python3 ball_collision.py -n 30 --preset vertical -o tiktok_shorts.mp4
 python3 ball_collision.py -n 40 --initial-angle 42.5 --preset square -o instagram.mp4
 
-# Run batch generator for 100 randomized videos
-python3 generate_batch.py --count 100 --output-dir ./collision-videos
+# Run batch generator for 20 randomized Full HD (1920x1080) videos
+python3 generate_batch.py --count 20 --width 1920 --height 1080 --output-dir ./collision-videos
 
 # Run unit tests
 python3 -m unittest test_ball_collision.py
@@ -165,7 +165,7 @@ All workflows reside in [`.github/workflows/`](.github/workflows/) and run **hou
 
 | Workflow | File | Output Path on `artifacts` | Description |
 |---|---|---|---|
-| **Ball Collision Videos** | [`generate_collision_videos.yml`](.github/workflows/generate_collision_videos.yml) | `collision-videos/` | Generates **100 randomized ball collision MP4 videos** varying in ball count, starting angle, video duration, and speeds with spatial audio. |
+| **Ball Collision Videos** | [`generate_collision_videos.yml`](.github/workflows/generate_collision_videos.yml) | `collision-videos/` | Generates **20 randomized 1920x1080 Full HD ball collision MP4 videos** varying in ball count, starting angle, video duration, and speeds with spatial audio. |
 | **GCD Grid Visualizations** | [`generate_gcd_grids.yml`](.github/workflows/generate_gcd_grids.yml) | `gcd-grids/` | Generates **100 unique GCD grid SVGs** with large dimensions (up to ~15,000) on each run. Avoids duplicates from prior runs via manifest inspection. |
 | **Voronoi Diagrams** | [`generate_voronoi_diagrams.yml`](.github/workflows/generate_voronoi_diagrams.yml) | `voronoi/` | Generates 19 Voronoi diagrams (2–20 sites) with timestamp-derived seeds. |
 | **Traversal Walkthrough PDFs** | [`generate_pdf_for_traversel.yml`](.github/workflows/generate_pdf_for_traversel.yml) | `generated/` | Generates random graphs, runs BFS/DFS step walkthroughs, and combines them into single unified PDFs using `pdfunite`. |

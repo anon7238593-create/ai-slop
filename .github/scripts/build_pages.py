@@ -53,9 +53,9 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                 "n_balls": 35,
                 "initial_angle": 45.0,
                 "speed": 240.0,
-                "width": 1280,
-                "height": 720,
-                "aspect_choice": "landscape_720p",
+                "width": 1920,
+                "height": 1080,
+                "aspect_choice": "landscape_1080p",
                 "file_size_mb": size_mb,
             })
 

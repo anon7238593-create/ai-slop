@@ -86,9 +86,9 @@ python3 ball_collision.py -n 60 --speed 800 --duration-after 4.0 -o fast_sim.mp4
 python3 ball_collision.py -n 1000 --speed 360 -o massive_ensemble_1000.mp4
 ```
 
-### Batch Video Generation (12 to 1000 Balls)
+### Batch Video Generation (12 to 1000 Balls, 1920x1080 Full HD)
 ```bash
-python3 generate_batch.py --count 100 --min-balls 12 --max-balls 1000 --output-dir ./collision-videos
+python3 generate_batch.py --count 20 --min-balls 12 --max-balls 1000 --width 1920 --height 1080 --output-dir ./collision-videos
 ```
 
 ---
