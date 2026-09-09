@@ -230,6 +230,32 @@ class TestBallCollision(unittest.TestCase):
         self.assertGreater(len(angles), 15)
         self.assertTrue(all(160.0 <= s["speed"] <= 260.0 for s in specs))
         self.assertTrue(all(12 <= s["n_balls"] <= 36 for s in specs))
+        self.assertTrue(all(28.0 <= s["duration_after"] <= 32.0 for s in specs))
+
+    def test_post_max_floating_duration(self):
+        """Verify simulation continues running for duration_after seconds after reaching target balls."""
+        n_target = 3
+        duration_after = 1.0
+        cfg = SimulationConfig(
+            n_target=n_target,
+            width=500,
+            height=400,
+            speed=500.0,
+            radius=8.0,
+            fps=30,
+            duration_after=duration_after,
+            max_duration=10.0,
+        )
+        sim = BallSimulation(cfg)
+        dt = 1.0 / cfg.fps
+
+        while not sim.is_finished():
+            sim.step(dt)
+
+        self.assertIsNotNone(sim.target_reached_time)
+        self.assertGreaterEqual(len(sim.balls), n_target)
+        floating_elapsed = sim.time - sim.target_reached_time
+        self.assertGreaterEqual(floating_elapsed, duration_after)
 
 
 if __name__ == '__main__':

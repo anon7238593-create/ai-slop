@@ -57,8 +57,8 @@ def build_random_video_spec(index: int, base_seed: int) -> Dict[str, Any]:
 
     # 3. Random speed & duration (slow and easy for viewers to track and analyze)
     speed = round(rng.uniform(160.0, 260.0), 1)
-    duration_after = round(rng.uniform(2.5, 4.0), 1)
-    max_duration = round(rng.uniform(12.0, 22.0), 1)
+    duration_after = round(rng.uniform(28.0, 32.0), 1)  # ~30 seconds post-max floating
+    max_duration = round(rng.uniform(75.0, 95.0), 1)
 
     # 4. Canvas resolution preset
     # Defaulting mainly to 720p landscape (1280x720) for batch efficiency,
@@ -202,7 +202,8 @@ Each simulation varies randomly across:
 2. **Initial Launch Angle**: Unique heading in [10°, 350°].
 3. **Random Inward Deflections**: Every border collision spawns a new ball at a fresh random inward angle into the arena.
 4. **Analytical Slow Speed**: Paced at $160 - 260$ px/s so viewers can clearly follow each bounce and spawn trajectory.
-5. **Spatial Audio & Color**: Multi-octave pentatonic stereo audio with golden-angle rainbow palettes.
+5. **30-Second Post-Max Floating**: Runs for ~30 seconds after target balls are reached to showcase the full floating ensemble.
+6. **Spatial Audio & Color**: Multi-octave pentatonic stereo audio with golden-angle rainbow palettes.
 
 | File | Balls ($N$) | Starting Angle | Canvas | Speed | File Size |
 |---|---|---|---|---|---|

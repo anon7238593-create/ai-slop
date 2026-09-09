@@ -97,8 +97,8 @@ python3 ball_collision.py -n 60 --speed 800 --duration-after 4.0 -o fast_sim.mp4
 | `--radius` | `float` | `14.0` | Ball radius in pixels |
 | `--turn-angle` | `str` | `random` | Spawn deflection angle: `random` (default) or numeric degrees (e.g. `90.0`) |
 | `--spawn-reference` | `str` | `incident` | Reference vector for deflection (`incident` or `reflected`) |
-| `--duration-after` | `float` | `3.5` | Seconds to continue recording after reaching $N$ balls |
-| `--max-duration` | `float` | `45.0` | Maximum video duration cutoff in seconds |
+| `--duration-after` | `float` | `30.0` | Seconds to continue recording after reaching $N$ balls to observe floating effect |
+| `--max-duration` | `float` | `90.0` | Maximum video duration cutoff in seconds |
 | `--seed` | `int` | `42` | Random seed for deterministic trajectories |
 | `-o`, `--output` | `str` | `None` | Output video path (defaults to `ball_collision_n{N}.mp4`) |
 | `--no-audio` | `flag` | `False` | Disable spatial audio synthesis |

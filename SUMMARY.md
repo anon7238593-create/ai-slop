@@ -229,3 +229,7 @@ artifacts
 7. **Slow-Speed Analytical Tracking & Organic Random Inward Spawning**:
    - Reduced simulation speeds from $650$ px/s to a calm, trackable $240$ px/s (batch: $160 - 260$ px/s), enabling human viewers to effortlessly analyze ball trajectories, elastic wall bounces, and spawn dynamics.
    - Replaced fixed 90-degree orthogonal deflection with organic random inward angles sampled across a $150^\circ$ interior fan ($-\pm 75^\circ$ from wall normal), producing diverse, kaleidoscopic geometric webs and visual aesthetics.
+
+8. **30-Second Post-Max Floating Ensemble Showcase**:
+   - Configured `duration_after: 30.0s` across simulation and batch generator so that when the maximum ball count $N$ is reached, the video continues running for 30 more seconds.
+   - The HUD dynamically switches to display a floating countdown (`BALLS: N/N (FLOATING: XX.Xs / 30.0s)`) with a dedicated floating progress bar, allowing viewers to marvel at the complex floating ensemble of balls gliding and reflecting smoothly together.

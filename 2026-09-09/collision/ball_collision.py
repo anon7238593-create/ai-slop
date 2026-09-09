@@ -95,8 +95,8 @@ class SimulationConfig:
     turn_angle_deg: Optional[float] = None  # None for random inward angle; or float for fixed angle
     spawn_reference: str = "incident"  # 'incident' or 'reflected'
     initial_angle_deg: Optional[float] = None  # custom starting ball launch angle
-    duration_after: float = 3.5  # seconds to keep simulating after reaching N balls
-    max_duration: float = 45.0  # safety cutoff in seconds
+    duration_after: float = 30.0  # seconds to keep simulating after reaching N balls (floating effect)
+    max_duration: float = 90.0  # safety cutoff in seconds
     substeps: int = 6  # physics substeps per frame
     enable_trails: bool = True
     enable_hud: bool = True
@@ -640,7 +640,7 @@ class SimulationRenderer:
 
         # HUD banner top-left
         hud_x, hud_y = m + 20, m + 16
-        hud_w, hud_h = 420, 84
+        hud_w, hud_h = 470, 84
 
         sub_img = frame[hud_y:hud_y + hud_h, hud_x:hud_x + hud_w]
         white_rect = np.zeros_like(sub_img)
@@ -661,20 +661,27 @@ class SimulationRenderer:
             cv2.LINE_AA,
         )
 
-        # Ball counter text
+        # Ball counter text & floating status
         if current_count >= target:
-            status_text = f"BALLS: {current_count} / {target} (MAX REACHED)"
+            if sim.target_reached_time is not None:
+                float_elapsed = sim.time - sim.target_reached_time
+                float_total = self.cfg.duration_after
+                status_text = f"BALLS: {current_count}/{target} (FLOATING: {float_elapsed:04.1f}s/{float_total:04.1f}s)"
+            else:
+                status_text = f"BALLS: {current_count}/{target} (MAX REACHED)"
             text_col = (50, 240, 120)  # Bright neon green
+            font_scale = 0.58
         else:
             status_text = f"BALLS: {current_count} / {target}"
             text_col = (255, 255, 255)
+            font_scale = 0.68
 
         cv2.putText(
             frame,
             status_text,
             (hud_x + 14, hud_y + 50),
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.68,
+            font_scale,
             text_col,
             2,
             cv2.LINE_AA,
@@ -686,10 +693,15 @@ class SimulationRenderer:
         bar_w = hud_w - 28
         bar_h = 8
         cv2.rectangle(frame, (bar_x, bar_y), (bar_x + bar_w, bar_y + bar_h), (60, 50, 40), -1)
-        fill_w = int(bar_w * progress)
-        if fill_w > 0:
-            bar_col = (50, 240, 120) if current_count >= target else (255, 180, 50)
-            cv2.rectangle(frame, (bar_x, bar_y), (bar_x + fill_w, bar_y + bar_h), bar_col, -1)
+        if current_count >= target and sim.target_reached_time is not None:
+            float_prog = min(1.0, (sim.time - sim.target_reached_time) / max(1e-3, self.cfg.duration_after))
+            fill_w = int(bar_w * float_prog)
+            if fill_w > 0:
+                cv2.rectangle(frame, (bar_x, bar_y), (bar_x + fill_w, bar_y + bar_h), (50, 240, 120), -1)
+        else:
+            fill_w = int(bar_w * progress)
+            if fill_w > 0:
+                cv2.rectangle(frame, (bar_x, bar_y), (bar_x + fill_w, bar_y + bar_h), (255, 180, 50), -1)
 
         # Top-right metrics HUD (Time, Resolution, Speed)
         info_w, info_h = 360, 64
@@ -1048,14 +1060,14 @@ def parse_args() -> SimulationConfig:
     parser.add_argument(
         "--duration-after",
         type=float,
-        default=3.5,
-        help="Seconds to continue simulation after reaching N balls (default: 3.5)"
+        default=30.0,
+        help="Seconds to continue simulation after reaching N balls to observe floating effect (default: 30.0)"
     )
     parser.add_argument(
         "--max-duration",
         type=float,
-        default=60.0,
-        help="Maximum simulation duration cutoff in seconds (default: 60.0)"
+        default=90.0,
+        help="Maximum simulation duration cutoff in seconds (default: 90.0)"
     )
     parser.add_argument(
         "--seed",
