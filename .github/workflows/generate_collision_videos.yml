@@ -11,6 +11,7 @@ on:
   push:
     # Ignoring artifacts branch prevents recursive workflow triggering
     branches-ignore:
+      - master # currently ignore it because this workflow is causing too much usage
       - artifacts
   schedule:
     - cron: "5 * * * *"
