@@ -161,15 +161,15 @@ Location: [`2026-09-05/yacc_test/`](2026-09-05/yacc_test/) & [`2026-09-05/statem
 
 ## Automated GitHub Actions Pipelines (`.github/workflows`)
 
-All workflows reside in [`.github/workflows/`](.github/workflows/) and run **hourly** (`cron: "0 * * * *"`), on `workflow_dispatch`, and on pushes to `master`.
+Workflows reside in [`.github/workflows/`](.github/workflows/) with a structured execution order: generation pipelines run first (hourly at minute 0 and 5, or on push to `master`), and GitHub Pages deploys last (triggered upon completion of the generation pipelines via `workflow_run`, hourly at minute 10, or on `workflow_dispatch`).
 
 | Workflow | File | Output Path on `artifacts` | Description |
 |---|---|---|---|
-| **Ball Collision Videos** | [`generate_collision_videos.yml`](.github/workflows/generate_collision_videos.yml) | `collision-videos/` | Generates **20 randomized 1920x1080 Full HD ball collision MP4 videos** varying in ball count, starting angle, video duration, and speeds with spatial audio. |
-| **GCD Grid Visualizations** | [`generate_gcd_grids.yml`](.github/workflows/generate_gcd_grids.yml) | `gcd-grids/` | Generates **100 unique GCD grid SVGs** with large dimensions (up to ~15,000) on each run. Avoids duplicates from prior runs via manifest inspection. |
-| **Voronoi Diagrams** | [`generate_voronoi_diagrams.yml`](.github/workflows/generate_voronoi_diagrams.yml) | `voronoi/` | Generates 19 Voronoi diagrams (2–20 sites) with timestamp-derived seeds. |
-| **Traversal Walkthrough PDFs** | [`generate_pdf_for_traversel.yml`](.github/workflows/generate_pdf_for_traversel.yml) | `generated/` | Generates random graphs, runs BFS/DFS step walkthroughs, and combines them into single unified PDFs using `pdfunite`. |
-| **Deploy GitHub Pages** | [`deploy_pages.yml`](.github/workflows/deploy_pages.yml) | GitHub Pages (`_site/`) | Builds and deploys the browsable media explorer website to GitHub Pages on every commit to `artifacts`. |
+| **GCD Grid Visualizations** | [`generate_gcd_grids.yml`](.github/workflows/generate_gcd_grids.yml) | `gcd-grids/` | Generates **100 unique GCD grid SVGs** with large dimensions (up to ~15,000) on each run. Avoids duplicates from prior runs via manifest inspection. Runs at `0 * * * *` and on push. |
+| **Voronoi Diagrams** | [`generate_voronoi_diagrams.yml`](.github/workflows/generate_voronoi_diagrams.yml) | `voronoi/` | Generates 19 Voronoi diagrams (2–20 sites) with timestamp-derived seeds. Runs at `0 * * * *` and on push. |
+| **Traversal Walkthrough PDFs** | [`generate_pdf_for_traversel.yml`](.github/workflows/generate_pdf_for_traversel.yml) | `generated/` | Generates random graphs, runs BFS/DFS step walkthroughs, and combines them into single unified PDFs using `pdfunite`. Runs at `0 * * * *` and on push. |
+| **Ball Collision Videos** | [`generate_collision_videos.yml`](.github/workflows/generate_collision_videos.yml) | `collision-videos/` | Generates **20 randomized 1920x1080 Full HD ball collision MP4 videos** varying in ball count, starting angle, video duration, and speeds with spatial audio. Runs at `5 * * * *`. |
+| **Deploy GitHub Pages** | [`deploy_pages.yml`](.github/workflows/deploy_pages.yml) | GitHub Pages (`_site/`) | **Runs last**: Builds and deploys the browsable media explorer website to GitHub Pages after generator pipelines complete (`workflow_run`), hourly at minute 10, or on `artifacts` updates. |
 
 ---
 

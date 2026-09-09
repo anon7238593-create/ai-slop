@@ -1,10 +1,19 @@
 name: Deploy website to GitHub Pages
 
 on:
+  workflow_run:
+    workflows:
+      - "Generate ball collision videos"
+      - "Generate GCD grid visualizations"
+      - "Generate Voronoi diagrams"
+      - "Generate traversal PDFs"
+    types:
+      - completed
+  schedule:
+    - cron: "10 * * * *"
   push:
     branches:
       - artifacts
-      - master
   workflow_dispatch:
 
 permissions:
@@ -18,6 +27,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
