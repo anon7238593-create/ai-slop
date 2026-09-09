@@ -43,7 +43,7 @@ A high-performance 2D physics simulation and video generator in Python. A ball b
   - `synthesize_audio_track()`: Spatial stereo audio synthesizer generating multi-octave pentatonic collision chimes with horizontal position panning ($x / W$).
   - Dual encoder: Direct H.264 pipe via FFmpeg (`libx264` / `aac`) with seamless fallback to OpenCV `VideoWriter`.
 - **[`generate_batch.py`](2026-09-09/collision/generate_batch.py)**:
-  - Parallel batch generator that creates 100 randomized ball collision simulations with different ball counts ($12 \le N \le 36$), starting launch angles ($10^\circ \dots 350^\circ$), video lengths, slow analytical speeds ($160 - 260$ px/s), and organic random spawn directions.
+  - Parallel batch generator that creates 100 randomized ball collision simulations with different ball counts ($12 \le N \le 1000$), starting launch angles ($10^\circ \dots 350^\circ$), video lengths, slow analytical speeds ($160 - 260$ px/s), and organic random spawn directions.
   - Automatically compiles a comprehensive `manifest.json` and formatted `README.md` cataloging each video's metadata.
 - **[`test_ball_collision.py`](2026-09-09/collision/test_ball_collision.py)**:
   - Comprehensive unit test suite validating strict speed conservation, random inward projection ($\vec{u} \cdot \hat{n} > 0$), angle diversity, 90-degree backward compatibility, termination on $N$ balls, palette generation, audio synthesis, frame rendering, and batch spec randomization.
@@ -266,4 +266,9 @@ artifacts
    - Deployed an interactive, high-performance static website to GitHub Pages (`https://anon7238593-create.github.io/ai-slop/`).
    - Integrated with GitHub Actions (`.github/workflows/deploy_pages.yml`) to automatically rebuild and publish whenever new media assets are committed to the `artifacts` branch.
    - Features single-page tab navigation, spotlight video player with live physics metadata, GCD grid tiling explorer, Voronoi site slider, and direct PDF traversal walkthrough viewers.
+
+10. **Expanded Ball Capacity (Upper Limit: 1000 Balls)**:
+   - Raised the maximum ball capacity from 36/60 to **1000 balls** across both the single-video generator and batch pipeline (`ball_collision.py` and `generate_batch.py`).
+   - Added strict CLI and config bounds validation ($1 \le N \le 1000$).
+   - Enhanced HUD metrics layout and logging to cleanly accommodate up to 4-digit ball counts.
 

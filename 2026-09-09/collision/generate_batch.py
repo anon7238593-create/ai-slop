@@ -34,6 +34,11 @@ if current_dir not in sys.path:
 from ball_collision import SimulationConfig, generate_video
 
 
+MAX_BALLS: int = 1000
+DEFAULT_MIN_BALLS: int = 12
+DEFAULT_MAX_BALLS: int = 1000
+
+
 def get_random_valid_angle(rng: random.Random) -> float:
     """Generate a random starting angle in [0, 360) avoiding axis alignment."""
     while True:
@@ -44,13 +49,18 @@ def get_random_valid_angle(rng: random.Random) -> float:
             return angle
 
 
-def build_random_video_spec(index: int, base_seed: int) -> Dict[str, Any]:
+def build_random_video_spec(
+    index: int,
+    base_seed: int,
+    min_balls: int = DEFAULT_MIN_BALLS,
+    max_balls: int = DEFAULT_MAX_BALLS,
+) -> Dict[str, Any]:
     """Construct randomized specification for video number index."""
     # Deterministic per-index randomness using base_seed
     rng = random.Random(base_seed + index * 1013)
 
-    # 1. Random number of balls: varied between 12 and 36 (optimal for clear viewer analysis)
-    n_balls = rng.randint(12, 36)
+    # 1. Random number of balls: varied between min_balls and max_balls (upper limit: 1000)
+    n_balls = rng.randint(min_balls, max_balls)
 
     # 2. Random starting ball launch direction (angle in degrees)
     initial_angle = get_random_valid_angle(rng)
@@ -132,7 +142,13 @@ def render_worker(spec: Dict[str, Any], output_dir: str) -> Dict[str, Any]:
     }
 
 
-def generate_batch(count: int, output_dir: str, workers: int = 2) -> None:
+def generate_batch(
+    count: int,
+    output_dir: str,
+    workers: int = 2,
+    min_balls: int = DEFAULT_MIN_BALLS,
+    max_balls: int = DEFAULT_MAX_BALLS,
+) -> None:
     """Generate count videos in parallel and produce manifest.json and README.md."""
     os.makedirs(output_dir, exist_ok=True)
     base_seed = secrets.randbits(32)
@@ -142,9 +158,13 @@ def generate_batch(count: int, output_dir: str, workers: int = 2) -> None:
     print(f"Output Directory: {output_dir}")
     print(f"Base Seed:        {base_seed}")
     print(f"Worker Processes: {workers}")
+    print(f"Ball Count Range: {min_balls} to {max_balls} (upper limit: {MAX_BALLS})")
     print("=" * 65)
 
-    specs = [build_random_video_spec(i + 1, base_seed) for i in range(count)]
+    specs = [
+        build_random_video_spec(i + 1, base_seed, min_balls=min_balls, max_balls=max_balls)
+        for i in range(count)
+    ]
     results: List[Dict[str, Any]] = []
 
     t_start = time.time()
@@ -157,7 +177,7 @@ def generate_batch(count: int, output_dir: str, workers: int = 2) -> None:
             completed += 1
             print(
                 f"[{completed:3d}/{count}] Generated {res['filename']} | "
-                f"N={res['n_balls']:2d} balls | "
+                f"N={res['n_balls']:4d} balls | "
                 f"Angle={res['initial_angle']:5.1f}° | "
                 f"Dims={res['width']}x{res['height']} | "
                 f"Size={res['file_size_mb']:.2f} MB | "
@@ -175,6 +195,8 @@ def generate_batch(count: int, output_dir: str, workers: int = 2) -> None:
         "total_videos": len(results),
         "total_size_mb": round(total_size_mb, 2),
         "base_seed": base_seed,
+        "min_balls": min_balls,
+        "max_balls": max_balls,
         "videos": results,
     }
     manifest_path = os.path.join(output_dir, "manifest.json")
@@ -198,7 +220,7 @@ Collection of {len(results)} distinct, randomized ball collision simulations wit
 - **Base Entropy Seed**: `{base_seed}`
 
 Each simulation varies randomly across:
-1. **Target Balls ($N$)**: Varied between 12 and 36 balls for optimal visual tracking.
+1. **Target Balls ($N$)**: Varied between {min_balls} and {max_balls} balls (upper limit: {MAX_BALLS}).
 2. **Initial Launch Angle**: Unique heading in [10°, 350°].
 3. **Random Inward Deflections**: Every border collision spawns a new ball at a fresh random inward angle into the arena.
 4. **Analytical Slow Speed**: Paced at $160 - 260$ px/s so viewers can clearly follow each bounce and spawn trajectory.
@@ -223,13 +245,25 @@ Each simulation varies randomly across:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Batch generator for 100 randomized ball collision videos."
+        description="Batch generator for randomized ball collision videos."
     )
     parser.add_argument(
         "--count",
         type=int,
         default=100,
         help="Number of videos to generate (default: 100)",
+    )
+    parser.add_argument(
+        "--min-balls",
+        type=int,
+        default=DEFAULT_MIN_BALLS,
+        help=f"Minimum target number of balls per video (default: {DEFAULT_MIN_BALLS})",
+    )
+    parser.add_argument(
+        "--max-balls",
+        type=int,
+        default=DEFAULT_MAX_BALLS,
+        help=f"Maximum target number of balls per video (default: {DEFAULT_MAX_BALLS}, upper limit: {MAX_BALLS})",
     )
     parser.add_argument(
         "--output-dir",
@@ -245,7 +279,21 @@ def main():
     )
 
     args = parser.parse_args()
-    generate_batch(args.count, args.output_dir, args.workers)
+
+    if args.min_balls < 1:
+        parser.error("The minimum number of balls must be at least 1.")
+    if args.max_balls > MAX_BALLS:
+        parser.error(f"The maximum number of balls cannot exceed the upper limit of {MAX_BALLS} (got {args.max_balls}).")
+    if args.min_balls > args.max_balls:
+        parser.error(f"--min-balls ({args.min_balls}) cannot be greater than --max-balls ({args.max_balls}).")
+
+    generate_batch(
+        args.count,
+        args.output_dir,
+        args.workers,
+        min_balls=args.min_balls,
+        max_balls=args.max_balls,
+    )
 
 
 if __name__ == "__main__":

@@ -81,10 +81,13 @@ class CollisionEvent:
     spawned_id: Optional[int] = None
 
 
+MAX_BALLS: int = 1000
+
+
 @dataclass
 class SimulationConfig:
     """Configuration settings for the simulation and video renderer."""
-    n_target: int = 35
+    n_target: int = 35  # target ball count (upper limit: 1000)
     width: int = 1920
     height: int = 1080
     margin: int = 40
@@ -104,6 +107,12 @@ class SimulationConfig:
     enable_ball_collisions: bool = False
     seed: int = 42
     output_path: str = "ball_collision.mp4"
+
+    def __post_init__(self):
+        if self.n_target < 1:
+            raise ValueError(f"Target number of balls must be at least 1 (got {self.n_target}).")
+        if self.n_target > MAX_BALLS:
+            raise ValueError(f"Target number of balls cannot exceed upper limit of {MAX_BALLS} (got {self.n_target}).")
 
 
 # ==============================================================================
@@ -993,7 +1002,7 @@ def parse_args() -> SimulationConfig:
         "-n", "--balls",
         type=int,
         default=35,
-        help="Target number of balls to reach (default: 35)"
+        help=f"Target number of balls to reach (1 to {MAX_BALLS}, default: 35)"
     )
     parser.add_argument(
         "--preset",
@@ -1103,6 +1112,9 @@ def parse_args() -> SimulationConfig:
     )
 
     args = parser.parse_args()
+
+    if args.balls < 1 or args.balls > MAX_BALLS:
+        parser.error(f"The number of balls must be between 1 and {MAX_BALLS} (got {args.balls}).")
 
     w, h = PRESETS[args.preset]
     if args.width is not None:

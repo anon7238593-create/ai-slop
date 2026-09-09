@@ -81,13 +81,23 @@ python3 ball_collision.py -n 35 --preset square -o instagram_collision.mp4
 python3 ball_collision.py -n 60 --speed 800 --duration-after 4.0 -o fast_sim.mp4
 ```
 
+### Large Ensemble Simulation (Up to 1000 Balls)
+```bash
+python3 ball_collision.py -n 1000 --speed 360 -o massive_ensemble_1000.mp4
+```
+
+### Batch Video Generation (12 to 1000 Balls)
+```bash
+python3 generate_batch.py --count 100 --min-balls 12 --max-balls 1000 --output-dir ./collision-videos
+```
+
 ---
 
 ## CLI Options
 
 | Flag | Type | Default | Description |
 |---|---|---|---|
-| `-n`, `--balls` | `int` | `35` | Target number of balls to reach |
+| `-n`, `--balls` | `int` | `35` | Target number of balls to reach (1 to 1000, default: 35) |
 | `--preset` | `str` | `1080p` | Resolution preset: `1080p`, `720p`, `square`, `vertical`, `4k` |
 | `--width` | `int` | `None` | Custom canvas width in pixels (overrides preset) |
 | `--height` | `int` | `None` | Custom canvas height in pixels (overrides preset) |

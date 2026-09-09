@@ -229,7 +229,7 @@ class TestBallCollision(unittest.TestCase):
         self.assertGreater(len(ball_counts), 5)
         self.assertGreater(len(angles), 15)
         self.assertTrue(all(160.0 <= s["speed"] <= 260.0 for s in specs))
-        self.assertTrue(all(12 <= s["n_balls"] <= 36 for s in specs))
+        self.assertTrue(all(12 <= s["n_balls"] <= 1000 for s in specs))
         self.assertTrue(all(28.0 <= s["duration_after"] <= 32.0 for s in specs))
 
     def test_post_max_floating_duration(self):
@@ -256,6 +256,38 @@ class TestBallCollision(unittest.TestCase):
         self.assertGreaterEqual(len(sim.balls), n_target)
         floating_elapsed = sim.time - sim.target_reached_time
         self.assertGreaterEqual(floating_elapsed, duration_after)
+
+    def test_ball_limit_validation(self):
+        """Verify upper limit of 1000 balls is enforced and valid configurations succeed."""
+        # 1000 balls configuration must be valid
+        cfg_1000 = SimulationConfig(n_target=1000)
+        self.assertEqual(cfg_1000.n_target, 1000)
+
+        # Exceeding 1000 balls must raise ValueError
+        with self.assertRaises(ValueError):
+            SimulationConfig(n_target=1001)
+
+        # Below 1 ball must raise ValueError
+        with self.assertRaises(ValueError):
+            SimulationConfig(n_target=0)
+
+    def test_simulation_with_1000_balls(self):
+        """Verify simulation correctly initializes and steps with upper limit of 1000 balls."""
+        cfg = SimulationConfig(
+            n_target=1000,
+            width=640,
+            height=360,
+            speed=240.0,
+            fps=30,
+            duration_after=1.0,
+            max_duration=5.0,
+        )
+        sim = BallSimulation(cfg)
+        self.assertEqual(len(sim.colors), 1050)
+        for _ in range(60):
+            sim.step(1.0 / 30.0)
+        self.assertGreater(len(sim.balls), 1)
+        self.assertLessEqual(len(sim.balls), 1000)
 
 
 if __name__ == '__main__':
