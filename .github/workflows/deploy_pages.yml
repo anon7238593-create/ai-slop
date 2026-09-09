@@ -1,0 +1,61 @@
+name: Deploy website to GitHub Pages
+
+on:
+  push:
+    branches:
+      - artifacts
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out master branch (website builder)
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          path: master-src
+          fetch-depth: 1
+
+      - name: Check out artifacts branch (media assets)
+        uses: actions/checkout@v4
+        with:
+          ref: artifacts
+          path: artifacts-src
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build static website
+        run: |
+          python3 master-src/.github/scripts/build_pages.py \
+            --artifacts-dir artifacts-src \
+            --output-dir _site
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

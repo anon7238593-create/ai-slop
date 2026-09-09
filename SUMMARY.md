@@ -13,8 +13,9 @@ This document provides a comprehensive summary of all code, algorithms, visualiz
 5. [Voronoi Diagram Generator (`2026-09-05/voronoi_diagram`)](#voronoi-diagram-generator-2026-09-05voronoi_diagram)
 6. [C / Yacc Parsers (`2026-09-05`)](#c--yacc-parsers-2026-09-05)
 7. [Automated GitHub Actions Pipelines (`.github/workflows`)](#automated-github-actions-pipelines-githubworkflows)
-8. [Artifact Branch Layout](#artifact-branch-layout)
-9. [Recent Enhancements & Milestones](#recent-enhancements--milestones)
+8. [GitHub Pages Interactive Media Explorer](#github-pages-interactive-media-explorer)
+9. [Artifact Branch Layout](#artifact-branch-layout)
+10. [Recent Enhancements & Milestones](#recent-enhancements--milestones)
 
 ---
 
@@ -22,6 +23,7 @@ This document provides a comprehensive summary of all code, algorithms, visualiz
 
 - **`master` Branch**: Contains all source code, CLI tools, unit tests, and GitHub Actions workflow definitions.
 - **`artifacts` Branch**: An automated, orphan-based storage branch where scheduled and event-triggered GitHub Actions jobs commit generated SVG visualizers, walkthrough PDFs, manifests, and documentation tables.
+- **GitHub Pages Static Deployment**: Hosted directly from GitHub Actions at [`https://anon7238593-create.github.io/ai-slop/`](https://anon7238593-create.github.io/ai-slop/). Rebuilds and deploys automatically on every single commit pushed to the `artifacts` branch.
 - **FIFO Queue Serializer (Zero-Cancellation Concurrency)**: Workflows execute sequentially one by one using `.github/scripts/wait_for_turn.py`. This inspects active runs via `gh run list` and pauses until older runs complete, completely eliminating GitHub Actions concurrency cancellations (`Canceling since a higher priority waiting request... exists`) while ensuring race-free, serial commits to the `artifacts` branch.
 
 ---
@@ -167,6 +169,32 @@ All workflows reside in [`.github/workflows/`](.github/workflows/) and run **hou
 | **GCD Grid Visualizations** | [`generate_gcd_grids.yml`](.github/workflows/generate_gcd_grids.yml) | `gcd-grids/` | Generates **100 unique GCD grid SVGs** with large dimensions (up to ~15,000) on each run. Avoids duplicates from prior runs via manifest inspection. |
 | **Voronoi Diagrams** | [`generate_voronoi_diagrams.yml`](.github/workflows/generate_voronoi_diagrams.yml) | `voronoi/` | Generates 19 Voronoi diagrams (2–20 sites) with timestamp-derived seeds. |
 | **Traversal Walkthrough PDFs** | [`generate_pdf_for_traversel.yml`](.github/workflows/generate_pdf_for_traversel.yml) | `generated/` | Generates random graphs, runs BFS/DFS step walkthroughs, and combines them into single unified PDFs using `pdfunite`. |
+| **Deploy GitHub Pages** | [`deploy_pages.yml`](.github/workflows/deploy_pages.yml) | GitHub Pages (`_site/`) | Builds and deploys the browsable media explorer website to GitHub Pages on every commit to `artifacts`. |
+
+---
+
+## GitHub Pages Interactive Media Explorer
+
+- **Live URL**: [`https://anon7238593-create.github.io/ai-slop/`](https://anon7238593-create.github.io/ai-slop/)
+- **Generator Script**: [`.github/scripts/build_pages.py`](.github/scripts/build_pages.py)
+- **HTML Template**: [`.github/scripts/template.html`](.github/scripts/template.html)
+- **Automated Workflow**: [`.github/workflows/deploy_pages.yml`](.github/workflows/deploy_pages.yml)
+
+### Architecture & Features
+1. **Continuous Deployment on `artifacts` Updates**:
+   - The workflow listens on `push: branches: [ artifacts, master ]` and `workflow_dispatch`.
+   - Whenever any media generation workflow pushes updated videos or SVGs to the `artifacts` branch, GitHub Pages automatically checks out the latest commit, processes the metadata manifests, bundles static assets into `_site/`, and deploys via official `actions/deploy-pages@v4`.
+2. **Simple, Intuitive Tab Navigation**:
+   - Clean, dark-mode single page interface with instant URL hash routing (`#collision`, `#gcd`, `#voronoi`, `#traversal`).
+   - Sticky header with live repo links and media count badges.
+3. **Dedicated Showcase Views**:
+   - **Collision Videos (`#collision`)**: Spotlight HTML5 video player with real-time metadata badges (ball count $N$, speed in px/s, launch angle, canvas dimensions, file size), instant keyword filter, aspect ratio dropdown, sorting, and 12-item pagination.
+   - **GCD Grids (`#gcd`)**: Interactive SVG inspector displaying Euclidean step counts and square totals, GCD size filters (Small, Medium, Large), and responsive tile cards.
+   - **Voronoi Diagrams (`#voronoi`)**: Interactive site count slider ($N = 2 \dots 20$) with live SVG display, download links, and a thumbnail gallery.
+   - **Graph Traversals (`#traversal`)**: Cards for complete BFS/DFS walkthrough PDFs with direct browser viewing and downloading.
+4. **Zero Heavy Dependencies**:
+   - Completely vanilla HTML5, CSS3, and JavaScript with embedded JSON manifest payload.
+   - Sub-second load times and lightweight GitHub Actions builds (< 20 seconds).
 
 ---
 
@@ -233,3 +261,9 @@ artifacts
 8. **30-Second Post-Max Floating Ensemble Showcase**:
    - Configured `duration_after: 30.0s` across simulation and batch generator so that when the maximum ball count $N$ is reached, the video continues running for 30 more seconds.
    - The HUD dynamically switches to display a floating countdown (`BALLS: N/N (FLOATING: XX.Xs / 30.0s)`) with a dedicated floating progress bar, allowing viewers to marvel at the complex floating ensemble of balls gliding and reflecting smoothly together.
+
+9. **Automated GitHub Pages Media Showcase Website**:
+   - Deployed an interactive, high-performance static website to GitHub Pages (`https://anon7238593-create.github.io/ai-slop/`).
+   - Integrated with GitHub Actions (`.github/workflows/deploy_pages.yml`) to automatically rebuild and publish whenever new media assets are committed to the `artifacts` branch.
+   - Features single-page tab navigation, spotlight video player with live physics metadata, GCD grid tiling explorer, Voronoi site slider, and direct PDF traversal walkthrough viewers.
+
