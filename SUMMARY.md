@@ -7,13 +7,14 @@ This document provides a comprehensive summary of all code, algorithms, visualiz
 ## Table of Contents
 
 1. [Repository Architecture & Workflow Model](#repository-architecture--workflow-model)
-2. [Euclidean Algorithm GCD Grid Visualizer (`2026-09-08/gcd_python`)](#euclidean-algorithm-gcd-grid-visualizer-2026-09-08gcd_python)
-3. [Graph Theory Suite & Tutorial Walkthroughs (`2026-09-05`)](#graph-theory-suite--tutorial-walkthroughs-2026-09-05)
-4. [Voronoi Diagram Generator (`2026-09-05/voronoi_diagram`)](#voronoi-diagram-generator-2026-09-05voronoi_diagram)
-5. [C / Yacc Parsers (`2026-09-05`)](#c--yacc-parsers-2026-09-05)
-6. [Automated GitHub Actions Pipelines (`.github/workflows`)](#automated-github-actions-pipelines-githubworkflows)
-7. [Artifact Branch Layout](#artifact-branch-layout)
-8. [Recent Enhancements & Milestones](#recent-enhancements--milestones)
+2. [90-Degree Ball Collision Spawner Simulation (`2026-09-09/collision`)](#90-degree-ball-collision-spawner-simulation-2026-09-09collision)
+3. [Euclidean Algorithm GCD Grid Visualizer (`2026-09-08/gcd_python`)](#euclidean-algorithm-gcd-grid-visualizer-2026-09-08gcd_python)
+4. [Graph Theory Suite & Tutorial Walkthroughs (`2026-09-05`)](#graph-theory-suite--tutorial-walkthroughs-2026-09-05)
+5. [Voronoi Diagram Generator (`2026-09-05/voronoi_diagram`)](#voronoi-diagram-generator-2026-09-05voronoi_diagram)
+6. [C / Yacc Parsers (`2026-09-05`)](#c--yacc-parsers-2026-09-05)
+7. [Automated GitHub Actions Pipelines (`.github/workflows`)](#automated-github-actions-pipelines-githubworkflows)
+8. [Artifact Branch Layout](#artifact-branch-layout)
+9. [Recent Enhancements & Milestones](#recent-enhancements--milestones)
 
 ---
 
@@ -22,6 +23,48 @@ This document provides a comprehensive summary of all code, algorithms, visualiz
 - **`master` Branch**: Contains all source code, CLI tools, unit tests, and GitHub Actions workflow definitions.
 - **`artifacts` Branch**: An automated, orphan-based storage branch where scheduled and event-triggered GitHub Actions jobs commit generated SVG visualizers, walkthrough PDFs, manifests, and documentation tables.
 - **Shared Concurrency**: All publishing workflows synchronize under the `visualization-artifacts` concurrency lock (`cancel-in-progress: false`), ensuring race-free, serial commits to the `artifacts` branch.
+
+---
+
+## 90-Degree Ball Collision Spawner Simulation (`2026-09-09/collision`)
+
+Location: [`2026-09-09/collision/`](2026-09-09/collision/)
+
+### Overview
+A high-performance 2D physics simulation and video generator in Python. A ball begins bouncing within a spacious arena (default 1080p Full HD: $1920 \times 1080$). Upon every boundary collision, the ball reflects elastically and immediately spawns a new ball with the **exact same scalar speed** and direction **rotated by 90 degrees** into the arena interior. Balls duplicate continuously on each border collision until a target count of $N$ balls is reached.
+
+### Key Components
+- **[`ball_collision.py`](2026-09-09/collision/ball_collision.py)**:
+  - `calculate_90_degree_spawn_velocity(vx_base, vy_base, wall_normal, speed)`: Exact orthogonal 90-degree inward deflection preserving scalar speed $\|\vec{v}_{spawn}\| = s$.
+  - `BallSimulation`: Sub-step continuous collision physics engine preventing tunneling at high velocities.
+  - `SimulationRenderer`: Full HD 60 FPS renderer with 3D sphere highlights, neon golden-angle palette, fading motion trails, expanding shockwave rings, and impact wall flashes.
+  - `synthesize_audio_track()`: Spatial stereo audio synthesizer generating multi-octave pentatonic collision chimes with horizontal position panning ($x / W$).
+  - Dual encoder: Direct H.264 pipe via FFmpeg (`libx264` / `aac`) with seamless fallback to OpenCV `VideoWriter`.
+- **[`generate_batch.py`](2026-09-09/collision/generate_batch.py)**:
+  - Parallel batch generator that creates 100 randomized ball collision simulations with different ball counts ($12 \le N \le 60$), starting launch angles ($10^\circ \dots 350^\circ$), video lengths, and speed profiles.
+  - Automatically compiles a comprehensive `manifest.json` and formatted `README.md` cataloging each video's metadata.
+- **[`test_ball_collision.py`](2026-09-09/collision/test_ball_collision.py)**:
+  - Comprehensive unit test suite validating strict speed conservation, velocity orthogonality ($\vec{u} \cdot \vec{v} = 0$), inward wall normal projection ($\vec{u} \cdot \hat{n} \ge 0$), termination on $N$ balls, palette generation, audio synthesis, frame rendering, and batch spec randomization.
+- **[`README.md`](2026-09-09/collision/README.md)**:
+  - Complete documentation, mathematical derivations, resolution presets, and CLI usage.
+
+### CLI Usage
+```bash
+cd 2026-09-09/collision
+
+# Generate default 1080p 60 FPS video (50 balls)
+python3 ball_collision.py -n 50
+
+# Custom resolution presets and starting angles
+python3 ball_collision.py -n 30 --preset vertical -o tiktok_shorts.mp4
+python3 ball_collision.py -n 40 --initial-angle 42.5 --preset square -o instagram.mp4
+
+# Run batch generator for 100 randomized videos
+python3 generate_batch.py --count 100 --output-dir ./collision-videos
+
+# Run unit tests
+python3 -m unittest test_ball_collision.py
+```
 
 ---
 
@@ -120,6 +163,7 @@ All workflows reside in [`.github/workflows/`](.github/workflows/) and run **hou
 
 | Workflow | File | Output Path on `artifacts` | Description |
 |---|---|---|---|
+| **Ball Collision Videos** | [`generate_collision_videos.yml`](.github/workflows/generate_collision_videos.yml) | `collision-videos/` | Generates **100 randomized ball collision MP4 videos** varying in ball count, starting angle, video duration, and speeds with spatial audio. |
 | **GCD Grid Visualizations** | [`generate_gcd_grids.yml`](.github/workflows/generate_gcd_grids.yml) | `gcd-grids/` | Generates **100 unique GCD grid SVGs** with large dimensions (up to ~15,000) on each run. Avoids duplicates from prior runs via manifest inspection. |
 | **Voronoi Diagrams** | [`generate_voronoi_diagrams.yml`](.github/workflows/generate_voronoi_diagrams.yml) | `voronoi/` | Generates 19 Voronoi diagrams (2–20 sites) with timestamp-derived seeds. |
 | **Traversal Walkthrough PDFs** | [`generate_pdf_for_traversel.yml`](.github/workflows/generate_pdf_for_traversel.yml) | `generated/` | Generates random graphs, runs BFS/DFS step walkthroughs, and combines them into single unified PDFs using `pdfunite`. |
@@ -132,6 +176,11 @@ When the workflows execute, the `artifacts` branch maintains the following direc
 
 ```text
 artifacts
+├── collision-videos/
+│   ├── README.md                      # Markdown table cataloging all 100 generated collision videos
+│   ├── manifest.json                  # JSON metadata (filename, n_balls, initial_angle, speed, dims, size)
+│   ├── collision_001.mp4              # 100 individual randomized MP4 simulations with spatial audio
+│   └── ...
 ├── gcd-grids/
 │   ├── README.md                      # Markdown table cataloging all 100 generated pairs
 │   ├── manifest.json                  # JSON metadata (a, b, gcd, seed, steps, squares)
@@ -167,4 +216,8 @@ artifacts
    - Increased batch generation size to **100 SVGs per run**.
 
 4. **Hourly Automation**:
-   - Transitioned all three repository workflows from daily schedules to **hourly schedules** (`cron: "0 * * * *"`).
+   - Transitioned all repository workflows to **hourly schedules** (`cron: "0 * * * *"`).
+
+5. **Randomized 90-Degree Collision Video Suite**:
+   - Added automated batch generation of 100 randomized ball collision MP4 videos on GitHub Actions (`.github/workflows/generate_collision_videos.yml`).
+   - Every video features varied target ball counts ($12 \dots 60$), unique starting angles ($10^\circ \dots 350^\circ$), differing speeds and lengths, and synthesized spatial stereo pentatonic audio.

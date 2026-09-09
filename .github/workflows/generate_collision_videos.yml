@@ -1,0 +1,86 @@
+name: Generate ball collision videos
+
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "Number of randomized collision videos to generate"
+        required: false
+        default: "100"
+        type: string
+  push:
+    # Ignoring artifacts branch prevents recursive workflow triggering
+    branches-ignore:
+      - artifacts
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write
+
+# Synchronize under the shared visualization concurrency lock for the artifacts branch
+concurrency:
+  group: visualization-artifacts
+  cancel-in-progress: false
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies (FFmpeg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: |
+          pip install numpy opencv-python-headless
+
+      - name: Fetch artifacts branch
+        run: |
+          git fetch origin artifacts || true
+
+      - name: Generate 100 randomized ball collision videos
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/collision-videos
+          VIDEO_COUNT: ${{ inputs.count || 100 }}
+        run: |
+          mkdir -p "$ARTIFACT_DIRECTORY"
+          python3 2026-09-09/collision/generate_batch.py \
+            --count "$VIDEO_COUNT" \
+            --output-dir "$ARTIFACT_DIRECTORY" \
+            --workers 2
+
+      - name: Commit collision videos to the artifacts branch
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/collision-videos
+        run: |
+          git fetch origin artifacts || true
+          if git show-ref --verify --quiet refs/remotes/origin/artifacts; then
+            git switch --force-create artifacts origin/artifacts
+          else
+            git switch --orphan artifacts
+            git rm -rf . || true
+          fi
+          rm -rf collision-videos
+          cp -R "$ARTIFACT_DIRECTORY" collision-videos
+          git add collision-videos
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Generate 100 random ball collision videos" \
+            -m "Generated $(jq -r '.total_videos // (.videos | length)' collision-videos/manifest.json) distinct randomized 90-degree ball collision videos with spatial audio."
+          if ! git push origin HEAD:artifacts; then
+            git fetch origin artifacts
+            git rebase origin/artifacts
+            git push origin HEAD:artifacts
+          fi
