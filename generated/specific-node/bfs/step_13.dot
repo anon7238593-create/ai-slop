@@ -25,27 +25,22 @@ graph traversal {
   A -- D [color="#7C3AED", penwidth=3.8];
   A -- E [color="#7C3AED", penwidth=3.8];
   A -- F [color="#7C3AED", penwidth=3.8];
-  A -- G [color="#7C3AED", penwidth=3.8];
+  A -- I [color="#7C3AED", penwidth=3.8];
   A -- J [color="#7C3AED", penwidth=3.8];
-  B -- D;
+  B -- C;
   B -- E [color="#7C3AED", penwidth=3.8];
-  B -- H [color="#7C3AED", penwidth=3.8];
+  B -- I;
+  B -- J;
   C -- E [color="#7C3AED", penwidth=3.8];
-  C -- F;
-  C -- G;
-  C -- J;
-  D -- H;
-  D -- I [color="#7C3AED", penwidth=3.8];
+  C -- G [color="#7C3AED", penwidth=3.8];
+  C -- H [color="#7C3AED", penwidth=3.8];
+  C -- I;
+  D -- G;
   F -- H;
-  F -- I;
-  F -- J;
-  G -- H;
   G -- I;
-  G -- J;
-  H -- I;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Queue:</B> G  →  J  →  H  →  I</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Queue:</B> I  →  J  →  G  →  H</TD></TR>
       <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, C, D, E, F</TD></TR>
     </TABLE>
   >];
