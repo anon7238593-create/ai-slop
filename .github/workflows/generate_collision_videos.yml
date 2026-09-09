@@ -19,7 +19,7 @@ on:
       - master # currently ignore it because this workflow is causing too much usage
       - artifacts
   schedule:
-    - cron: "5 * * * *"
+    - cron: "5 1 * * *"
 
 permissions:
   contents: write
