@@ -11,10 +11,7 @@ on:
 
 permissions:
   contents: write
-
-concurrency:
-  group: visualization-artifacts
-  cancel-in-progress: false
+  actions: read
 
 jobs:
   generate-and-publish:
@@ -29,6 +26,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Wait for turn (run one by one)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/wait_for_turn.py
 
       - name: Install PDF generation tools
         run: sudo apt-get update && sudo apt-get install -y graphviz poppler-utils
@@ -89,4 +91,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Generate traversal PDFs" \
             -m "Random graph seed: $(jq -r .random_seed generated/graph.json)"
-          git push origin HEAD:artifacts
+          if ! git push origin HEAD:artifacts; then
+            git fetch origin artifacts
+            git rebase origin/artifacts
+            git push origin HEAD:artifacts
+          fi

@@ -11,11 +11,7 @@ on:
 
 permissions:
   contents: write
-
-# Shared with the traversal workflow: both publish to the same branch.
-concurrency:
-  group: visualization-artifacts
-  cancel-in-progress: false
+  actions: read
 
 jobs:
   generate-and-publish:
@@ -30,6 +26,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Wait for turn (run one by one)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/wait_for_turn.py
 
       - name: Generate SVG collection
         env:
@@ -58,4 +59,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Generate Voronoi diagrams" \
             -m "Voronoi seed: $(jq -r .seed voronoi/manifest.json)"
-          git push origin HEAD:artifacts
+          if ! git push origin HEAD:artifacts; then
+            git fetch origin artifacts
+            git rebase origin/artifacts
+            git push origin HEAD:artifacts
+          fi

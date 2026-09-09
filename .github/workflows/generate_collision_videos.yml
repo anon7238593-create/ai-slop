@@ -17,11 +17,7 @@ on:
 
 permissions:
   contents: write
-
-# Synchronize under the shared visualization concurrency lock for the artifacts branch
-concurrency:
-  group: visualization-artifacts
-  cancel-in-progress: false
+  actions: read
 
 jobs:
   generate-and-publish:
@@ -36,6 +32,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Wait for turn (run one by one)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/wait_for_turn.py
 
       - name: Install system dependencies (FFmpeg)
         run: |
