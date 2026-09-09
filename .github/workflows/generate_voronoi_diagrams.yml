@@ -27,11 +27,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Wait for turn (run one by one)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 .github/scripts/wait_for_turn.py
-
       - name: Generate SVG collection
         env:
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/voronoi-diagrams
@@ -41,26 +36,11 @@ jobs:
             --seed "$seed" \
             --output "$ARTIFACT_DIRECTORY"
 
-      - name: Commit SVGs to the artifacts branch
+      - name: Commit and push SVGs to the artifacts branch
         env:
+          TARGET_DIR: voronoi
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/voronoi-diagrams
+          COMMIT_TITLE: "Generate Voronoi diagrams"
         run: |
-          git fetch origin artifacts || true
-          if git show-ref --verify --quiet refs/remotes/origin/artifacts; then
-            git switch --force-create artifacts origin/artifacts
-          else
-            git switch --orphan artifacts
-            git rm -rf . || true
-          fi
-          rm -rf voronoi
-          cp -R "$ARTIFACT_DIRECTORY" voronoi
-          git add voronoi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Generate Voronoi diagrams" \
-            -m "Voronoi seed: $(jq -r .seed voronoi/manifest.json)"
-          if ! git push origin HEAD:artifacts; then
-            git fetch origin artifacts
-            git rebase origin/artifacts
-            git push origin HEAD:artifacts
-          fi
+          export COMMIT_DESCRIPTION="Voronoi seed: $(jq -r .seed "$ARTIFACT_DIRECTORY"/manifest.json)"
+          bash .github/scripts/push_artifacts.sh

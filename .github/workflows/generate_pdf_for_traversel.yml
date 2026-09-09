@@ -27,11 +27,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Wait for turn (run one by one)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 .github/scripts/wait_for_turn.py
-
       - name: Install PDF generation tools
         run: sudo apt-get update && sudo apt-get install -y graphviz poppler-utils
 
@@ -73,26 +68,11 @@ jobs:
             "$ARTIFACT_DIRECTORY"/specific-node/dfs/step_*.pdf \
             "$ARTIFACT_DIRECTORY"/specific-node/specific_node_bfs_dfs_walkthrough.pdf
 
-      - name: Commit PDFs to the artifacts branch
+      - name: Commit and push PDFs to the artifacts branch
         env:
+          TARGET_DIR: generated
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
+          COMMIT_TITLE: "Generate traversal PDFs"
         run: |
-          git fetch origin artifacts || true
-          if git show-ref --verify --quiet refs/remotes/origin/artifacts; then
-            git switch --force-create artifacts origin/artifacts
-          else
-            git switch --orphan artifacts
-            git rm -rf . || true
-          fi
-          rm -rf generated
-          cp -R "$ARTIFACT_DIRECTORY" generated
-          git add generated
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Generate traversal PDFs" \
-            -m "Random graph seed: $(jq -r .random_seed generated/graph.json)"
-          if ! git push origin HEAD:artifacts; then
-            git fetch origin artifacts
-            git rebase origin/artifacts
-            git push origin HEAD:artifacts
-          fi
+          export COMMIT_DESCRIPTION="Random graph seed: $(jq -r .random_seed "$ARTIFACT_DIRECTORY"/graph.json)"
+          bash .github/scripts/push_artifacts.sh

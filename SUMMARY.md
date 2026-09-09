@@ -24,7 +24,7 @@ This document provides a comprehensive summary of all code, algorithms, visualiz
 - **`master` Branch**: Contains all source code, CLI tools, unit tests, and GitHub Actions workflow definitions.
 - **`artifacts` Branch**: An automated, orphan-based storage branch where scheduled and event-triggered GitHub Actions jobs commit generated SVG visualizers, walkthrough PDFs, manifests, and documentation tables.
 - **GitHub Pages Static Deployment**: Hosted directly from GitHub Actions at [`https://anon7238593-create.github.io/ai-slop/`](https://anon7238593-create.github.io/ai-slop/). Rebuilds and deploys automatically on every single commit pushed to the `artifacts` branch.
-- **FIFO Queue Serializer (Zero-Cancellation Concurrency)**: Workflows execute sequentially one by one using `.github/scripts/wait_for_turn.py`. This inspects active runs via `gh run list` and pauses until older runs complete, completely eliminating GitHub Actions concurrency cancellations (`Canceling since a higher priority waiting request... exists`) while ensuring race-free, serial commits to the `artifacts` branch.
+- **Atomic Artifacts Publisher (Conflict-Free Concurrency)**: Workflows generate their media artifacts in parallel and publish atomically to the `artifacts` branch using `.github/scripts/push_artifacts.sh`. This synchronizes with the latest remote HEAD on each retry attempt, eliminates `git rebase` merge conflicts across generated directories, and resolves ref-locking push contention through randomized exponential backoff and jitter.
 
 ---
 
@@ -250,9 +250,9 @@ artifacts
    - Added automated batch generation of 100 randomized ball collision MP4 videos on GitHub Actions (`.github/workflows/generate_collision_videos.yml`).
    - Every video features varied target ball counts ($12 \dots 60$), unique starting angles ($10^\circ \dots 350^\circ$), differing speeds and lengths, and synthesized spatial stereo pentatonic audio.
 
-6. **Zero-Cancellation FIFO Workflow Serializer**:
-   - Resolved GitHub Actions cancellation issue (`Canceling since a higher priority waiting request for visualization-artifacts exists`) by replacing GitHub's built-in single-slot pending concurrency groups with an intelligent FIFO queue serializer (`.github/scripts/wait_for_turn.py`).
-   - Workflows now run sequentially one by one in true order of dispatch, eliminating race conditions on the `artifacts` branch while preventing any premature run terminations.
+6. **Zero-Cancellation Atomic Artifacts Publisher**:
+   - Resolved GitHub Actions cancellation issue (`Canceling since a higher priority waiting request for visualization-artifacts exists`) and `git rebase` / push ref lock errors by implementing an atomic, retry-capable publisher (`.github/scripts/push_artifacts.sh`).
+   - Workflows now run and generate artifacts concurrently without blocking or artificial queue delays, atomically synchronizing with `origin/artifacts` on every push retry to guarantee conflict-free, 100% reliable publishing.
 
 7. **Slow-Speed Analytical Tracking & Organic Random Inward Spawning**:
    - Reduced simulation speeds from $650$ px/s to a calm, trackable $240$ px/s (batch: $160 - 260$ px/s), enabling human viewers to effortlessly analyze ball trajectories, elastic wall bounces, and spawn dynamics.

@@ -26,11 +26,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Wait for turn (run one by one)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 .github/scripts/wait_for_turn.py
-
       - name: Fetch artifacts branch
         run: |
           git fetch origin artifacts || true
@@ -117,26 +112,11 @@ jobs:
           )
           PY
 
-      - name: Commit grids to the artifacts branch
+      - name: Commit and push grids to the artifacts branch
         env:
+          TARGET_DIR: gcd-grids
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/gcd-grids
+          COMMIT_TITLE: "Generate 100 GCD grid visualizations"
         run: |
-          git fetch origin artifacts || true
-          if git show-ref --verify --quiet refs/remotes/origin/artifacts; then
-            git switch --force-create artifacts origin/artifacts
-          else
-            git switch --orphan artifacts
-            git rm -rf . || true
-          fi
-          rm -rf gcd-grids
-          cp -R "$ARTIFACT_DIRECTORY" gcd-grids
-          git add gcd-grids
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Generate 100 GCD grid visualizations" \
-            -m "Generated $(jq -r '.total // (.grids | length)' gcd-grids/manifest.json) unique random GCD grid visualizations with diverse dimensions."
-          if ! git push origin HEAD:artifacts; then
-            git fetch origin artifacts
-            git rebase origin/artifacts
-            git push origin HEAD:artifacts
-          fi
+          export COMMIT_DESCRIPTION="Generated $(jq -r '.total // (.grids | length)' "$ARTIFACT_DIRECTORY"/manifest.json) unique random GCD grid visualizations with diverse dimensions."
+          bash .github/scripts/push_artifacts.sh

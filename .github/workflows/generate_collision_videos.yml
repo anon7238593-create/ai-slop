@@ -33,11 +33,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Wait for turn (run one by one)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 .github/scripts/wait_for_turn.py
-
       - name: Install system dependencies (FFmpeg)
         run: |
           sudo apt-get update
@@ -46,10 +41,6 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install numpy opencv-python-headless
-
-      - name: Fetch artifacts branch
-        run: |
-          git fetch origin artifacts || true
 
       - name: Generate 100 randomized ball collision videos
         env:
@@ -62,26 +53,11 @@ jobs:
             --output-dir "$ARTIFACT_DIRECTORY" \
             --workers 2
 
-      - name: Commit collision videos to the artifacts branch
+      - name: Commit and push collision videos to the artifacts branch
         env:
+          TARGET_DIR: collision-videos
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/collision-videos
+          COMMIT_TITLE: "Generate 100 random ball collision videos"
         run: |
-          git fetch origin artifacts || true
-          if git show-ref --verify --quiet refs/remotes/origin/artifacts; then
-            git switch --force-create artifacts origin/artifacts
-          else
-            git switch --orphan artifacts
-            git rm -rf . || true
-          fi
-          rm -rf collision-videos
-          cp -R "$ARTIFACT_DIRECTORY" collision-videos
-          git add collision-videos
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Generate 100 random ball collision videos" \
-            -m "Generated $(jq -r '.total_videos // (.videos | length)' collision-videos/manifest.json) distinct randomized ball collision videos with slow analytical speeds and random inward angles."
-          if ! git push origin HEAD:artifacts; then
-            git fetch origin artifacts
-            git rebase origin/artifacts
-            git push origin HEAD:artifacts
-          fi
+          export COMMIT_DESCRIPTION="Generated $(jq -r '.total_videos // (.videos | length)' "$ARTIFACT_DIRECTORY"/manifest.json) distinct randomized ball collision videos with slow analytical speeds and random inward angles."
+          bash .github/scripts/push_artifacts.sh
