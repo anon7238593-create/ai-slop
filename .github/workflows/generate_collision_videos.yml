@@ -9,9 +9,9 @@ on:
         default: "20"
         type: string
       max_balls:
-        description: "Maximum number of balls per video (up to 1000)"
+        description: "Maximum number of balls per video (up to 100)"
         required: false
-        default: "1000"
+        default: "100"
         type: string
   push:
     # Ignoring artifacts branch prevents recursive workflow triggering
@@ -56,7 +56,7 @@ jobs:
           mkdir -p "$ARTIFACT_DIRECTORY"
           python3 2026-09-09/collision/generate_batch.py \
             --count "$VIDEO_COUNT" \
-            --max-balls "${{ inputs.max_balls || 1000 }}" \
+            --max-balls "${{ inputs.max_balls || 100 }}" \
             --width 1920 \
             --height 1080 \
             --output-dir "$ARTIFACT_DIRECTORY" \
