@@ -15,35 +15,36 @@ graph traversal {
   C [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   D [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   E [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  F [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  F [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   G [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   H [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   I [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  J [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  A -- B;
-  A -- C [color="#7C3AED", penwidth=3.8];
+  J [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  A -- B [color="#7C3AED", penwidth=3.8];
+  A -- C;
   A -- E [color="#7C3AED", penwidth=3.8];
-  B -- D [color="#7C3AED", penwidth=3.8];
-  B -- E [color="#7C3AED", penwidth=3.8];
-  B -- H [color="#7C3AED", penwidth=3.8];
+  A -- G [color="#7C3AED", penwidth=3.8];
+  A -- H;
+  B -- C;
+  B -- H;
+  B -- J;
+  C -- D [color="#7C3AED", penwidth=3.8];
+  C -- E [color="#7C3AED", penwidth=3.8];
+  C -- F;
   C -- G;
-  C -- J;
-  D -- F [color="#7C3AED", penwidth=3.8];
-  D -- G;
+  C -- I [color="#7C3AED", penwidth=3.8];
+  C -- J [color="#7C3AED", penwidth=3.8];
+  D -- F;
   D -- J;
-  E -- G [color="#7C3AED", penwidth=3.8];
-  E -- J [color="#7C3AED", penwidth=3.8];
-  F -- H;
-  F -- I;
+  E -- F [color="#7C3AED", penwidth=3.8];
+  E -- H [color="#7C3AED", penwidth=3.8];
   G -- H;
-  G -- I [color="#7C3AED", penwidth=3.8];
   G -- J;
   H -- I;
-  I -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Queue:</B> F</TD></TR>
-      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, C, D, E, G, H, I, J</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Queue:</B> J</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, C, D, E, F, G, H, I</TD></TR>
     </TABLE>
   >];
 }
