@@ -17,31 +17,28 @@ graph traversal {
   E [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   F [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   G [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
-  H [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  H [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   I [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   J [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   A -- B [color="#7C3AED", penwidth=3.8];
   A -- C [color="#7C3AED", penwidth=3.8];
-  A -- E [color="#7C3AED", penwidth=3.8];
   A -- F [color="#7C3AED", penwidth=3.8];
-  A -- H [color="#7C3AED", penwidth=3.8];
+  B -- C;
   B -- D [color="#7C3AED", penwidth=3.8];
-  B -- E;
-  B -- H;
+  B -- E [color="#7C3AED", penwidth=3.8];
   B -- I [color="#7C3AED", penwidth=3.8];
-  C -- D;
   C -- E;
-  C -- I;
+  C -- H;
+  D -- E;
   D -- G;
-  D -- H;
-  E -- G;
   E -- J;
-  G -- H;
-  H -- I;
+  F -- H;
+  F -- I;
+  F -- J;
   H -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> H  |  F  |  E  |  C  |  I</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> F  |  C  |  I  |  E</TD></TR>
       <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B</TD></TR>
     </TABLE>
   >];
