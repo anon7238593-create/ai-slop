@@ -1,0 +1,75 @@
+name: Generate 500-ball collision videos release
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "Number of randomized collision videos to generate"
+        required: false
+        default: "20"
+        type: string
+      balls:
+        description: "Target number of balls per video"
+        required: false
+        default: "500"
+        type: string
+      tag:
+        description: "Specific release tag name"
+        required: false
+        default: "collision-500-balls"
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies (FFmpeg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: |
+          pip install numpy opencv-python-headless
+
+      - name: Generate 500-ball collision videos (1920x1080)
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/collision-videos-500-balls
+          VIDEO_COUNT: ${{ inputs.count || '20' }}
+          BALL_COUNT: ${{ inputs.balls || '500' }}
+        run: |
+          mkdir -p "$ARTIFACT_DIRECTORY"
+          python3 2026-09-09/collision/generate_batch.py \
+            --count "$VIDEO_COUNT" \
+            --min-balls "$BALL_COUNT" \
+            --max-balls "$BALL_COUNT" \
+            --width 1920 \
+            --height 1080 \
+            --output-dir "$ARTIFACT_DIRECTORY" \
+            --workers 2
+
+      - name: Create GitHub Release with specific tag
+        env:
+          TARGET_DIR: collision-videos-500-balls
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/collision-videos-500-balls
+          RELEASE_TAG: ${{ inputs.tag || 'collision-500-balls' }}
+          RELEASE_TITLE: "500-Ball Collision Videos (${{ inputs.count || '20' }} Videos at 1920x1080 Full HD)"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export COMMIT_DESCRIPTION="Generated $(jq -r '.total_videos // (.videos | length)' "$ARTIFACT_DIRECTORY"/manifest.json) distinct 1920x1080 Full HD ball collision videos featuring exactly 500 balls with slow analytical speeds, random inward angles, spatial audio, and post-max floating ensemble."
+          bash .github/scripts/create_release.sh

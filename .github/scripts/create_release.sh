@@ -175,18 +175,27 @@ else
 
   while [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; do
     ATTEMPT=$((ATTEMPT + 1))
-    echo "==> [Attempt $ATTEMPT/$MAX_ATTEMPTS] Creating GitHub Release '$TAG_NAME'..."
 
-    if gh release create "$TAG_NAME" "${UPLOAD_ASSETS[@]}" \
-         --title "$TITLE" \
-         --notes-file "$NOTES_FILE" \
-         --target "$TARGET_REF" \
-         --latest="${RELEASE_LATEST:-false}"; then
-      SUCCESS=1
-      break
+    if gh release view "$TAG_NAME" &>/dev/null; then
+      echo "==> [Attempt $ATTEMPT/$MAX_ATTEMPTS] Release '$TAG_NAME' already exists. Updating release metadata and uploading assets with --clobber..."
+      if gh release edit "$TAG_NAME" --title "$TITLE" --notes-file "$NOTES_FILE" && \
+         gh release upload "$TAG_NAME" "${UPLOAD_ASSETS[@]}" --clobber; then
+        SUCCESS=1
+        break
+      fi
+    else
+      echo "==> [Attempt $ATTEMPT/$MAX_ATTEMPTS] Creating GitHub Release '$TAG_NAME'..."
+      if gh release create "$TAG_NAME" "${UPLOAD_ASSETS[@]}" \
+           --title "$TITLE" \
+           --notes-file "$NOTES_FILE" \
+           --target "$TARGET_REF" \
+           --latest="${RELEASE_LATEST:-false}"; then
+        SUCCESS=1
+        break
+      fi
     fi
 
-    echo "Warning: 'gh release create' failed on attempt $ATTEMPT."
+    echo "Warning: Release operation failed on attempt $ATTEMPT."
     if [ "$ATTEMPT" -lt "$MAX_ATTEMPTS" ]; then
       sleep 4
     fi
