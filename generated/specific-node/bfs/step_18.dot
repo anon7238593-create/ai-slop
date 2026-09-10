@@ -18,36 +18,31 @@ graph traversal {
   F [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   G [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   H [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  I [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  J [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  I [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  J [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   A -- B;
-  A -- D [color="#7C3AED", penwidth=3.8];
+  A -- C;
   A -- E [color="#7C3AED", penwidth=3.8];
-  A -- G;
-  A -- H;
-  A -- I;
-  A -- J [color="#7C3AED", penwidth=3.8];
-  B -- C;
+  A -- F [color="#7C3AED", penwidth=3.8];
+  A -- H [color="#7C3AED", penwidth=3.8];
+  B -- D [color="#7C3AED", penwidth=3.8];
   B -- E [color="#7C3AED", penwidth=3.8];
-  B -- F;
   B -- H;
+  B -- I [color="#7C3AED", penwidth=3.8];
   C -- D;
   C -- E [color="#7C3AED", penwidth=3.8];
+  C -- I;
+  D -- G;
   D -- H;
-  D -- I;
-  E -- F [color="#7C3AED", penwidth=3.8];
   E -- G [color="#7C3AED", penwidth=3.8];
-  E -- H [color="#7C3AED", penwidth=3.8];
-  E -- I [color="#7C3AED", penwidth=3.8];
-  F -- G;
-  G -- I;
-  G -- J;
+  E -- J [color="#7C3AED", penwidth=3.8];
+  G -- H;
+  H -- I;
   H -- J;
-  I -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Queue:</B> J</TD></TR>
-      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, C, E, F, G, H, I</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Queue:</B> I</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, C, E, F, G, H, J</TD></TR>
     </TABLE>
   >];
 }
