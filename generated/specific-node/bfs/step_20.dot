@@ -20,21 +20,25 @@ graph traversal {
   H [fillcolor="#FFEDD5", color="#EA580C", fontcolor="#9A3412"];
   I [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   J [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  A -- B;
+  A -- B [color="#7C3AED", penwidth=3.8];
   A -- C [color="#7C3AED", penwidth=3.8];
   A -- D [color="#7C3AED", penwidth=3.8];
   A -- E [color="#7C3AED", penwidth=3.8];
-  A -- J [color="#7C3AED", penwidth=3.8];
+  A -- J;
+  B -- C;
   B -- D;
-  B -- E [color="#7C3AED", penwidth=3.8];
-  B -- F [color="#7C3AED", penwidth=3.8];
-  B -- H [color="#7C3AED", penwidth=3.8];
-  B -- I;
+  B -- F;
+  B -- J;
   D -- H;
-  E -- G [color="#7C3AED", penwidth=3.8];
+  E -- F [color="#7C3AED", penwidth=3.8];
   E -- I [color="#7C3AED", penwidth=3.8];
-  G -- I;
-  G -- J;
+  E -- J [color="#7C3AED", penwidth=3.8];
+  F -- G [color="#7C3AED", penwidth=3.8];
+  F -- I;
+  F -- J;
+  G -- H;
+  H -- J [color="#7C3AED", penwidth=3.8];
+  I -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
       <TR><TD ALIGN="LEFT"><B>Queue:</B> (empty)</TD></TR>
