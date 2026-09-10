@@ -26,9 +26,9 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Fetch artifacts branch
+      - name: Fetch artifacts branch metadata
         run: |
-          git fetch origin artifacts || true
+          git fetch --filter=blob:none --depth=1 origin artifacts:refs/remotes/origin/artifacts || true
 
       - name: Generate colored GCD grids
         env:
