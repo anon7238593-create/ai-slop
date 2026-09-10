@@ -8,8 +8,12 @@ on:
         required: false
         default: "20"
         type: string
+      min_balls:
+        description: "Minimum number of balls per video (optional, defaults to min(12, max_balls))"
+        required: false
+        type: string
       max_balls:
-        description: "Maximum number of balls per video (up to 100)"
+        description: "Maximum number of balls per video (up to 1000)"
         required: false
         default: "100"
         type: string
@@ -48,15 +52,21 @@ jobs:
         run: |
           pip install numpy opencv-python-headless
 
-      - name: Generate 20 randomized ball collision videos (1920x1080)
+      - name: Generate randomized ball collision videos (1920x1080)
         env:
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/collision-videos
           VIDEO_COUNT: ${{ inputs.count || 20 }}
+          MIN_BALLS: ${{ inputs.min_balls || '' }}
         run: |
           mkdir -p "$ARTIFACT_DIRECTORY"
+          EXTRA_ARGS=()
+          if [ -n "$MIN_BALLS" ]; then
+            EXTRA_ARGS+=(--min-balls "$MIN_BALLS")
+          fi
           python3 2026-09-09/collision/generate_batch.py \
             --count "$VIDEO_COUNT" \
             --max-balls "${{ inputs.max_balls || 100 }}" \
+            "${EXTRA_ARGS[@]}" \
             --width 1920 \
             --height 1080 \
             --output-dir "$ARTIFACT_DIRECTORY" \

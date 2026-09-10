@@ -282,8 +282,8 @@ def main():
     parser.add_argument(
         "--min-balls",
         type=int,
-        default=DEFAULT_MIN_BALLS,
-        help=f"Minimum target number of balls per video (default: {DEFAULT_MIN_BALLS})",
+        default=None,
+        help=f"Minimum target number of balls per video (default: min({DEFAULT_MIN_BALLS}, max-balls))",
     )
     parser.add_argument(
         "--max-balls",
@@ -306,11 +306,16 @@ def main():
 
     args = parser.parse_args()
 
-    if args.min_balls < 1:
-        parser.error("The minimum number of balls must be at least 1.")
+    if args.max_balls < 1:
+        parser.error("The maximum number of balls must be at least 1.")
     if args.max_balls > MAX_BALLS:
         parser.error(f"The maximum number of balls cannot exceed the upper limit of {MAX_BALLS} (got {args.max_balls}).")
-    if args.min_balls > args.max_balls:
+
+    if args.min_balls is None:
+        args.min_balls = min(DEFAULT_MIN_BALLS, args.max_balls)
+    elif args.min_balls < 1:
+        parser.error("The minimum number of balls must be at least 1.")
+    elif args.min_balls > args.max_balls:
         parser.error(f"--min-balls ({args.min_balls}) cannot be greater than --max-balls ({args.max_balls}).")
 
     generate_batch(
