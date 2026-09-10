@@ -12,39 +12,38 @@ graph traversal {
   }
   A [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   B [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  C [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
+  C [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   D [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   E [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   F [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   G [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   H [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   I [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
-  J [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
-  A -- B;
+  J [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
+  A -- B [color="#7C3AED", penwidth=3.8];
   A -- C;
-  A -- E [color="#7C3AED", penwidth=3.8];
   A -- F;
-  A -- I;
-  A -- J;
+  A -- G;
+  A -- J [color="#7C3AED", penwidth=3.8];
+  B -- C;
   B -- D [color="#7C3AED", penwidth=3.8];
   B -- E [color="#7C3AED", penwidth=3.8];
+  B -- F [color="#7C3AED", penwidth=3.8];
+  B -- H [color="#7C3AED", penwidth=3.8];
+  B -- I [color="#7C3AED", penwidth=3.8];
   C -- E [color="#7C3AED", penwidth=3.8];
-  C -- G;
-  C -- I;
   D -- G;
-  E -- F [color="#7C3AED", penwidth=3.8];
   E -- G [color="#7C3AED", penwidth=3.8];
-  E -- H [color="#7C3AED", penwidth=3.8];
-  E -- I [color="#7C3AED", penwidth=3.8];
-  E -- J [color="#7C3AED", penwidth=3.8];
   F -- H;
+  F -- I;
+  F -- J;
   G -- H;
+  G -- I;
   H -- I;
-  H -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> J  |  I  |  H  |  G</TD></TR>
-      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, C, D, E, F</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> G  |  C  |  I  |  H</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, D, E, F, J</TD></TR>
     </TABLE>
   >];
 }
