@@ -36,11 +36,22 @@ jobs:
             --seed "$seed" \
             --output "$ARTIFACT_DIRECTORY"
 
+      - name: Create GitHub Release for Voronoi diagrams
+        env:
+          TARGET_DIR: voronoi
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/voronoi-diagrams
+          RELEASE_TITLE: "Generate Voronoi diagrams"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export COMMIT_DESCRIPTION="Voronoi seed: $(jq -r .seed "$ARTIFACT_DIRECTORY"/manifest.json)"
+          bash .github/scripts/create_release.sh
+
       - name: Commit and push SVGs to the artifacts branch
         env:
           TARGET_DIR: voronoi
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/voronoi-diagrams
           COMMIT_TITLE: "Generate Voronoi diagrams"
+          GH_TOKEN: ${{ github.token }}
         run: |
           export COMMIT_DESCRIPTION="Voronoi seed: $(jq -r .seed "$ARTIFACT_DIRECTORY"/manifest.json)"
           bash .github/scripts/push_artifacts.sh

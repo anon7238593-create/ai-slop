@@ -22,9 +22,10 @@ This document provides a comprehensive summary of all code, algorithms, visualiz
 ## Repository Architecture & Workflow Model
 
 - **`master` Branch**: Contains all source code, CLI tools, unit tests, and GitHub Actions workflow definitions.
+- **GitHub Releases (High-Capacity Media Hosting)**: Before generated assets are committed to Git, an automated GitHub Release is created via [`.github/scripts/create_release.sh`](.github/scripts/create_release.sh). This enables hosting large media assets (videos up to 2GB per asset) without bloating the Git object store or encountering GitHub's 100MB repository file limit. Each release includes individual media assets and a consolidated `.zip` bundle.
 - **`artifacts` Branch**: An automated, orphan-based storage branch where scheduled and event-triggered GitHub Actions jobs commit generated SVG visualizers, walkthrough PDFs, manifests, and documentation tables.
 - **GitHub Pages Static Deployment**: Hosted directly from GitHub Actions at [`https://anon7238593-create.github.io/ai-slop/`](https://anon7238593-create.github.io/ai-slop/). Rebuilds and deploys automatically on every single commit pushed to the `artifacts` branch.
-- **Atomic Artifacts Publisher (Conflict-Free Concurrency)**: Workflows generate their media artifacts in parallel and publish atomically to the `artifacts` branch using `.github/scripts/push_artifacts.sh`. This synchronizes with the latest remote HEAD on each retry attempt, eliminates `git rebase` merge conflicts across generated directories, and resolves ref-locking push contention through randomized exponential backoff and jitter.
+- **Atomic Artifacts Publisher (Conflict-Free Concurrency)**: Workflows generate their media artifacts in parallel and publish atomically to the `artifacts` branch using [`.github/scripts/push_artifacts.sh`](.github/scripts/push_artifacts.sh). This synchronizes with the latest remote HEAD on each retry attempt, eliminates `git rebase` merge conflicts across generated directories, and resolves ref-locking push contention through randomized exponential backoff and jitter. Any oversized media files ($\ge 95\text{MB}$) are excluded from Git commits while remaining fully accessible via the GitHub Release URLs in `manifest.json`.
 
 ---
 
@@ -271,4 +272,10 @@ artifacts
    - Raised the maximum ball capacity from 36/60 to **1000 balls** across both the single-video generator and batch pipeline (`ball_collision.py` and `generate_batch.py`).
    - Added strict CLI and config bounds validation ($1 \le N \le 1000$).
    - Enhanced HUD metrics layout and logging to cleanly accommodate up to 4-digit ball counts.
+
+11. **Release-First Publishing Pipeline for Large Media Hosting**:
+   - Integrated automated GitHub Release creation (`.github/scripts/create_release.sh`) into all artifact pipelines before files are committed to the `artifacts` branch.
+   - Enables hosting large media assets (videos up to 2GB per file) without being blocked by GitHub's 100MB repository limit or causing Git object store bloat.
+   - Automatically packages a full `.zip` bundle alongside individual assets, and dynamically enriches `manifest.json` with `release_tag`, `release_url`, `release_download_url`, and `has_git_blob` flags.
+   - Implemented a safety threshold in `push_artifacts.sh`: files $\ge 95\text{MB}$ are safely excluded from Git commits while remaining hosted on GitHub Releases, with seamless video player fallback on the GitHub Pages website.
 

@@ -38,6 +38,9 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                 data["collision"]["size_mb"] = c_data.get("total_size_mb", 0.0)
                 data["collision"]["generated_at"] = c_data.get("generated_at", "")
                 data["collision"]["base_seed"] = c_data.get("base_seed")
+                data["collision"]["release_tag"] = c_data.get("release_tag")
+                data["collision"]["release_url"] = c_data.get("release_url")
+                data["collision"]["release_archive_url"] = c_data.get("release_archive_url")
         except Exception as e:
             print(f"Warning loading collision manifest: {e}", file=sys.stderr)
 
@@ -69,6 +72,9 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                 data["gcd"]["grids"] = g_data.get("grids", [])
                 data["gcd"]["total"] = g_data.get("total", len(data["gcd"]["grids"]))
                 data["gcd"]["generated_at"] = g_data.get("generated_at", "")
+                data["gcd"]["release_tag"] = g_data.get("release_tag")
+                data["gcd"]["release_url"] = g_data.get("release_url")
+                data["gcd"]["release_archive_url"] = g_data.get("release_archive_url")
         except Exception as e:
             print(f"Warning loading GCD manifest: {e}", file=sys.stderr)
 
@@ -100,6 +106,9 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                 data["voronoi"]["seed"] = v_data.get("seed")
                 data["voronoi"]["generated_at"] = v_data.get("generated_at", "")
                 data["voronoi"]["total"] = len(data["voronoi"]["diagrams"])
+                data["voronoi"]["release_tag"] = v_data.get("release_tag")
+                data["voronoi"]["release_url"] = v_data.get("release_url")
+                data["voronoi"]["release_archive_url"] = v_data.get("release_archive_url")
         except Exception as e:
             print(f"Warning loading Voronoi manifest: {e}", file=sys.stderr)
 
@@ -115,6 +124,17 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
     # 4. Traversal PDFs
     gen_dir = os.path.join(artifacts_dir, "generated")
     if os.path.exists(gen_dir):
+        gen_manifest = os.path.join(gen_dir, "manifest.json")
+        if os.path.exists(gen_manifest):
+            try:
+                with open(gen_manifest, "r", encoding="utf-8") as f:
+                    t_data = json.load(f)
+                    data["traversal"]["release_tag"] = t_data.get("release_tag")
+                    data["traversal"]["release_url"] = t_data.get("release_url")
+                    data["traversal"]["release_archive_url"] = t_data.get("release_archive_url")
+            except Exception:
+                pass
+
         graph_json = os.path.join(gen_dir, "graph.json")
         if os.path.exists(graph_json):
             try:

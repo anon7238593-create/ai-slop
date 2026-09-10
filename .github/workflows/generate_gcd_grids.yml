@@ -112,11 +112,22 @@ jobs:
           )
           PY
 
+      - name: Create GitHub Release for GCD grids
+        env:
+          TARGET_DIR: gcd-grids
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/gcd-grids
+          RELEASE_TITLE: "Generate 100 GCD grid visualizations"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export COMMIT_DESCRIPTION="Generated $(jq -r '.total // (.grids | length)' "$ARTIFACT_DIRECTORY"/manifest.json) unique random GCD grid visualizations with diverse dimensions."
+          bash .github/scripts/create_release.sh
+
       - name: Commit and push grids to the artifacts branch
         env:
           TARGET_DIR: gcd-grids
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/gcd-grids
           COMMIT_TITLE: "Generate 100 GCD grid visualizations"
+          GH_TOKEN: ${{ github.token }}
         run: |
           export COMMIT_DESCRIPTION="Generated $(jq -r '.total // (.grids | length)' "$ARTIFACT_DIRECTORY"/manifest.json) unique random GCD grid visualizations with diverse dimensions."
           bash .github/scripts/push_artifacts.sh

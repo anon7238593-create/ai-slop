@@ -23,9 +23,42 @@ fi
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+# Ensure GitHub Release is created before committing artifacts to the branch
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ ! -f "$ARTIFACT_DIRECTORY/.release_created" ] && [ "${SKIP_RELEASE:-false}" != "true" ]; then
+  echo "==> Triggering artifact release creation before committing to artifacts branch..."
+  bash "$SCRIPT_DIR/create_release.sh"
+fi
+
+# Fetch release URL if available
+RELEASE_URL=""
+if [ -f "$ARTIFACT_DIRECTORY/.release_url" ]; then
+  RELEASE_URL="$(cat "$ARTIFACT_DIRECTORY/.release_url")"
+elif [ -f "$ARTIFACT_DIRECTORY/manifest.json" ]; then
+  RELEASE_URL="$(python3 -c 'import json; print(json.load(open("'"$ARTIFACT_DIRECTORY"'/manifest.json")).get("release_url", ""))' 2>/dev/null || true)"
+fi
+
+# Clean up marker files so they aren't tracked in git index
+rm -f "$ARTIFACT_DIRECTORY/.release_created" "$ARTIFACT_DIRECTORY/.release_tag" "$ARTIFACT_DIRECTORY/.release_url"
+
 # 1. Write the new target directory into Git's object store (isolated index)
 TMP_INDEX=$(mktemp -u)
-NEW_SUBTREE=$(GIT_INDEX_FILE="$TMP_INDEX" git --work-tree="$ARTIFACT_DIRECTORY" add -A && GIT_INDEX_FILE="$TMP_INDEX" git write-tree)
+GIT_INDEX_FILE="$TMP_INDEX" git --work-tree="$ARTIFACT_DIRECTORY" add -A
+
+# Exclude oversized files (>=95MB) from Git commit to avoid GitHub 100MB file limit errors.
+# Oversized files are already preserved and hosted on the GitHub Release!
+OVERSIZED_FILES=$(find "$ARTIFACT_DIRECTORY" -type f -size +95M 2>/dev/null || true)
+if [ -n "$OVERSIZED_FILES" ]; then
+  echo "==> Notice: Excluding media files >=95MB from Git branch (hosted in GitHub Release):"
+  while IFS= read -r large_file; do
+    [ -n "$large_file" ] || continue
+    rel_path="${large_file#$ARTIFACT_DIRECTORY/}"
+    echo "    - $rel_path ($(du -h "$large_file" | cut -f1))"
+    GIT_INDEX_FILE="$TMP_INDEX" git --work-tree="$ARTIFACT_DIRECTORY" rm --cached -f "$rel_path" >/dev/null
+  done <<< "$OVERSIZED_FILES"
+fi
+
+NEW_SUBTREE=$(GIT_INDEX_FILE="$TMP_INDEX" git write-tree)
 rm -f "$TMP_INDEX"
 echo "==> Generated subtree for '$TARGET_DIR': $NEW_SUBTREE"
 
@@ -33,6 +66,10 @@ if [ -n "${COMMIT_DESCRIPTION:-}" ]; then
   COMMIT_MSG=$(printf "%s\n\n%s" "$COMMIT_TITLE" "$COMMIT_DESCRIPTION")
 else
   COMMIT_MSG="$COMMIT_TITLE"
+fi
+
+if [ -n "$RELEASE_URL" ]; then
+  COMMIT_MSG=$(printf "%s\n\nRelease: %s" "$COMMIT_MSG" "$RELEASE_URL")
 fi
 
 MAX_ATTEMPTS=15

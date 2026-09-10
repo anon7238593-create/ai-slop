@@ -463,6 +463,7 @@
       </div>
       <div class="header-links">
         <a href="https://github.com/anon7238593-create/ai-slop" target="_blank" rel="noopener">Repository &rarr;</a>
+        <a href="https://github.com/anon7238593-create/ai-slop/releases" target="_blank" rel="noopener">Releases &rarr;</a>
         <a href="https://github.com/anon7238593-create/ai-slop/tree/artifacts" target="_blank" rel="noopener">artifacts branch &rarr;</a>
       </div>
     </div>
@@ -684,12 +685,28 @@
         `Balls: ${item.n_balls} | Initial Angle: ${item.initial_angle}\u00B0 | Speed: ${item.speed} px/s | Canvas: ${item.width}\u00D7${item.height} | Size: ${item.file_size_mb || 0} MB`;
 
       const player = document.getElementById('main-video-player');
-      const src = `collision-videos/${item.filename}`;
+      const localSrc = `collision-videos/${item.filename}`;
+      const src = (item.has_git_blob === false && item.release_download_url)
+        ? item.release_download_url
+        : localSrc;
+
       if (player.getAttribute('src') !== src) {
         player.setAttribute('src', src);
         player.load();
       }
-      document.getElementById('spotlight-video-link').href = src;
+
+      player.onerror = () => {
+        if (item.release_download_url && player.getAttribute('src') !== item.release_download_url) {
+          player.setAttribute('src', item.release_download_url);
+          player.load();
+        }
+      };
+
+      const link = document.getElementById('spotlight-video-link');
+      link.href = item.release_download_url || localSrc;
+      if (item.release_download_url) {
+        link.title = "Download from GitHub Release";
+      }
     }
 
     function getFilteredCollisionVideos() {

@@ -68,11 +68,24 @@ jobs:
             "$ARTIFACT_DIRECTORY"/specific-node/dfs/step_*.pdf \
             "$ARTIFACT_DIRECTORY"/specific-node/specific_node_bfs_dfs_walkthrough.pdf
 
+      - name: Create GitHub Release for traversal PDFs
+        env:
+          TARGET_DIR: generated
+          RELEASE_TAG_PREFIX: traversal-pdfs
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
+          RELEASE_TITLE: "Generate traversal PDFs"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export COMMIT_DESCRIPTION="Random graph seed: $(jq -r .random_seed "$ARTIFACT_DIRECTORY"/graph.json)"
+          bash .github/scripts/create_release.sh
+
       - name: Commit and push PDFs to the artifacts branch
         env:
           TARGET_DIR: generated
+          RELEASE_TAG_PREFIX: traversal-pdfs
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
           COMMIT_TITLE: "Generate traversal PDFs"
+          GH_TOKEN: ${{ github.token }}
         run: |
           export COMMIT_DESCRIPTION="Random graph seed: $(jq -r .random_seed "$ARTIFACT_DIRECTORY"/graph.json)"
           bash .github/scripts/push_artifacts.sh
