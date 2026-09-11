@@ -13,34 +13,36 @@ graph traversal {
   A [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   B [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   C [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  D [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  D [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   E [fillcolor="#FFEDD5", color="#EA580C", fontcolor="#9A3412"];
-  F [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
-  G [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
+  F [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  G [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   H [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
-  I [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
+  I [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   J [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   A -- B [color="#7C3AED", penwidth=3.8];
-  A -- I [color="#7C3AED", penwidth=3.8];
   B -- C [color="#7C3AED", penwidth=3.8];
-  B -- E [color="#7C3AED", penwidth=3.8];
-  B -- I;
-  B -- J [color="#7C3AED", penwidth=3.8];
+  B -- D [color="#7C3AED", penwidth=3.8];
   C -- D;
-  C -- I;
-  C -- J;
-  D -- H;
-  D -- I [color="#7C3AED", penwidth=3.8];
-  E -- F;
-  E -- G;
+  C -- E [color="#7C3AED", penwidth=3.8];
+  C -- F [color="#7C3AED", penwidth=3.8];
+  C -- G [color="#7C3AED", penwidth=3.8];
+  C -- I [color="#7C3AED", penwidth=3.8];
+  C -- J [color="#7C3AED", penwidth=3.8];
+  D -- E;
+  D -- F;
+  D -- H [color="#7C3AED", penwidth=3.8];
   E -- H;
-  F -- G;
-  H -- I [color="#7C3AED", penwidth=3.8];
-  H -- J;
+  E -- J;
+  F -- H;
+  F -- J;
+  G -- H;
+  G -- I;
+  I -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Queue:</B> J  →  D  →  H</TD></TR>
-      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, C, I</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Queue:</B> F  →  G  →  I  →  J  →  H</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, C, D</TD></TR>
     </TABLE>
   >];
 }

@@ -18,28 +18,30 @@ graph traversal {
   F [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   G [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   H [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
-  I [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  I [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   J [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   A -- B [color="#7C3AED", penwidth=3.8];
-  A -- I [color="#7C3AED", penwidth=3.8];
   B -- C;
-  B -- E;
-  B -- I;
-  B -- J;
+  B -- D;
   C -- D;
+  C -- E;
+  C -- F;
+  C -- G;
   C -- I;
   C -- J;
+  D -- E;
+  D -- F;
   D -- H;
-  D -- I;
-  E -- F;
-  E -- G;
   E -- H;
-  F -- G;
-  H -- I;
-  H -- J;
+  E -- J;
+  F -- H;
+  F -- J;
+  G -- H;
+  G -- I;
+  I -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> I</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> (empty)</TD></TR>
       <TR><TD ALIGN="LEFT"><B>Visited:</B> A</TD></TR>
     </TABLE>
   >];
