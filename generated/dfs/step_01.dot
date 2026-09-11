@@ -23,18 +23,29 @@ graph traversal {
   A -- B;
   A -- D;
   A -- G;
-  A -- I;
+  A -- J;
   B -- C;
   B -- E;
   B -- F;
-  B -- I;
+  B -- H;
   B -- J;
+  C -- F;
+  C -- G;
+  C -- H;
+  C -- J;
   D -- F;
-  D -- J;
-  E -- H;
+  D -- G;
+  D -- I;
+  E -- F;
+  E -- G;
+  E -- I;
+  E -- J;
+  F -- G;
+  F -- H;
+  F -- I;
   G -- H;
   G -- I;
-  I -- J;
+  H -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
       <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> A</TD></TR>
