@@ -170,7 +170,7 @@ Workflows reside in [`.github/workflows/`](.github/workflows/) with a structured
 | **Voronoi Diagrams** | [`generate_voronoi_diagrams.yml`](.github/workflows/generate_voronoi_diagrams.yml) | `voronoi/` | Generates 19 Voronoi diagrams (2–20 sites) with timestamp-derived seeds. Runs at `0 * * * *` and on push. |
 | **Traversal Walkthrough PDFs** | [`generate_pdf_for_traversel.yml`](.github/workflows/generate_pdf_for_traversel.yml) | `generated/` | Generates random graphs, runs BFS/DFS step walkthroughs, and combines them into single unified PDFs using `pdfunite`. Runs at `0 * * * *` and on push. |
 | **Ball Collision Videos** | [`generate_collision_videos.yml`](.github/workflows/generate_collision_videos.yml) | `collision-videos/` | Generates **20 randomized 1920x1080 Full HD ball collision MP4 videos** varying in ball count, starting angle, video duration, and speeds with spatial audio. Runs at `5 * * * *`. |
-| **500-Ball Collision Videos Release** | [`generate_500_ball_collision_videos.yml`](.github/workflows/generate_500_ball_collision_videos.yml) | GitHub Release (`collision-500-balls`) | Generates **20 videos with exactly 500 balls** at 1920x1080 resolution. Publishes directly as a GitHub Release under a specific tag without pushing to the `artifacts` branch. Runs daily at 12:00 UTC (`0 12 * * *`). |
+| **500-Ball Collision Videos Release** | [`generate_500_ball_collision_videos.yml`](.github/workflows/generate_500_ball_collision_videos.yml) | GitHub Releases (`collision-500-balls-*`) | Generates **20 videos with exactly 500 balls** at 1920x1080 resolution. Publishes directly as unique GitHub Releases without pushing to the `artifacts` branch. Runs hourly (`0 * * * *`). |
 | **Deploy GitHub Pages** | [`deploy_pages.yml`](.github/workflows/deploy_pages.yml) | GitHub Pages (`_site/`) | **Runs last**: Builds and deploys the browsable media explorer website to GitHub Pages after generator pipelines complete (`workflow_run`), hourly at minute 10, or on `artifacts` updates. |
 
 ---
@@ -281,9 +281,9 @@ artifacts
    - Implemented a safety threshold in `push_artifacts.sh`: files $\ge 95\text{MB}$ are safely excluded from Git commits while remaining hosted on GitHub Releases, with seamless video player fallback on the GitHub Pages website.
 
 12. **High-Density 500-Ball Collision Videos Release Pipeline**:
-   - Added a dedicated daily GitHub Actions workflow ([`.github/workflows/generate_500_ball_collision_videos.yml`](.github/workflows/generate_500_ball_collision_videos.yml)) running at 12:00 UTC (`0 12 * * *`).
+   - Added a dedicated hourly GitHub Actions workflow ([`.github/workflows/generate_500_ball_collision_videos.yml`](.github/workflows/generate_500_ball_collision_videos.yml)) running at `0 * * * *`.
    - Generates 20 full-scale simulations at 1920x1080 resolution featuring exactly 500 balls per video.
-   - Completely bypasses the `artifacts` branch to eliminate Git repository bloat from heavy high-density media, publishing assets directly as a GitHub Release under a specific tag (`collision-500-balls`).
-   - Enhanced `create_release.sh` to seamlessly handle release updates/asset clobbering when specific release tags are reused.
+   - Completely bypasses the `artifacts` branch to eliminate Git repository bloat from heavy high-density media, publishing assets directly as unique timestamped GitHub Releases (`collision-500-balls-<timestamp>-run<id>`).
+   - Generates unique release names / titles on every run (with optional manual tag and release name overrides via `workflow_dispatch`).
 
 

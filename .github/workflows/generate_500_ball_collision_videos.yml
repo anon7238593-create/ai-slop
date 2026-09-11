@@ -2,7 +2,7 @@ name: Generate 500-ball collision videos release
 
 on:
   schedule:
-    - cron: "0 12 * * *"
+    - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
       count:
@@ -16,9 +16,14 @@ on:
         default: "500"
         type: string
       tag:
-        description: "Specific release tag name"
+        description: "Specific release tag override (leave blank for automatic unique tag)"
         required: false
-        default: "collision-500-balls"
+        default: ""
+        type: string
+      release_name:
+        description: "Specific release title/name override (leave blank for automatic unique title)"
+        required: false
+        default: ""
         type: string
 
 permissions:
@@ -63,13 +68,24 @@ jobs:
             --output-dir "$ARTIFACT_DIRECTORY" \
             --workers 2
 
-      - name: Create GitHub Release with specific tag
+      - name: Create unique GitHub Release for 500-ball collision videos
         env:
           TARGET_DIR: collision-videos-500-balls
+          RELEASE_TAG_PREFIX: collision-500-balls
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/collision-videos-500-balls
-          RELEASE_TAG: ${{ inputs.tag || 'collision-500-balls' }}
-          RELEASE_TITLE: "500-Ball Collision Videos (${{ inputs.count || '20' }} Videos at 1920x1080 Full HD)"
+          RELEASE_TAG: ${{ inputs.tag }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          export COMMIT_DESCRIPTION="Generated $(jq -r '.total_videos // (.videos | length)' "$ARTIFACT_DIRECTORY"/manifest.json) distinct 1920x1080 Full HD ball collision videos featuring exactly 500 balls with slow analytical speeds, random inward angles, spatial audio, and post-max floating ensemble."
+          VIDEO_COUNT="${{ inputs.count || '20' }}"
+          BALL_COUNT="${{ inputs.balls || '500' }}"
+          CUSTOM_TITLE="${{ inputs.release_name }}"
+          RELEASE_DATE="$(date -u +'%Y-%m-%d %H:%M UTC')"
+          if [ -n "$CUSTOM_TITLE" ]; then
+            export RELEASE_TITLE="$CUSTOM_TITLE"
+          elif [ -n "${RELEASE_TAG:-}" ]; then
+            export RELEASE_TITLE="${BALL_COUNT}-Ball Collision Videos (${VIDEO_COUNT} Videos at 1920x1080 Full HD) - ${RELEASE_TAG}"
+          else
+            export RELEASE_TITLE="${BALL_COUNT}-Ball Collision Videos (${VIDEO_COUNT} Videos at 1920x1080 Full HD) - ${RELEASE_DATE} (#${{ github.run_number }})"
+          fi
+          export COMMIT_DESCRIPTION="Generated $(jq -r '.total_videos // (.videos | length)' "$ARTIFACT_DIRECTORY"/manifest.json) distinct 1920x1080 Full HD ball collision videos featuring exactly ${BALL_COUNT} balls with slow analytical speeds, random inward angles, spatial audio, and post-max floating ensemble."
           bash .github/scripts/create_release.sh
