@@ -1,0 +1,94 @@
+{
+  "graph": {
+    "A": [
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "I"
+    ],
+    "B": [
+      "A",
+      "F",
+      "J"
+    ],
+    "C": [
+      "A",
+      "E",
+      "G",
+      "H",
+      "I",
+      "J"
+    ],
+    "D": [
+      "A",
+      "E",
+      "G",
+      "H"
+    ],
+    "E": [
+      "A",
+      "C",
+      "D",
+      "F",
+      "G",
+      "I"
+    ],
+    "F": [
+      "A",
+      "B",
+      "E"
+    ],
+    "G": [
+      "A",
+      "C",
+      "D",
+      "E",
+      "H",
+      "I"
+    ],
+    "H": [
+      "C",
+      "D",
+      "G"
+    ],
+    "I": [
+      "A",
+      "C",
+      "E",
+      "G",
+      "J"
+    ],
+    "J": [
+      "B",
+      "C",
+      "I"
+    ]
+  },
+  "start_node": "A",
+  "seed": 1789154682,
+  "nodes": 10,
+  "edges": 23,
+  "generated_videos": [
+    {
+      "algorithm": "bfs",
+      "filename": "bfs_traversal.mp4",
+      "title": "Breadth-First Search (BFS) Animation",
+      "data_structure": "FIFO Queue"
+    },
+    {
+      "algorithm": "dfs",
+      "filename": "dfs_traversal.mp4",
+      "title": "Depth-First Search (DFS) Animation",
+      "data_structure": "LIFO Stack"
+    },
+    {
+      "algorithm": "comparison",
+      "filename": "bfs_dfs_comparison.mp4",
+      "title": "Comparative Traversal: BFS vs DFS",
+      "data_structure": "Queue vs Stack"
+    }
+  ]
+}
