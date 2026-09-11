@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4410" height="4211" viewBox="0 0 4410 4211" style="max-width: 100%; height: auto;">
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+  <text x="2205.0" y="57" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#172033">Euclidean algorithm: gcd(1824, 1680) = 48</text>
+  <text x="2205.0" y="96" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#475569">Take the biggest squares first; each remaining strip creates a smaller square size. Seed 3013664534.</text>
+  <g>
+    <rect x="150.00" y="126.00" width="3850.00" height="3850.00" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="2075.00" y="2067.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">1680×1680</text>
+    <rect x="4000.00" y="3646.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="3827.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="3316.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="3497.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="2986.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="3167.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="2656.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="2837.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="2326.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="2507.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="1996.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="2177.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="1666.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="1847.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="1336.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="1517.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="1006.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="1187.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="676.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="857.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="346.00" width="330.00" height="330.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="4165.00" y="527.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">144×144</text>
+    <rect x="4000.00" y="126.00" width="220.00" height="220.00" fill="#51cf66" stroke="#172033" stroke-width="2.5"/>
+    <text x="4110.00" y="248.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#172033">96×96</text>
+    <rect x="4220.00" y="236.00" width="110.00" height="110.00" fill="#ffd43b" stroke="#172033" stroke-width="2.5"/>
+    <text x="4275.00" y="297.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#172033">48×48</text>
+    <rect x="4220.00" y="126.00" width="110.00" height="110.00" fill="#ffd43b" stroke="#172033" stroke-width="2.5"/>
+    <text x="4275.00" y="187.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#172033">48×48</text>
+  </g>
+  <rect x="150.0" y="4057.0" width="28" height="28" fill="#ff6b6b" stroke="#172033" stroke-width="1.5"/>
+  <text x="188.0" y="4081.0" font-family="Arial, sans-serif" font-size="24" fill="#172033">Step 1: 1 square(s) of 1680×1680</text>
+  <rect x="1543.3" y="4057.0" width="28" height="28" fill="#4dabf7" stroke="#172033" stroke-width="1.5"/>
+  <text x="1581.3" y="4081.0" font-family="Arial, sans-serif" font-size="24" fill="#172033">Step 2: 11 square(s) of 144×144</text>
+  <rect x="2936.7" y="4057.0" width="28" height="28" fill="#51cf66" stroke="#172033" stroke-width="1.5"/>
+  <text x="2974.7" y="4081.0" font-family="Arial, sans-serif" font-size="24" fill="#172033">Step 3: 1 square(s) of 96×96</text>
+  <rect x="150.0" y="4097.0" width="28" height="28" fill="#ffd43b" stroke="#172033" stroke-width="1.5"/>
+  <text x="188.0" y="4121.0" font-family="Arial, sans-serif" font-size="24" fill="#172033">Step 4: 2 square(s) of 48×48</text>
+  <text x="2240.0" y="4026.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#172033">Width = 1824</text>
+  <text x="105.0" y="2051.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#172033" transform="rotate(-90 105.0 2051.0)">Height = 1680</text>
+</svg>
