@@ -1,0 +1,54 @@
+{
+  "topic": "RSA Key Generation and Foundational Number Theory",
+  "timestamp": "2026-09-11T19:38:25Z",
+  "total_scenes": 5,
+  "total_render_time_sec": 82.99,
+  "quality": "m",
+  "scenes": [
+    {
+      "scene_name": "FermatsLittleTheoremScene",
+      "description": "Fermat's Little Theorem (Residue Permutation & Cyclic Powers)",
+      "file_name": "FermatsLittleTheoremScene.mp4",
+      "file_path": "/home/runner/work/_temp/rsa-animations/FermatsLittleTheoremScene.mp4",
+      "size_bytes": 673046,
+      "size_mb": 0.64,
+      "render_time_sec": 13.61
+    },
+    {
+      "scene_name": "BezoutsIdentityScene",
+      "description": "B\u00e9zout's Identity & Extended Euclidean Algorithm",
+      "file_name": "BezoutsIdentityScene.mp4",
+      "file_path": "/home/runner/work/_temp/rsa-animations/BezoutsIdentityScene.mp4",
+      "size_bytes": 562290,
+      "size_mb": 0.54,
+      "render_time_sec": 14.01
+    },
+    {
+      "scene_name": "EulersTheoremScene",
+      "description": "Euler's Totient Theorem & Multiplicativity Grid",
+      "file_name": "EulersTheoremScene.mp4",
+      "file_path": "/home/runner/work/_temp/rsa-animations/EulersTheoremScene.mp4",
+      "size_bytes": 508535,
+      "size_mb": 0.48,
+      "render_time_sec": 12.77
+    },
+    {
+      "scene_name": "ModularInverseScene",
+      "description": "Modular Multiplicative Inverse & Coprimality Condition",
+      "file_name": "ModularInverseScene.mp4",
+      "file_path": "/home/runner/work/_temp/rsa-animations/ModularInverseScene.mp4",
+      "size_bytes": 520702,
+      "size_mb": 0.5,
+      "render_time_sec": 12.5
+    },
+    {
+      "scene_name": "RSAKeyGenerationScene",
+      "description": "RSA Key Generation, Encryption, Decryption & Correctness Proof",
+      "file_name": "RSAKeyGenerationScene.mp4",
+      "file_path": "/home/runner/work/_temp/rsa-animations/RSAKeyGenerationScene.mp4",
+      "size_bytes": 1193441,
+      "size_mb": 1.14,
+      "render_time_sec": 30.11
+    }
+  ]
+}
