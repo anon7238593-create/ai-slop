@@ -12,12 +12,15 @@ Welcome to the **`ai-slop`** agent system. This document outlines the specialize
 
 | If User Asks About / Works On | Automatically Activate Agent | Reference File & Skill |
 |---|---|---|
+| Multi-component architectures, large features, fleet execution, parallel subagents, batch migrations | **Master Orchestrator Agent** | [**`agents/master-orchestrator.md`**](file:///home/aman/dev/ai-slop/agents/master-orchestrator.md)<br>`skills/master-orchestrator` |
 | Workflows, CI/CD pipelines, `.github/workflows/`, `push_artifacts.sh`, `create_release.sh`, GitHub Releases, failed action runs, or branch sync errors | **GitHub Actions & CI/CD Specialist** | [**`agents/github-actions-checker.md`**](file:///home/aman/dev/ai-slop/agents/github-actions-checker.md)<br>`skills/github-actions-checker` |
 | Bouncing balls, 2D physics simulation, elastic collision, `ball_collision.py`, speed conservation, spatial audio synthesis, FFmpeg piping, batch videos | **Simulation & Physics Video Generator** | [**`agents/simulation-physics-generator.md`**](file:///home/aman/dev/ai-slop/agents/simulation-physics-generator.md)<br>`skills/simulation-physics-generator` |
 | Euclidean GCD tiling (`gcd_grid.py`), 4K Voronoi half-plane clipping, Graph Theory (BFS/DFS, shortest paths), Manim animations (Matrix / RSA), SVGs | **Mathematical & Algorithmic Visualizer** | [**`agents/math-algorithm-visualizer.md`**](file:///home/aman/dev/ai-slop/agents/math-algorithm-visualizer.md)<br>`skills/math-algorithm-visualizer` |
 | GitHub Pages site, web showcase, `template.html`, `build_pages.py`, `#collision` / `#gcd` / `#voronoi` tabs, video spotlight player, CSS dark mode | **Frontend & GitHub Pages Specialist** | [**`agents/frontend-pages-explorer.md`**](file:///home/aman/dev/ai-slop/agents/frontend-pages-explorer.md)<br>`skills/frontend-pages-explorer` |
 | Running unit tests (`test_*.py`), manifest validation, schema checks, C/Yacc compilation, workflow YAML linting, pre-commit regressions | **QA, Test Runner & Validation Specialist** | [**`agents/qa-tester-validator.md`**](file:///home/aman/dev/ai-slop/agents/qa-tester-validator.md)<br>`skills/qa-tester-validator` |
-| Creating a new experiment, new date folder (`YYYY-MM-DD/<feature>/`), generator CLI, end-to-end integration across pipelines and site | **Experiment Scaffolding & Integration Specialist** | [**`agents/experiment-scaffolder.md`**](file:///home/aman/dev/ai-slop/agents/experiment-scaffolder.md)<br>`skills/experiment-scaffolder` |
+| Creating a new experiment, new date folder (`YYYY-MM-DD/<feature>/`), generator CLI, end-to-end integration across pipelines and site | **Experiment Scaffolder** | [**`agents/experiment-scaffolder.md`**](file:///home/aman/dev/ai-slop/agents/experiment-scaffolder.md)<br>`skills/experiment-scaffolder` |
+| Creating, designing, updating, or registering new specialized agents, skills, or subagent personas | **Agent Factory & Meta-Agent Architect** | [**`agents/agent-factory.md`**](file:///home/aman/dev/ai-slop/agents/agent-factory.md)<br>`skills/agent-factory` |
+| Activity logging, state synchronization, heartbeat logs, agent coordination, inter-agent synchronization, keeping Antigravity instances in sync | **Activity Summary & State Synchronization Agent** | [**`agents/activity-summary-sync.md`**](file:///home/aman/dev/ai-slop/agents/activity-summary-sync.md)<br>`skills/activity-summary-sync` |
 
 ---
 
@@ -27,6 +30,8 @@ When a user request spans multiple domains (e.g. *"Create a new sorting algorith
 
 ```
 User Prompt (e.g. "Add a new cellular automata generator")
+   │
+   ├─► 🔄 Activity Summary & State Sync: Logs milestones to activity_log.jsonl & maintains CURRENT_STATE.md
    │
    ├─► 1. Experiment Scaffolder: Creates YYYY-MM-DD/automata/, CLI, test suite, README
    │
