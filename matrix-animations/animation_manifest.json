@@ -1,109 +1,109 @@
 {
   "configuration": {
-    "seed": 1789154178,
-    "scale_x": 1.4,
-    "scale_y": 0.6,
+    "seed": 1789154729,
+    "scale_x": 1.6,
+    "scale_y": 0.7,
     "scale_matrix": [
       [
-        1.4,
+        1.6,
         0.0
       ],
       [
         0.0,
-        0.6
+        0.7
       ]
     ],
-    "shear_k": -1.2,
-    "shear_axis": "x",
+    "shear_k": -0.6,
+    "shear_axis": "y",
     "shear_matrix": [
       [
         1.0,
-        -1.2
+        0.0
       ],
       [
-        0.0,
+        -0.6,
         1.0
       ]
     ],
-    "lambda_1": 1.7,
-    "lambda_2": 0.8,
+    "lambda_1": 1.3,
+    "lambda_2": 0.6,
     "v1": [
-      0.829,
-      0.559
+      0.702,
+      0.712
     ],
     "v2": [
-      -0.559,
-      0.829
+      -0.712,
+      0.702
     ],
-    "theta_rad": 0.5934119456780721,
-    "theta_deg": 34.0,
+    "theta_rad": 0.7923794804054256,
+    "theta_deg": 45.4,
     "matrix_a": [
       [
-        1.42,
-        0.42
-      ],
-      [
-        0.42,
-        1.08
-      ]
-    ],
-    "det_a": 1.357,
-    "trace_a": 2.5,
-    "test_vector_w": [
-      0.25,
-      1.28
-    ],
-    "phi_rad": -0.4590215932745087,
-    "phi_deg": -26.3,
-    "matrix_b": [
-      [
-        0.72,
+        0.95,
         0.35
       ],
       [
-        -0.35,
-        0.72
+        0.35,
+        0.95
       ]
     ],
-    "det_b": 0.641,
-    "matrix_c": [
+    "det_a": 0.78,
+    "trace_a": 1.9,
+    "test_vector_w": [
+      -0.01,
+      1.3
+    ],
+    "phi_rad": -0.9599310885968813,
+    "phi_deg": -55.0,
+    "matrix_b": [
       [
-        1.17,
-        0.68
+        0.52,
+        0.74
       ],
       [
-        -0.19,
-        0.63
+        -0.74,
+        0.52
       ]
     ],
-    "det_c": 0.866
+    "det_b": 0.818,
+    "matrix_c": [
+      [
+        0.75,
+        0.89
+      ],
+      [
+        -0.52,
+        0.23
+      ]
+    ],
+    "det_c": 0.635
   },
-  "generated_at": "2026-09-11 19:17:17 UTC",
+  "generated_at": "2026-09-11 19:26:35 UTC",
   "quality": "m",
   "videos": [
     {
       "scene": "SpaceTransformationsScene",
       "filename": "space_transformations.mp4",
-      "size_mb": 1.49,
-      "render_duration_s": 13.0
+      "size_mb": 1.37,
+      "render_duration_s": 14.0
     },
     {
       "scene": "EigenvectorsScene",
       "filename": "eigenvectors_invariant_directions.mp4",
-      "size_mb": 0.96,
-      "render_duration_s": 11.0
+      "size_mb": 0.94,
+      "render_duration_s": 12.5
     },
     {
       "scene": "MatrixMultiplicationScene",
       "filename": "matrix_multiplication_composition.mp4",
-      "size_mb": 2.07,
-      "render_duration_s": 15.6
+      "size_mb": 2.25,
+      "render_duration_s": 18.1
     },
     {
       "scene": "MasterMatrixMultiplicationStory",
       "filename": "master_matrix_multiplication_story.mp4",
-      "size_mb": 2.45,
-      "render_duration_s": 19.3
+      "size_mb": 2.49,
+      "render_duration_s": 21.6
     }
   ]
 }
