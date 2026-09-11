@@ -24,7 +24,7 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
         "collision": {"videos": [], "total": 0, "size_mb": 0.0, "generated_at": "", "base_seed": None},
         "gcd": {"grids": [], "total": 0, "generated_at": ""},
         "voronoi": {"diagrams": [], "total": 0, "seed": None, "generated_at": ""},
-        "traversal": {"files": [], "graph": {}, "total": 0},
+        "traversal": {"files": [], "videos": [], "graph": {}, "total": 0},
     }
 
     # 1. Collision Videos
@@ -165,8 +165,38 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                 "size_kb": round(os.path.getsize(spec_pdf) / 1024, 1),
             })
 
+        # 4b. Traversal Videos
+        video_items = []
+        vids = [
+            (
+                "bfs_traversal.mp4",
+                "Breadth-First Search (BFS) Animation",
+                "Level-by-level wavefront exploration with FIFO Queue visualization and signal propagation.",
+            ),
+            (
+                "dfs_traversal.mp4",
+                "Depth-First Search (DFS) Animation",
+                "Deep branch exploration and backtracking with LIFO Stack visualization.",
+            ),
+            (
+                "bfs_dfs_comparison.mp4",
+                "Comparative Traversal: BFS vs DFS",
+                "Side-by-side synchronized comparison demonstrating Queue vs Stack on the identical graph topology.",
+            ),
+        ]
+        for fname, v_title, v_desc in vids:
+            vpath = os.path.join(gen_dir, fname)
+            if os.path.exists(vpath):
+                video_items.append({
+                    "title": v_title,
+                    "filename": f"generated/{fname}",
+                    "description": v_desc,
+                    "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
+                })
+
         data["traversal"]["files"] = pdf_items
-        data["traversal"]["total"] = len(pdf_items)
+        data["traversal"]["videos"] = video_items
+        data["traversal"]["total"] = len(pdf_items) + len(video_items)
 
     return data
 

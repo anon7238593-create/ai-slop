@@ -27,10 +27,14 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install PDF generation tools
-        run: sudo apt-get update && sudo apt-get install -y graphviz poppler-utils
+      - name: Install PDF and video generation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz poppler-utils ffmpeg libcairo2-dev pkg-config
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pycairo
 
-      - name: Generate a random graph walkthrough
+      - name: Generate a random graph walkthrough and animation videos
         env:
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
         run: |
@@ -41,6 +45,12 @@ jobs:
             --nodes 10 \
             --edge-probability 0.30 \
             --seed "$seed" \
+            --output "$ARTIFACT_DIRECTORY"
+          python3 2026-09-05/bfs_dfs_tutorial/traversal_animator.py \
+            --algorithm all \
+            --graph-json "$ARTIFACT_DIRECTORY/graph.json" \
+            --fps 30 \
+            --save-frames \
             --output "$ARTIFACT_DIRECTORY"
           python3 2026-09-05/bfs_dfs_tutorial/specific_node_traversal.py \
             --algorithm both \
@@ -53,6 +63,7 @@ jobs:
           mkdir -p "$ARTIFACT_DIRECTORY/specific-node/code"
           cp 2026-09-05/bfs_dfs_tutorial/bfs_dfs_visualizer.py \
             2026-09-05/bfs_dfs_tutorial/specific_node_traversal.py \
+            2026-09-05/bfs_dfs_tutorial/traversal_animator.py \
             "$ARTIFACT_DIRECTORY/specific-node/code/"
 
       - name: Combine all traversal steps into one PDF
@@ -68,23 +79,23 @@ jobs:
             "$ARTIFACT_DIRECTORY"/specific-node/dfs/step_*.pdf \
             "$ARTIFACT_DIRECTORY"/specific-node/specific_node_bfs_dfs_walkthrough.pdf
 
-      - name: Create GitHub Release for traversal PDFs
+      - name: Create GitHub Release for traversal PDFs and videos
         env:
           TARGET_DIR: generated
-          RELEASE_TAG_PREFIX: traversal-pdfs
+          RELEASE_TAG_PREFIX: traversal-walkthrough
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
-          RELEASE_TITLE: "Generate traversal PDFs"
+          RELEASE_TITLE: "Generate traversal PDFs & animation videos"
           GH_TOKEN: ${{ github.token }}
         run: |
           export COMMIT_DESCRIPTION="Random graph seed: $(jq -r .random_seed "$ARTIFACT_DIRECTORY"/graph.json)"
           bash .github/scripts/create_release.sh
 
-      - name: Commit and push PDFs to the artifacts branch
+      - name: Commit and push PDFs and videos to the artifacts branch
         env:
           TARGET_DIR: generated
-          RELEASE_TAG_PREFIX: traversal-pdfs
+          RELEASE_TAG_PREFIX: traversal-walkthrough
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/traversal-pdfs
-          COMMIT_TITLE: "Generate traversal PDFs"
+          COMMIT_TITLE: "Generate traversal PDFs and animation videos"
           GH_TOKEN: ${{ github.token }}
         run: |
           export COMMIT_DESCRIPTION="Random graph seed: $(jq -r .random_seed "$ARTIFACT_DIRECTORY"/graph.json)"

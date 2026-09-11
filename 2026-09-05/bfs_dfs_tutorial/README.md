@@ -43,3 +43,16 @@ Use `--random-graph --nodes 10 --seed 20260905` with it to reproduce the workflo
 ## Customize the graph
 
 Edit `GRAPH` and `START_NODE` near the top of `bfs_dfs_visualizer.py`. The neighbour ordering is preserved, so it controls the exact teaching sequence. `GRAPH` is currently undirected: include both directions for every connection.
+
+## Animation Videos (1080p MP4)
+
+Generate high-definition 1080p MP4 videos with live Queue (FIFO) and Stack (LIFO) memory inspectors and side-by-side comparison:
+
+```bash
+# Generate BFS, DFS, and side-by-side comparison videos
+python3 traversal_animator.py --algorithm all --output output/
+
+# Generate from random graph or existing graph.json
+python3 traversal_animator.py --graph-json output/graph.json --algorithm comparison
+```
+

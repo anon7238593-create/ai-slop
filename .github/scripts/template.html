@@ -634,12 +634,33 @@
     <!-- 4. Graph Traversals -->
     <section id="tab-traversal" class="tab-content">
       <div class="section-intro">
-        <h2>Graph Traversal Walkthroughs</h2>
+        <h2>Graph Traversal Animations & Walkthroughs</h2>
         <p>
-          Comparative step-by-step PDF slide walkthroughs illustrating Breadth-First Search and Depth-First Search exploration trees, active queue/stack memory, and discovery orders.
+          High-definition 1080p algorithm animations and step-by-step comparative PDF slide decks illustrating Breadth-First Search (FIFO Queue) and Depth-First Search (LIFO Stack) exploration trees, live memory state, and node discovery order.
         </p>
       </div>
 
+      <div class="viewer" id="traversal-viewer">
+        <div class="viewer-display">
+          <video id="traversal-video-player" controls preload="metadata">
+            <source src="" type="video/mp4">
+          </video>
+        </div>
+        <div class="viewer-info">
+          <div>
+            <div class="viewer-title" id="spotlight-traversal-title">bfs_dfs_comparison.mp4</div>
+            <div class="viewer-meta" id="spotlight-traversal-meta"></div>
+          </div>
+          <div>
+            <a id="spotlight-traversal-link" href="#" target="_blank" class="btn">Open file &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.1rem; color: var(--text-heading);">Animation Videos</h3>
+      <div class="grid grid-3" id="traversal-video-grid" style="margin-bottom: 2rem;"></div>
+
+      <h3 style="margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.1rem; color: var(--text-heading);">Step-by-Step PDF Walkthroughs</h3>
       <div class="doc-list" id="pdf-container"></div>
     </section>
 
@@ -941,7 +962,70 @@
     // =========================================================================
     // 4. Graph Traversals
     // =========================================================================
+    function showTraversalSpotlight(video) {
+      document.getElementById('spotlight-traversal-title').textContent = video.title;
+      document.getElementById('spotlight-traversal-meta').textContent =
+        `${video.filename} · ${video.size_mb || 1.0} MB · 1080p Widescreen`;
+
+      const player = document.getElementById('traversal-video-player');
+      player.querySelector('source').src = video.filename;
+      player.load();
+
+      const link = document.getElementById('spotlight-traversal-link');
+      link.href = video.filename;
+      link.download = video.filename.split('/').pop();
+    }
+
     function renderTraversals() {
+      // 1. Render Videos
+      const videoGrid = document.getElementById('traversal-video-grid');
+      videoGrid.innerHTML = '';
+      const videos = (DATA.traversal.videos && DATA.traversal.videos.length > 0) ? DATA.traversal.videos : [
+        {
+          title: "Comparative Traversal: BFS vs DFS",
+          filename: "generated/bfs_dfs_comparison.mp4",
+          description: "Side-by-side synchronized comparison demonstrating Queue vs Stack on the identical graph topology.",
+          size_mb: 0.90
+        },
+        {
+          title: "Breadth-First Search (BFS) Animation",
+          filename: "generated/bfs_traversal.mp4",
+          description: "Level-by-level wavefront exploration with FIFO Queue visualization and signal propagation.",
+          size_mb: 0.56
+        },
+        {
+          title: "Depth-First Search (DFS) Animation",
+          filename: "generated/dfs_traversal.mp4",
+          description: "Deep branch exploration and backtracking with LIFO Stack visualization.",
+          size_mb: 0.56
+        }
+      ];
+
+      videos.forEach((v) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-body">
+            <div class="card-title">${v.title}</div>
+            <div class="card-meta">${v.description}</div>
+            <div style="margin-top:0.75rem; font-size:0.8rem; color:var(--text-muted);">${v.filename} (${v.size_mb || 1.0} MB)</div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-play" style="width:100%; justify-content:center;">&#9654; Watch Video</button>
+          </div>
+        `;
+        card.querySelector('.btn-play').addEventListener('click', () => {
+          showTraversalSpotlight(v);
+          document.getElementById('traversal-viewer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+        videoGrid.appendChild(card);
+      });
+
+      if (videos.length > 0) {
+        showTraversalSpotlight(videos[0]);
+      }
+
+      // 2. Render PDF Walkthroughs
       const container = document.getElementById('pdf-container');
       container.innerHTML = '';
       const files = DATA.traversal.files || [];
