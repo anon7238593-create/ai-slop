@@ -44,13 +44,17 @@ Use `--random-graph --nodes 10 --seed 20260905` with it to reproduce the workflo
 
 Edit `GRAPH` and `START_NODE` near the top of `bfs_dfs_visualizer.py`. The neighbour ordering is preserved, so it controls the exact teaching sequence. `GRAPH` is currently undirected: include both directions for every connection.
 
-## Animation Videos (1080p MP4)
+## Animation Videos (2K QHD & 4K UHD MP4)
 
-Generate high-definition 1080p MP4 videos with live Queue (FIFO) and Stack (LIFO) memory inspectors and side-by-side comparison:
+Generate high-definition 2K QHD (2560×1440) or 4K UHD (3840×2160) MP4 videos with pristine subpixel anti-aliasing, live Queue (FIFO) and Stack (LIFO) memory inspectors, and side-by-side synchronized comparison:
 
 ```bash
-# Generate BFS, DFS, and side-by-side comparison videos
-python3 traversal_animator.py --algorithm all --output output/
+# Generate BFS, DFS, and side-by-side comparison videos in 2K QHD (default)
+python3 traversal_animator.py --algorithm all --preset 2k --output output/
+
+# Slow pacing for classroom demonstrations (2.5s per step or custom seconds)
+python3 traversal_animator.py --algorithm all --speed slow --output output/
+python3 traversal_animator.py --algorithm bfs --step-duration 2.0 --preset 4k --output output/
 
 # Generate from random graph or existing graph.json
 python3 traversal_animator.py --graph-json output/graph.json --algorithm comparison

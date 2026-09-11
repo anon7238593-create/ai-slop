@@ -1288,7 +1288,7 @@ class TraversalVideoRenderer:
 
 
 class ComparativeTraversalRenderer:
-    """Side-by-side comparative renderer presenting BFS vs DFS on identical graphs."""
+    """Side-by-side comparative renderer presenting BFS vs DFS on identical graphs with dynamic scaling."""
 
     def __init__(
         self,
@@ -1296,8 +1296,8 @@ class ComparativeTraversalRenderer:
         layout: dict[str, tuple[float, float]],
         bfs_steps: list[TraversalStep],
         dfs_steps: list[TraversalStep],
-        width: int = 1920,
-        height: int = 1080,
+        width: int = 2560,
+        height: int = 1440,
     ):
         self.graph = graph
         self.layout = layout
@@ -1305,13 +1305,26 @@ class ComparativeTraversalRenderer:
         self.dfs_steps = dfs_steps
         self.width = width
         self.height = height
+        self.scale = max(0.2, min(width / 1920.0, height / 1080.0))
 
         # Compute dual layouts: one for left half, one for right half
-        self.bfs_layout = layout_graph(graph, box_x=30.0, box_y=110.0, box_w=890.0, box_h=720.0, margin=55.0)
-        self.dfs_layout = layout_graph(graph, box_x=990.0, box_y=110.0, box_w=890.0, box_h=720.0, margin=55.0)
+        margin = 30.0 * self.scale
+        gap = 20.0 * self.scale
+        panel_w = (width - 2.0 * margin - gap) / 2.0
+        panel_h = height - 115.0 * self.scale
 
-        self.bfs_renderer = TraversalVideoRenderer(graph, self.bfs_layout, "bfs", width=920, height=height)
-        self.dfs_renderer = TraversalVideoRenderer(graph, self.dfs_layout, "dfs", width=920, height=height)
+        left_x = margin
+        right_x = margin + panel_w + gap
+        panel_y = 100.0 * self.scale
+
+        box_w = panel_w - 40.0 * self.scale
+        box_h = panel_h - 260.0 * self.scale
+
+        self.bfs_layout = layout_graph(graph, box_x=left_x + 20.0 * self.scale, box_y=panel_y + 55.0 * self.scale, box_w=box_w, box_h=box_h, margin=55.0 * self.scale)
+        self.dfs_layout = layout_graph(graph, box_x=right_x + 20.0 * self.scale, box_y=panel_y + 55.0 * self.scale, box_w=box_w, box_h=box_h, margin=55.0 * self.scale)
+
+        self.bfs_renderer = TraversalVideoRenderer(graph, self.bfs_layout, "bfs", width=int(panel_w), height=height)
+        self.dfs_renderer = TraversalVideoRenderer(graph, self.dfs_layout, "dfs", width=int(panel_w), height=height)
 
     def render_frame(
         self,
@@ -1322,25 +1335,36 @@ class ComparativeTraversalRenderer:
         dfs_frame: int,
         global_frame: int,
     ) -> None:
-        """Render a comparative side-by-side frame with synchronized execution."""
+        """Render a comparative side-by-side frame with synchronized execution and anti-aliasing."""
+        configure_cairo_context(ctx)
+
         # 1. Background
         ctx.set_source_rgb(*COLOR_BG)
         ctx.paint()
 
+        margin = 30.0 * self.scale
+        gap = 20.0 * self.scale
+        panel_w = (self.width - 2.0 * margin - gap) / 2.0
+        panel_h = self.height - 115.0 * self.scale
+        panel_y = 100.0 * self.scale
+        left_x = margin
+        right_x = margin + panel_w + gap
+
         # 2. Main Title Banner
-        draw_rounded_rect(ctx, 30.0, 20.0, self.width - 60.0, 68.0, 10.0)
+        banner_h = 70.0 * self.scale
+        draw_rounded_rect(ctx, margin, 15.0 * self.scale, self.width - 2.0 * margin, banner_h, 10.0 * self.scale)
         ctx.set_source_rgb(0.08, 0.12, 0.19)
         ctx.fill_preserve()
         ctx.set_source_rgb(*COLOR_PANEL_BORDER)
-        ctx.set_line_width(1.5)
+        ctx.set_line_width(max(1.0, 1.5 * self.scale))
         ctx.stroke()
 
         draw_text_centered(
             ctx,
             "GRAPH TRAVERSAL COMPARISON: BREADTH-FIRST SEARCH vs DEPTH-FIRST SEARCH",
             self.width / 2.0,
-            42.0,
-            font_size=20.0,
+            38.0 * self.scale,
+            font_size=max(12.0, 20.0 * self.scale),
             font_bold=True,
             color=(0.95, 0.98, 1.0),
         )
@@ -1348,59 +1372,63 @@ class ComparativeTraversalRenderer:
             ctx,
             "Wavefront Level-by-Level Expansion (Queue)  vs  Deep Branch Diving with Backtracking (Stack)",
             self.width / 2.0,
-            68.0,
-            font_size=13.0,
+            64.0 * self.scale,
+            font_size=max(9.0, 13.0 * self.scale),
             font_bold=False,
             color=(0.60, 0.72, 0.88),
         )
 
         # 3. Left Panel: BFS
-        panel_w = 910.0
         draw_card_panel(
             ctx,
-            30.0,
-            105.0,
+            left_x,
+            panel_y,
             panel_w,
-            945.0,
+            panel_h,
             title="BREADTH-FIRST SEARCH (BFS)",
             badge="FIFO QUEUE",
             badge_color=(0.02, 0.71, 0.83),
+            scale=self.scale,
         )
-        self.bfs_renderer._draw_dot_grid(ctx, 45.0, 155.0, panel_w - 30.0, 660.0)
+        grid_h = panel_h - 265.0 * self.scale
+        self.bfs_renderer._draw_dot_grid(ctx, left_x + 15.0 * self.scale, panel_y + 50.0 * self.scale, panel_w - 30.0 * self.scale, grid_h)
         self.bfs_renderer._draw_edges(ctx, bfs_step, bfs_frame)
         self.bfs_renderer._draw_nodes(ctx, bfs_step, global_frame)
 
         # BFS Mini Bottom HUD
-        self._draw_mini_hud(ctx, 45.0, 830.0, panel_w - 30.0, bfs_step, "bfs", (0.02, 0.71, 0.83))
+        mini_hud_y = panel_y + panel_h - 200.0 * self.scale
+        self._draw_mini_hud(ctx, left_x + 15.0 * self.scale, mini_hud_y, panel_w - 30.0 * self.scale, bfs_step, "bfs", (0.02, 0.71, 0.83))
 
         # 4. Right Panel: DFS
         draw_card_panel(
             ctx,
-            970.0,
-            105.0,
+            right_x,
+            panel_y,
             panel_w,
-            945.0,
+            panel_h,
             title="DEPTH-FIRST SEARCH (DFS)",
             badge="LIFO STACK",
             badge_color=(0.85, 0.20, 0.50),
+            scale=self.scale,
         )
-        self.dfs_renderer._draw_dot_grid(ctx, 985.0, 155.0, panel_w - 30.0, 660.0)
+        self.dfs_renderer._draw_dot_grid(ctx, right_x + 15.0 * self.scale, panel_y + 50.0 * self.scale, panel_w - 30.0 * self.scale, grid_h)
         self.dfs_renderer._draw_edges(ctx, dfs_step, dfs_frame)
         self.dfs_renderer._draw_nodes(ctx, dfs_step, global_frame)
 
         # DFS Mini Bottom HUD
-        self._draw_mini_hud(ctx, 985.0, 830.0, panel_w - 30.0, dfs_step, "dfs", (0.85, 0.20, 0.50))
+        self._draw_mini_hud(ctx, right_x + 15.0 * self.scale, mini_hud_y, panel_w - 30.0 * self.scale, dfs_step, "dfs", (0.85, 0.20, 0.50))
 
         # 5. Center Divider "VS" Badge
         cx = self.width / 2.0
-        cy = 500.0
-        ctx.arc(cx, cy, 26.0, 0.0, 2.0 * math.pi)
+        cy = panel_y + (panel_h - 200.0 * self.scale) / 2.0
+        r_vs = max(16.0, 26.0 * self.scale)
+        ctx.arc(cx, cy, r_vs, 0.0, 2.0 * math.pi)
         ctx.set_source_rgb(0.08, 0.12, 0.20)
         ctx.fill_preserve()
         ctx.set_source_rgb(0.55, 0.36, 0.96)
-        ctx.set_line_width(2.5)
+        ctx.set_line_width(max(1.5, 2.5 * self.scale))
         ctx.stroke()
-        draw_text_centered(ctx, "VS", cx, cy, 15.0, font_bold=True, color=(0.95, 0.90, 1.0))
+        draw_text_centered(ctx, "VS", cx, cy, max(10.0, 15.0 * self.scale), font_bold=True, color=(0.95, 0.90, 1.0))
 
     def _draw_mini_hud(
         self,
@@ -1412,27 +1440,29 @@ class ComparativeTraversalRenderer:
         algorithm: str,
         theme_color: tuple[float, float, float],
     ) -> None:
-        """Draw compact bottom summary card for side-by-side mode."""
-        draw_rounded_rect(ctx, x, y, w, 200.0, 8.0)
+        """Draw compact bottom summary card for side-by-side mode with resolution scaling."""
+        hud_h = 190.0 * self.scale
+        draw_rounded_rect(ctx, x, y, w, hud_h, 8.0 * self.scale)
         ctx.set_source_rgb(0.08, 0.12, 0.19)
         ctx.fill_preserve()
         ctx.set_source_rgb(0.18, 0.25, 0.36)
-        ctx.set_line_width(1.0)
+        ctx.set_line_width(max(1.0, 1.0 * self.scale))
         ctx.stroke()
 
         # Step and Title
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(13.0)
+        ctx.set_font_size(max(10.0, 13.0 * self.scale))
         ctx.set_source_rgb(*theme_color)
-        ctx.move_to(x + 14.0, y + 24.0)
+        ctx.move_to(x + 14.0 * self.scale, y + 24.0 * self.scale)
         ctx.show_text(f"Step {step.step_number}: {step.title}")
 
         # Description
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        ctx.set_font_size(12.5)
+        ctx.set_font_size(max(9.5, 12.5 * self.scale))
         ctx.set_source_rgb(0.85, 0.90, 0.98)
-        ctx.move_to(x + 14.0, y + 46.0)
-        ctx.show_text(step.description[:95] + ("..." if len(step.description) > 95 else ""))
+        ctx.move_to(x + 14.0 * self.scale, y + 46.0 * self.scale)
+        desc = step.description[:110] + ("..." if len(step.description) > 110 else "")
+        ctx.show_text(desc)
 
         # Frontier sequence
         ds_type = "Queue (Front → Rear)" if algorithm == "bfs" else "Stack (Top → Bottom)"
@@ -1440,9 +1470,9 @@ class ComparativeTraversalRenderer:
         frontier_str = " → ".join(frontier_items) if frontier_items else "(empty)"
 
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(12.0)
+        ctx.set_font_size(max(9.0, 12.0 * self.scale))
         ctx.set_source_rgb(0.65, 0.75, 0.88)
-        ctx.move_to(x + 14.0, y + 74.0)
+        ctx.move_to(x + 14.0 * self.scale, y + 74.0 * self.scale)
         ctx.show_text(f"{ds_type}:  ")
 
         ctx.set_source_rgb(1.0, 1.0, 1.0)
@@ -1451,16 +1481,16 @@ class ComparativeTraversalRenderer:
         # Visited sequence
         vis_str = " → ".join(step.visited_order) if step.visited_order else "(none)"
         ctx.set_source_rgb(0.06, 0.73, 0.51)
-        ctx.move_to(x + 14.0, y + 102.0)
+        ctx.move_to(x + 14.0 * self.scale, y + 102.0 * self.scale)
         ctx.show_text("Visited Order:  ")
 
         ctx.set_source_rgb(0.90, 0.98, 0.94)
         ctx.show_text(vis_str)
 
         # Spanning Tree Edges count
-        ctx.set_font_size(11.5)
+        ctx.set_font_size(max(8.5, 11.5 * self.scale))
         ctx.set_source_rgb(0.55, 0.65, 0.80)
-        ctx.move_to(x + 14.0, y + 132.0)
+        ctx.move_to(x + 14.0 * self.scale, y + 132.0 * self.scale)
         ctx.show_text(f"Spanning Tree Edges: {len(step.tree_edges)}  │  Total Visited: {len(step.visited_order)}")
 
 
@@ -1471,27 +1501,30 @@ def render_standalone_video(
     output_path: Path,
     start_node: str = "A",
     fps: int = 30,
-    width: int = 1920,
-    height: int = 1080,
+    width: int = 2560,
+    height: int = 1440,
     ffmpeg_bin: Optional[str] = None,
     save_preview_frame: Optional[Path] = None,
+    step_duration: float = 1.8,
 ) -> None:
-    """Encode a standalone high-definition traversal video (BFS or DFS)."""
+    """Encode a standalone high-definition traversal video (BFS or DFS) with anti-aliasing."""
     ffmpeg_cmd = find_ffmpeg(ffmpeg_bin)
     if not ffmpeg_cmd:
         raise RuntimeError("FFmpeg executable not found. Please install ffmpeg or specify --ffmpeg-bin.")
 
-    steps = build_traversal_steps(graph, start_node, algorithm)
+    frames_per_step = max(6, int(fps * step_duration))
+    steps = build_traversal_steps(graph, start_node, algorithm, frames_per_step=frames_per_step)
     renderer = TraversalVideoRenderer(graph, layout, algorithm, width=width, height=height)
 
-    # Calculate total frames
-    total_frames = 20 + sum(s.frame_duration for s in steps) + 45
-    print(f"[{algorithm.upper()}] Encoding {total_frames} frames ({total_frames / fps:.1f}s) to {output_path}...")
+    init_hold_frames = max(10, int(fps * 1.5))
+    final_hold_frames = max(15, int(fps * 3.0))
+    total_frames = init_hold_frames + sum(s.frame_duration for s in steps) + final_hold_frames
+    print(f"[{algorithm.upper()}] Encoding {total_frames} frames ({total_frames / fps:.1f}s) at {width}x{height} to {output_path}...")
 
-    # Spawn ffmpeg
     cmd = [
         ffmpeg_cmd,
         "-y",
+        "-loglevel", "error",
         "-f", "rawvideo",
         "-vcodec", "rawvideo",
         "-s", f"{width}x{height}",
@@ -1500,8 +1533,9 @@ def render_standalone_video(
         "-i", "-",
         "-c:v", "libx264",
         "-pix_fmt", "yuv420p",
-        "-preset", "fast",
-        "-crf", "19",
+        "-preset", "medium",
+        "-tune", "animation",
+        "-crf", "17",
         str(output_path),
     ]
 
@@ -1510,12 +1544,13 @@ def render_standalone_video(
 
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
     ctx = cairo.Context(surface)
+    configure_cairo_context(ctx)
 
     global_frame = 0
 
     # 1. Initial Hold
     init_step = steps[0]
-    for f in range(20):
+    for f in range(init_hold_frames):
         renderer.render_frame(ctx, init_step, f, len(steps), global_frame)
         surface.flush()
         proc.stdin.write(surface.get_data())
@@ -1538,7 +1573,7 @@ def render_standalone_video(
 
     # 3. Final Hold
     final_step = steps[-1]
-    for f in range(45):
+    for f in range(final_hold_frames):
         renderer.render_frame(ctx, final_step, f, len(steps), global_frame)
         surface.flush()
         proc.stdin.write(surface.get_data())
@@ -1563,29 +1598,34 @@ def render_comparative_video(
     output_path: Path,
     start_node: str = "A",
     fps: int = 30,
-    width: int = 1920,
-    height: int = 1080,
+    width: int = 2560,
+    height: int = 1440,
     ffmpeg_bin: Optional[str] = None,
     save_preview_frame: Optional[Path] = None,
+    step_duration: float = 1.8,
 ) -> None:
-    """Encode a comparative side-by-side video contrasting BFS and DFS."""
+    """Encode a comparative side-by-side video contrasting BFS and DFS with anti-aliasing."""
     ffmpeg_cmd = find_ffmpeg(ffmpeg_bin)
     if not ffmpeg_cmd:
         raise RuntimeError("FFmpeg executable not found. Please install ffmpeg or specify --ffmpeg-bin.")
 
-    bfs_steps = build_traversal_steps(graph, start_node, "bfs")
-    dfs_steps = build_traversal_steps(graph, start_node, "dfs")
+    frames_per_step = max(6, int(fps * step_duration))
+    bfs_steps = build_traversal_steps(graph, start_node, "bfs", frames_per_step=frames_per_step)
+    dfs_steps = build_traversal_steps(graph, start_node, "dfs", frames_per_step=frames_per_step)
 
     renderer = ComparativeTraversalRenderer(graph, layout, bfs_steps, dfs_steps, width=width, height=height)
 
     # Align step sequences by step progress
     max_steps = max(len(bfs_steps), len(dfs_steps))
-    total_frames = 20 + max_steps * 18 + 50
-    print(f"[COMPARISON] Encoding {total_frames} frames ({total_frames / fps:.1f}s) to {output_path}...")
+    init_hold_frames = max(10, int(fps * 1.5))
+    final_hold_frames = max(15, int(fps * 3.0))
+    total_frames = init_hold_frames + max_steps * frames_per_step + final_hold_frames
+    print(f"[COMPARISON] Encoding {total_frames} frames ({total_frames / fps:.1f}s) at {width}x{height} to {output_path}...")
 
     cmd = [
         ffmpeg_cmd,
         "-y",
+        "-loglevel", "error",
         "-f", "rawvideo",
         "-vcodec", "rawvideo",
         "-s", f"{width}x{height}",
@@ -1594,8 +1634,9 @@ def render_comparative_video(
         "-i", "-",
         "-c:v", "libx264",
         "-pix_fmt", "yuv420p",
-        "-preset", "fast",
-        "-crf", "19",
+        "-preset", "medium",
+        "-tune", "animation",
+        "-crf", "17",
         str(output_path),
     ]
 
@@ -1604,24 +1645,24 @@ def render_comparative_video(
 
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
     ctx = cairo.Context(surface)
+    configure_cairo_context(ctx)
 
     global_frame = 0
 
     # 1. Initial Hold
-    for f in range(20):
+    for f in range(init_hold_frames):
         renderer.render_frame(ctx, bfs_steps[0], dfs_steps[0], f, f, global_frame)
         surface.flush()
         proc.stdin.write(surface.get_data())
         global_frame += 1
 
     # 2. Stepping Loop
-    step_duration = 18
     mid_saved = False
     for s_idx in range(max_steps):
         b_step = bfs_steps[min(s_idx, len(bfs_steps) - 1)]
         d_step = dfs_steps[min(s_idx, len(dfs_steps) - 1)]
 
-        for f in range(step_duration):
+        for f in range(frames_per_step):
             renderer.render_frame(ctx, b_step, d_step, f, f, global_frame)
             surface.flush()
             proc.stdin.write(surface.get_data())
@@ -1633,7 +1674,7 @@ def render_comparative_video(
             global_frame += 1
 
     # 3. Final Hold
-    for f in range(50):
+    for f in range(final_hold_frames):
         renderer.render_frame(ctx, bfs_steps[-1], dfs_steps[-1], f, f, global_frame)
         surface.flush()
         proc.stdin.write(surface.get_data())
@@ -1668,12 +1709,45 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=42, help="random seed for reproducible graph generation")
     parser.add_argument("--start-node", help="node from which to start the traversal")
     parser.add_argument("--fps", type=int, default=30, help="video framerate (default 30)")
-    parser.add_argument("--width", type=int, default=1920, help="video width in pixels (default 1920)")
-    parser.add_argument("--height", type=int, default=1080, help="video height in pixels (default 1080)")
+    parser.add_argument(
+        "--preset",
+        choices=("720p", "1080p", "1440p", "2k", "4k"),
+        default="2k",
+        help="resolution preset: 2k (2560x1440, default), 4k (3840x2160), 1080p (1920x1080), 720p (1280x720)",
+    )
+    parser.add_argument("--width", type=int, help="video width in pixels (overrides preset)")
+    parser.add_argument("--height", type=int, help="video height in pixels (overrides preset)")
+    parser.add_argument(
+        "--speed",
+        choices=("slow", "normal", "fast"),
+        default="normal",
+        help="pacing preset: slow (2.5s/step), normal (1.8s/step, default), fast (1.0s/step)",
+    )
+    parser.add_argument("--step-duration", type=float, help="duration in seconds for each traversal action step (overrides --speed)")
     parser.add_argument("--ffmpeg-bin", help="path to ffmpeg binary executable")
     parser.add_argument("--save-frames", action="store_true", help="export sample preview PNG frames")
 
     args = parser.parse_args()
+
+    # Resolution calculation
+    RESOLUTION_PRESETS = {
+        "720p": (1280, 720),
+        "1080p": (1920, 1080),
+        "1440p": (2560, 1440),
+        "2k": (2560, 1440),
+        "4k": (3840, 2160),
+    }
+    preset_w, preset_h = RESOLUTION_PRESETS.get(args.preset, (2560, 1440))
+    video_width = args.width if args.width is not None else preset_w
+    video_height = args.height if args.height is not None else preset_h
+
+    # Pacing calculation
+    SPEED_PRESETS = {
+        "slow": 2.5,
+        "normal": 1.8,
+        "fast": 1.0,
+    }
+    step_duration = args.step_duration if args.step_duration is not None else SPEED_PRESETS.get(args.speed, 1.8)
 
     # Determine Graph
     if args.graph_json and args.graph_json.exists():
@@ -1696,8 +1770,19 @@ def main() -> None:
 
     args.output.mkdir(parents=True, exist_ok=True)
 
-    # Compute graph layout for 1200x950 stage
-    layout = layout_graph(graph, box_x=60.0, box_y=80.0, box_w=1200.0, box_h=920.0, margin=75.0, seed=seed)
+    # Compute graph layout scaled to video dimensions
+    scale = max(0.2, min(video_width / 1920.0, video_height / 1080.0))
+    margin = 35.0 * scale
+    gap = 25.0 * scale
+    graph_w = (video_width - 2.0 * margin - gap) * 0.675
+    graph_h = video_height - 2.0 * margin
+
+    box_x = margin + 20.0 * scale
+    box_y = margin + 55.0 * scale
+    box_w = graph_w - 40.0 * scale
+    box_h = graph_h - 75.0 * scale
+
+    layout = layout_graph(graph, box_x=box_x, box_y=box_y, box_w=box_w, box_h=box_h, margin=75.0 * scale, seed=seed)
 
     # Write manifest / metadata
     manifest = {
@@ -1706,6 +1791,10 @@ def main() -> None:
         "seed": seed,
         "nodes": len(graph),
         "edges": sum(len(neighbors) for neighbors in graph.values()) // 2,
+        "resolution": f"{video_width}x{video_height}",
+        "fps": args.fps,
+        "step_duration_seconds": step_duration,
+        "preset": args.preset,
         "generated_videos": [],
     }
 
@@ -1722,16 +1811,19 @@ def main() -> None:
             out_bfs,
             start_node=start_node,
             fps=args.fps,
-            width=args.width,
-            height=args.height,
+            width=video_width,
+            height=video_height,
             ffmpeg_bin=args.ffmpeg_bin,
             save_preview_frame=prev_bfs,
+            step_duration=step_duration,
         )
         manifest["generated_videos"].append({
             "algorithm": "bfs",
             "filename": out_bfs.name,
             "title": "Breadth-First Search (BFS) Animation",
             "data_structure": "FIFO Queue",
+            "resolution": f"{video_width}x{video_height}",
+            "step_duration": step_duration,
         })
 
     if alg_choice in ("dfs", "both", "all"):
@@ -1744,16 +1836,19 @@ def main() -> None:
             out_dfs,
             start_node=start_node,
             fps=args.fps,
-            width=args.width,
-            height=args.height,
+            width=video_width,
+            height=video_height,
             ffmpeg_bin=args.ffmpeg_bin,
             save_preview_frame=prev_dfs,
+            step_duration=step_duration,
         )
         manifest["generated_videos"].append({
             "algorithm": "dfs",
             "filename": out_dfs.name,
             "title": "Depth-First Search (DFS) Animation",
             "data_structure": "LIFO Stack",
+            "resolution": f"{video_width}x{video_height}",
+            "step_duration": step_duration,
         })
 
     if alg_choice in ("comparison", "all"):
@@ -1765,16 +1860,19 @@ def main() -> None:
             out_comp,
             start_node=start_node,
             fps=args.fps,
-            width=args.width,
-            height=args.height,
+            width=video_width,
+            height=video_height,
             ffmpeg_bin=args.ffmpeg_bin,
             save_preview_frame=prev_comp,
+            step_duration=step_duration,
         )
         manifest["generated_videos"].append({
             "algorithm": "comparison",
             "filename": out_comp.name,
             "title": "Comparative Traversal: BFS vs DFS",
             "data_structure": "Queue vs Stack",
+            "resolution": f"{video_width}x{video_height}",
+            "step_duration": step_duration,
         })
 
     (args.output / "video_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
