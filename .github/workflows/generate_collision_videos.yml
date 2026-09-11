@@ -15,7 +15,7 @@ on:
       max_balls:
         description: "Maximum number of balls per video (up to 1000)"
         required: false
-        default: "100"
+        default: "300"
         type: string
   push:
     # Ignoring artifacts branch prevents recursive workflow triggering
