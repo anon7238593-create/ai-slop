@@ -1,109 +1,109 @@
 {
   "configuration": {
-    "seed": 1789155400,
-    "scale_x": 0.7,
-    "scale_y": 1.6,
+    "seed": 1789155685,
+    "scale_x": 1.5,
+    "scale_y": 0.6,
     "scale_matrix": [
       [
-        0.7,
+        1.5,
         0.0
       ],
       [
         0.0,
-        1.6
+        0.6
       ]
     ],
-    "shear_k": 1.2,
+    "shear_k": 0.6,
     "shear_axis": "x",
     "shear_matrix": [
       [
         1.0,
-        1.2
+        0.6
       ],
       [
         0.0,
         1.0
       ]
     ],
-    "lambda_1": 1.7,
-    "lambda_2": 0.6,
+    "lambda_1": 1.9,
+    "lambda_2": 0.8,
     "v1": [
-      0.786,
-      0.618
+      0.617,
+      0.787
     ],
     "v2": [
-      -0.618,
-      0.786
+      -0.787,
+      0.617
     ],
-    "theta_rad": 0.6667157742618339,
-    "theta_deg": 38.2,
+    "theta_rad": 0.905825881785057,
+    "theta_deg": 51.9,
     "matrix_a": [
       [
-        1.28,
+        1.22,
         0.53
       ],
       [
         0.53,
-        1.02
+        1.48
       ]
     ],
-    "det_a": 1.025,
-    "trace_a": 2.3,
+    "det_a": 1.525,
+    "trace_a": 2.7,
     "test_vector_w": [
-      0.15,
+      -0.16,
       1.29
     ],
-    "phi_rad": 0.6440264939859076,
-    "phi_deg": 36.9,
+    "phi_rad": -0.7714355293814937,
+    "phi_deg": -44.2,
     "matrix_b": [
       [
-        0.88,
-        -0.66
+        0.79,
+        0.77
       ],
       [
-        0.66,
-        0.88
+        -0.77,
+        0.79
       ]
     ],
-    "det_b": 1.21,
+    "det_b": 1.217,
     "matrix_c": [
       [
-        0.78,
-        -0.21
+        1.37,
+        1.56
       ],
       [
-        1.31,
-        1.25
+        -0.52,
+        0.76
       ]
     ],
-    "det_c": 1.25
+    "det_c": 1.852
   },
-  "generated_at": "2026-09-11 19:38:02 UTC",
+  "generated_at": "2026-09-11 19:42:32 UTC",
   "quality": "m",
   "videos": [
     {
       "scene": "SpaceTransformationsScene",
       "filename": "space_transformations.mp4",
-      "size_mb": 1.53,
-      "render_duration_s": 16.5
+      "size_mb": 1.35,
+      "render_duration_s": 13.6
     },
     {
       "scene": "EigenvectorsScene",
       "filename": "eigenvectors_invariant_directions.mp4",
-      "size_mb": 0.99,
-      "render_duration_s": 15.8
+      "size_mb": 0.98,
+      "render_duration_s": 12.8
     },
     {
       "scene": "MatrixMultiplicationScene",
       "filename": "matrix_multiplication_composition.mp4",
-      "size_mb": 2.02,
-      "render_duration_s": 22.7
+      "size_mb": 2.4,
+      "render_duration_s": 18.5
     },
     {
       "scene": "MasterMatrixMultiplicationStory",
       "filename": "master_matrix_multiplication_story.mp4",
-      "size_mb": 2.47,
-      "render_duration_s": 27.0
+      "size_mb": 2.66,
+      "render_duration_s": 22.0
     }
   ]
 }
