@@ -1,0 +1,84 @@
+name: Generate RSA Key Generation Animations
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - artifacts
+    paths:
+      - '2026-09-12/rsa_key_generation_manim/**'
+      - '.github/workflows/generate_rsa_key_generation_animation.yml'
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install System Dependencies for Manim
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg libcairo2-dev libpango1.0-dev pkg-config \
+            texlive-latex-base texlive-latex-extra texlive-fonts-recommended dvisvgm
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install manim numpy scipy
+
+      - name: Run RSA Math Unit Tests
+        run: |
+          python3 2026-09-12/rsa_key_generation_manim/test_rsa_math.py
+
+      - name: Generate RSA and Theorem Animations
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/rsa-animations
+        run: |
+          mkdir -p "$ARTIFACT_DIRECTORY"
+          python3 2026-09-12/rsa_key_generation_manim/generate_rsa_animation.py \
+            --quality m \
+            --scene all \
+            --output-dir "$ARTIFACT_DIRECTORY"
+
+          mkdir -p "$ARTIFACT_DIRECTORY/code"
+          cp 2026-09-12/rsa_key_generation_manim/rsa_math.py \
+            2026-09-12/rsa_key_generation_manim/rsa_scenes.py \
+            2026-09-12/rsa_key_generation_manim/generate_rsa_animation.py \
+            2026-09-12/rsa_key_generation_manim/test_rsa_math.py \
+            "$ARTIFACT_DIRECTORY/code/"
+
+      - name: Create GitHub Release for RSA Animations
+        env:
+          TARGET_DIR: rsa-animations
+          RELEASE_TAG_PREFIX: rsa-animations
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/rsa-animations
+          RELEASE_TITLE: "Generate RSA Key Generation Animations"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export COMMIT_DESCRIPTION="Generated 5 RSA & Number Theory Manim animations"
+          bash .github/scripts/create_release.sh
+
+      - name: Commit and push videos to the artifacts branch
+        env:
+          TARGET_DIR: rsa-animations
+          RELEASE_TAG_PREFIX: rsa-animations
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/rsa-animations
+          COMMIT_TITLE: "Generate RSA Key Generation Animations"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export COMMIT_DESCRIPTION="Generated 5 RSA & Number Theory Manim animations"
+          bash .github/scripts/push_artifacts.sh

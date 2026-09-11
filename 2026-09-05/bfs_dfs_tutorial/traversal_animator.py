@@ -264,9 +264,9 @@ def build_traversal_steps(
     graph: dict[str, list[str]],
     start_node: str,
     algorithm: str,
-    frames_per_step: int = 16,
+    frames_per_step: int = 54,
 ) -> list[TraversalStep]:
-    """Generate fine-grained traversal events with animated transitions."""
+    """Generate fine-grained traversal events with animated transitions at clear pedagogical pacing."""
     steps: list[TraversalStep] = []
     step_counter = 1
 
@@ -293,7 +293,7 @@ def build_traversal_steps(
             visited_order=visited_order,
             tree_edges=tree_edges,
             active_edges=set(),
-            frame_duration=25,
+            frame_duration=max(15, int(frames_per_step * 1.1)),
         )
     )
 
@@ -369,7 +369,7 @@ def build_traversal_steps(
                         visited_order=visited_order,
                         tree_edges=tree_edges,
                         active_edges={edge},
-                        frame_duration=max(8, frames_per_step // 2),
+                        frame_duration=max(12, int(frames_per_step * 0.75)),
                     )
                 )
 
@@ -391,7 +391,7 @@ def build_traversal_steps(
                 visited_order=visited_order,
                 tree_edges=tree_edges,
                 active_edges=set(),
-                frame_duration=frames_per_step,
+                frame_duration=max(12, int(frames_per_step * 0.85)),
             )
         )
 
@@ -410,14 +410,28 @@ def build_traversal_steps(
             visited_order=visited_order,
             tree_edges=tree_edges,
             active_edges=set(),
-            frame_duration=45,
+            frame_duration=max(20, int(frames_per_step * 1.8)),
         )
     )
 
     return steps
 
 
-# Cairo Drawing Utilities
+# Cairo Drawing Utilities & Anti-Aliasing Configuration
+def configure_cairo_context(ctx: cairo.Context) -> None:
+    """Configure pristine anti-aliasing and subpixel font hinting on a Cairo context."""
+    ctx.set_antialias(cairo.ANTIALIAS_BEST)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+
+    font_opts = cairo.FontOptions()
+    font_opts.set_antialias(cairo.ANTIALIAS_BEST)
+    font_opts.set_hint_style(cairo.HINT_STYLE_FULL)
+    font_opts.set_hint_metrics(cairo.HINT_METRICS_ON)
+    font_opts.set_subpixel_order(cairo.SUBPIXEL_ORDER_RGB)
+    ctx.set_font_options(font_opts)
+
+
 def draw_rounded_rect(
     ctx: cairo.Context,
     x: float,
@@ -426,7 +440,7 @@ def draw_rounded_rect(
     h: float,
     r: float,
 ) -> None:
-    """Draw a smooth rounded rectangle path."""
+    """Draw a smooth rounded rectangle path with anti-aliasing."""
     r = max(0.0, min(r, w / 2.0, h / 2.0))
     ctx.new_sub_path()
     ctx.arc(x + w - r, y + r, r, -math.pi / 2.0, 0.0)
@@ -445,7 +459,7 @@ def draw_text_centered(
     font_bold: bool = True,
     color: tuple[float, float, float] = (1.0, 1.0, 1.0),
 ) -> None:
-    """Draw text centered at (cx, cy)."""
+    """Draw text centered at (cx, cy) with crisp font rendering."""
     ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD if font_bold else cairo.FONT_WEIGHT_NORMAL)
     ctx.set_font_size(font_size)
     ext = ctx.text_extents(text)
@@ -465,75 +479,77 @@ def draw_card_panel(
     title: Optional[str] = None,
     badge: Optional[str] = None,
     badge_color: tuple[float, float, float] = (0.02, 0.71, 0.83),
+    scale: float = 1.0,
 ) -> None:
-    """Draw a modern glass/slate card panel with title header."""
+    """Draw a modern glass/slate card panel with title header scaled proportionally."""
     # Outer Card
-    draw_rounded_rect(ctx, x, y, w, h, 14.0)
+    draw_rounded_rect(ctx, x, y, w, h, 14.0 * scale)
     ctx.set_source_rgb(*COLOR_PANEL)
     ctx.fill_preserve()
     ctx.set_source_rgb(*COLOR_PANEL_BORDER)
-    ctx.set_line_width(1.5)
+    ctx.set_line_width(max(1.0, 1.5 * scale))
     ctx.stroke()
 
     # Optional Header
     if title:
-        header_h = 44.0
+        header_h = 44.0 * scale
         # Header background
         ctx.save()
-        draw_rounded_rect(ctx, x, y, w, header_h, 14.0)
+        draw_rounded_rect(ctx, x, y, w, header_h, 14.0 * scale)
         # Rectify bottom corners
-        ctx.rectangle(x, y + 20.0, w, header_h - 20.0)
+        ctx.rectangle(x, y + 20.0 * scale, w, header_h - 20.0 * scale)
         ctx.set_source_rgb(0.09, 0.13, 0.20)
         ctx.fill()
         ctx.restore()
 
         # Header border divider
         ctx.set_source_rgb(*COLOR_PANEL_BORDER)
-        ctx.set_line_width(1.0)
+        ctx.set_line_width(max(1.0, 1.0 * scale))
         ctx.move_to(x, y + header_h)
         ctx.line_to(x + w, y + header_h)
         ctx.stroke()
 
         # Title text
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(15.0)
+        ctx.set_font_size(15.0 * scale)
         ctx.set_source_rgb(0.85, 0.90, 0.98)
-        ctx.move_to(x + 18.0, y + 28.0)
+        ctx.move_to(x + 18.0 * scale, y + 28.0 * scale)
         ctx.show_text(title)
 
         # Optional Right Badge
         if badge:
-            ctx.set_font_size(12.0)
+            ctx.set_font_size(12.0 * scale)
             b_ext = ctx.text_extents(badge)
-            bw = b_ext.width + 16.0
-            bh = 22.0
-            bx = x + w - bw - 16.0
-            by = y + 11.0
-            draw_rounded_rect(ctx, bx, by, bw, bh, 6.0)
+            bw = b_ext.width + 16.0 * scale
+            bh = 22.0 * scale
+            bx = x + w - bw - 16.0 * scale
+            by = y + 11.0 * scale
+            draw_rounded_rect(ctx, bx, by, bw, bh, 6.0 * scale)
             ctx.set_source_rgba(badge_color[0], badge_color[1], badge_color[2], 0.2)
             ctx.fill_preserve()
             ctx.set_source_rgb(*badge_color)
-            ctx.set_line_width(1.2)
+            ctx.set_line_width(max(1.0, 1.2 * scale))
             ctx.stroke()
-            draw_text_centered(ctx, badge, bx + bw / 2.0, by + bh / 2.0, 11.0, font_bold=True, color=badge_color)
+            draw_text_centered(ctx, badge, bx + bw / 2.0, by + bh / 2.0, 11.0 * scale, font_bold=True, color=badge_color)
 
 
 class TraversalVideoRenderer:
-    """High-performance frame renderer for BFS and DFS traversal animations."""
+    """High-performance frame renderer for BFS and DFS traversal animations with dynamic resolution scaling."""
 
     def __init__(
         self,
         graph: dict[str, list[str]],
         layout: dict[str, tuple[float, float]],
         algorithm: str,
-        width: int = 1920,
-        height: int = 1080,
+        width: int = 2560,
+        height: int = 1440,
     ):
         self.graph = graph
         self.layout = layout
         self.algorithm = algorithm
         self.width = width
         self.height = height
+        self.scale = max(0.2, min(width / 1920.0, height / 1080.0))
 
         # Precompute unique edges
         self.unique_edges: list[tuple[str, str]] = []
@@ -542,9 +558,10 @@ class TraversalVideoRenderer:
                 if u < v:
                     self.unique_edges.append((u, v))
 
-        # Node radius based on node count
-        n_nodes = len(graph)
-        self.node_radius = max(24.0, min(36.0, 360.0 / math.sqrt(n_nodes * 2.5)))
+        # Node radius based on node count and resolution scale
+        n_nodes = max(1, len(graph))
+        base_r = max(24.0, min(38.0, 380.0 / math.sqrt(n_nodes * 2.5)))
+        self.node_radius = max(12.0, base_r * self.scale)
 
     def render_frame(
         self,
@@ -554,17 +571,25 @@ class TraversalVideoRenderer:
         total_steps: int,
         global_frame: int,
     ) -> None:
-        """Render a complete 1080p frame representing the current animation state."""
+        """Render a complete high-resolution frame representing the current animation state."""
+        # Ensure context anti-aliasing
+        configure_cairo_context(ctx)
+
         # 1. Background
         ctx.set_source_rgb(*COLOR_BG)
         ctx.paint()
 
         # Stage Layout: Graph Canvas (Left) & Inspector HUD (Right)
-        graph_x, graph_y = 40.0, 40.0
-        graph_w, graph_h = 1240.0, 1000.0
+        margin = 35.0 * self.scale
+        gap = 25.0 * self.scale
 
-        hud_x, hud_y = 1310.0, 40.0
-        hud_w, hud_h = 570.0, 1000.0
+        graph_w = (self.width - 2.0 * margin - gap) * 0.675
+        hud_w = self.width - 2.0 * margin - gap - graph_w
+        graph_h = self.height - 2.0 * margin
+        hud_h = self.height - 2.0 * margin
+
+        graph_x, graph_y = margin, margin
+        hud_x, hud_y = graph_x + graph_w + gap, margin
 
         # Draw Graph Container
         draw_card_panel(
@@ -576,10 +601,12 @@ class TraversalVideoRenderer:
             title="GRAPH TOPOLOGY & EXPLORATION",
             badge=f"{len(self.graph)} Nodes · {len(self.unique_edges)} Edges",
             badge_color=(0.55, 0.36, 0.96),
+            scale=self.scale,
         )
 
         # Subtle Dot Grid inside graph area
-        self._draw_dot_grid(ctx, graph_x + 20.0, graph_y + 55.0, graph_w - 40.0, graph_h - 75.0)
+        grid_top = 55.0 * self.scale
+        self._draw_dot_grid(ctx, graph_x + 20.0 * self.scale, graph_y + grid_top, graph_w - 40.0 * self.scale, graph_h - grid_top - 20.0 * self.scale)
 
         # Draw Edges & Active Signal Particles
         self._draw_edges(ctx, step, frame_idx)
@@ -591,20 +618,21 @@ class TraversalVideoRenderer:
         self._draw_hud(ctx, hud_x, hud_y, hud_w, hud_h, step, total_steps, global_frame)
 
     def _draw_dot_grid(self, ctx: cairo.Context, x: float, y: float, w: float, h: float) -> None:
-        """Draw a sleek subtle background dot grid."""
-        spacing = 40.0
+        """Draw a sleek subtle background dot grid with resolution scaling."""
+        spacing = 40.0 * self.scale
+        dot_r = max(0.8, 1.3 * self.scale)
         ctx.set_source_rgb(*COLOR_GRID_DOT)
         curr_y = y + spacing / 2.0
         while curr_y < y + h:
             curr_x = x + spacing / 2.0
             while curr_x < x + w:
-                ctx.arc(curr_x, curr_y, 1.2, 0.0, 2.0 * math.pi)
+                ctx.arc(curr_x, curr_y, dot_r, 0.0, 2.0 * math.pi)
                 ctx.fill()
                 curr_x += spacing
             curr_y += spacing
 
     def _draw_edges(self, ctx: cairo.Context, step: TraversalStep, frame_idx: int) -> None:
-        """Draw dormant, tree, and active traveling edges."""
+        """Draw dormant, tree, and active traveling edges with anti-aliasing."""
         # 1. Dormant and Non-Tree Edges
         for u, v in self.unique_edges:
             pair = frozenset((u, v))
@@ -613,7 +641,7 @@ class TraversalVideoRenderer:
             p1 = self.layout[u]
             p2 = self.layout[v]
             ctx.set_source_rgba(*COLOR_EDGE_DORMANT)
-            ctx.set_line_width(2.5)
+            ctx.set_line_width(max(1.2, 2.5 * self.scale))
             ctx.move_to(p1[0], p1[1])
             ctx.line_to(p2[0], p2[1])
             ctx.stroke()
@@ -627,14 +655,14 @@ class TraversalVideoRenderer:
 
                 # Glow halo
                 ctx.set_source_rgba(*COLOR_EDGE_GLOW)
-                ctx.set_line_width(8.0)
+                ctx.set_line_width(max(3.5, 9.0 * self.scale))
                 ctx.move_to(p1[0], p1[1])
                 ctx.line_to(p2[0], p2[1])
                 ctx.stroke()
 
                 # Core tree line
                 ctx.set_source_rgba(*COLOR_EDGE_TREE)
-                ctx.set_line_width(4.0)
+                ctx.set_line_width(max(2.0, 4.5 * self.scale))
                 ctx.move_to(p1[0], p1[1])
                 ctx.line_to(p2[0], p2[1])
                 ctx.stroke()
@@ -646,30 +674,31 @@ class TraversalVideoRenderer:
             p1 = self.layout[u]
             p2 = self.layout[v]
 
-            # Progress t from 0.0 to 1.0 along the edge
-            t = min(1.0, max(0.0, frame_idx / max(1, step.frame_duration - 1)))
+            # Progress t with smoothstep easing for fluid motion
+            linear_t = min(1.0, max(0.0, frame_idx / max(1, step.frame_duration - 1)))
+            t = linear_t * linear_t * (3.0 - 2.0 * linear_t)
             part_x = (1.0 - t) * p1[0] + t * p2[0]
             part_y = (1.0 - t) * p1[1] + t * p2[1]
 
             # Glowing trail line from u to particle
             ctx.set_source_rgba(0.02, 0.71, 0.83, 0.6)
-            ctx.set_line_width(3.0)
+            ctx.set_line_width(max(1.5, 3.5 * self.scale))
             ctx.move_to(p1[0], p1[1])
             ctx.line_to(part_x, part_y)
             ctx.stroke()
 
             # Glowing particle aura
-            ctx.arc(part_x, part_y, 14.0, 0.0, 2.0 * math.pi)
+            ctx.arc(part_x, part_y, max(6.0, 16.0 * self.scale), 0.0, 2.0 * math.pi)
             ctx.set_source_rgba(*COLOR_SIGNAL_GLOW)
             ctx.fill()
 
             # Solid particle core
-            ctx.arc(part_x, part_y, 5.5, 0.0, 2.0 * math.pi)
+            ctx.arc(part_x, part_y, max(2.5, 6.0 * self.scale), 0.0, 2.0 * math.pi)
             ctx.set_source_rgb(*COLOR_SIGNAL_CORE)
             ctx.fill()
 
     def _draw_nodes(self, ctx: cairo.Context, step: TraversalStep, global_frame: int) -> None:
-        """Draw all graph nodes with high-contrast state styling and badges."""
+        """Draw all graph nodes with high-contrast state styling, scaled badges, and anti-aliasing."""
         r = self.node_radius
         frontier_set = set(step.frontier)
 
@@ -687,18 +716,18 @@ class TraversalVideoRenderer:
             fill_c, border_c, text_c = NODE_COLORS[state]
 
             # Drop Shadow
-            ctx.arc(nx + 2.0, ny + 3.0, r, 0.0, 2.0 * math.pi)
+            ctx.arc(nx + 2.0 * self.scale, ny + 3.0 * self.scale, r, 0.0, 2.0 * math.pi)
             ctx.set_source_rgba(0.0, 0.0, 0.0, 0.35)
             ctx.fill()
 
             # Active Pulsing Aura
             if state == "active":
                 pulse_phase = (global_frame % 30) / 30.0
-                pulse_r = r + 6.0 + 8.0 * math.sin(pulse_phase * math.pi)
+                pulse_r = r + (7.0 + 9.0 * math.sin(pulse_phase * math.pi)) * self.scale
                 pulse_alpha = 0.5 * (1.0 - pulse_phase)
                 ctx.arc(nx, ny, pulse_r, 0.0, 2.0 * math.pi)
                 ctx.set_source_rgba(border_c[0], border_c[1], border_c[2], pulse_alpha)
-                ctx.set_line_width(3.0)
+                ctx.set_line_width(max(1.5, 3.5 * self.scale))
                 ctx.stroke()
 
             # Base Node Circle
@@ -707,18 +736,18 @@ class TraversalVideoRenderer:
             ctx.fill_preserve()
 
             # Border Ring
-            border_w = 4.0 if state in ("active", "frontier") else 2.5
+            border_w = max(1.8, (4.5 if state in ("active", "frontier") else 3.0) * self.scale)
             ctx.set_source_rgb(*border_c)
             ctx.set_line_width(border_w)
             ctx.stroke()
 
             # Node Label
-            draw_text_centered(ctx, node, nx, ny, font_size=r * 0.72, font_bold=True, color=text_c)
+            draw_text_centered(ctx, node, nx, ny, font_size=max(10.0, r * 0.72), font_bold=True, color=text_c)
 
-            # Visited Order Badge (Small emerald circle with visit sequence index)
+            # Visited Order Badge (Emerald circle with visit sequence index)
             if node in step.visited_order:
                 order_idx = step.visited_order.index(node) + 1
-                badge_r = 11.0
+                badge_r = max(8.0, 13.0 * self.scale)
                 bx = nx + r * 0.72
                 by = ny - r * 0.72
 
@@ -726,7 +755,7 @@ class TraversalVideoRenderer:
                 ctx.set_source_rgb(0.06, 0.73, 0.51)
                 ctx.fill_preserve()
                 ctx.set_source_rgb(0.02, 0.28, 0.18)
-                ctx.set_line_width(1.5)
+                ctx.set_line_width(max(1.0, 1.5 * self.scale))
                 ctx.stroke()
 
                 draw_text_centered(
@@ -734,7 +763,7 @@ class TraversalVideoRenderer:
                     str(order_idx),
                     bx,
                     by,
-                    font_size=11.0,
+                    font_size=max(8.0, 12.0 * self.scale),
                     font_bold=True,
                     color=(1.0, 1.0, 1.0),
                 )
@@ -766,96 +795,98 @@ class TraversalVideoRenderer:
             title="ALGORITHM & MEMORY INSPECTOR",
             badge=ds_badge,
             badge_color=ds_badge_color,
+            scale=self.scale,
         )
 
-        inner_x = x + 20.0
-        inner_w = w - 40.0
-        curr_y = y + 60.0
+        inner_x = x + 20.0 * self.scale
+        inner_w = w - 40.0 * self.scale
+        curr_y = y + 60.0 * self.scale
 
         # Section A: Header & Complexities
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(20.0)
+        ctx.set_font_size(max(12.0, 21.0 * self.scale))
         ctx.set_source_rgb(0.95, 0.98, 1.0)
-        ctx.move_to(inner_x, curr_y + 18.0)
+        ctx.move_to(inner_x, curr_y + 18.0 * self.scale)
         ctx.show_text(alg_name)
 
         # Complexity Pills
-        curr_y += 32.0
+        curr_y += 32.0 * self.scale
         comp_text = "Time: O(V + E)  │  Space: O(V)"
-        draw_rounded_rect(ctx, inner_x, curr_y, inner_w, 28.0, 6.0)
+        pill_h = 30.0 * self.scale
+        draw_rounded_rect(ctx, inner_x, curr_y, inner_w, pill_h, 6.0 * self.scale)
         ctx.set_source_rgba(0.12, 0.18, 0.28, 0.8)
         ctx.fill()
         draw_text_centered(
             ctx,
             comp_text,
             inner_x + inner_w / 2.0,
-            curr_y + 14.0,
-            font_size=12.0,
+            curr_y + pill_h / 2.0,
+            font_size=max(9.0, 12.5 * self.scale),
             font_bold=True,
             color=(0.65, 0.75, 0.90),
         )
 
         # Section B: Current Step & Action Commentary Card
-        curr_y += 42.0
-        card_h = 135.0
-        draw_rounded_rect(ctx, inner_x, curr_y, inner_w, card_h, 10.0)
+        curr_y += pill_h + 16.0 * self.scale
+        card_h = 145.0 * self.scale
+        draw_rounded_rect(ctx, inner_x, curr_y, inner_w, card_h, 10.0 * self.scale)
         ctx.set_source_rgb(0.09, 0.13, 0.22)
         ctx.fill_preserve()
         ctx.set_source_rgb(0.22, 0.30, 0.44)
-        ctx.set_line_width(1.2)
+        ctx.set_line_width(max(1.0, 1.2 * self.scale))
         ctx.stroke()
 
         # Step Counter Pill
-        step_pill_w = 110.0
-        step_pill_h = 24.0
-        draw_rounded_rect(ctx, inner_x + 14.0, curr_y + 12.0, step_pill_w, step_pill_h, 5.0)
+        step_pill_w = 125.0 * self.scale
+        step_pill_h = 26.0 * self.scale
+        draw_rounded_rect(ctx, inner_x + 14.0 * self.scale, curr_y + 12.0 * self.scale, step_pill_w, step_pill_h, 5.0 * self.scale)
         ctx.set_source_rgba(0.55, 0.36, 0.96, 0.25)
         ctx.fill_preserve()
         ctx.set_source_rgb(0.55, 0.36, 0.96)
-        ctx.set_line_width(1.0)
+        ctx.set_line_width(max(1.0, 1.0 * self.scale))
         ctx.stroke()
         draw_text_centered(
             ctx,
             f"STEP {step.step_number:02d} / {total_steps:02d}",
-            inner_x + 14.0 + step_pill_w / 2.0,
-            curr_y + 12.0 + step_pill_h / 2.0,
-            11.0,
+            inner_x + 14.0 * self.scale + step_pill_w / 2.0,
+            curr_y + 12.0 * self.scale + step_pill_h / 2.0,
+            max(8.0, 11.5 * self.scale),
             font_bold=True,
             color=(0.85, 0.75, 1.0),
         )
 
         # Action Title Badge
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(14.0)
+        ctx.set_font_size(max(10.0, 15.0 * self.scale))
         ctx.set_source_rgb(0.96, 0.62, 0.04)
-        ctx.move_to(inner_x + 135.0, curr_y + 29.0)
+        ctx.move_to(inner_x + step_pill_w + 24.0 * self.scale, curr_y + 29.0 * self.scale)
         ctx.show_text(step.title)
 
         # Action Description (wrapped if long)
         self._draw_wrapped_text(
             ctx,
             text=step.description,
-            x=inner_x + 14.0,
-            y=curr_y + 56.0,
-            max_width=inner_w - 28.0,
-            line_height=20.0,
-            font_size=13.5,
+            x=inner_x + 14.0 * self.scale,
+            y=curr_y + 58.0 * self.scale,
+            max_width=inner_w - 28.0 * self.scale,
+            line_height=22.0 * self.scale,
+            font_size=max(9.5, 14.0 * self.scale),
             color=(0.85, 0.90, 0.98),
         )
 
         # Section C: Live Memory Data Structure Visualizer (Queue or Stack)
-        curr_y += card_h + 18.0
+        curr_y += card_h + 16.0 * self.scale
         if is_bfs:
             curr_y = self._draw_queue_visualizer(ctx, inner_x, curr_y, inner_w, step)
         else:
             curr_y = self._draw_stack_visualizer(ctx, inner_x, curr_y, inner_w, step)
 
         # Section D: Visited Sequence Ribbon
-        curr_y += 18.0
+        curr_y += 16.0 * self.scale
         curr_y = self._draw_visited_sequence(ctx, inner_x, curr_y, inner_w, step, global_frame)
 
         # Section E: State Legend & Stats
-        curr_y += 18.0
+        curr_y += 16.0 * self.scale
         self._draw_legend_and_progress(ctx, inner_x, curr_y, inner_w, step, total_steps)
 
     def _draw_queue_visualizer(
@@ -866,47 +897,47 @@ class TraversalVideoRenderer:
         w: float,
         step: TraversalStep,
     ) -> float:
-        """Draw the animated horizontal FIFO Queue memory visualizer."""
-        container_h = 160.0
-        draw_rounded_rect(ctx, x, y, w, container_h, 10.0)
+        """Draw the animated horizontal FIFO Queue memory visualizer with resolution scaling."""
+        container_h = 175.0 * self.scale
+        draw_rounded_rect(ctx, x, y, w, container_h, 10.0 * self.scale)
         ctx.set_source_rgb(0.08, 0.12, 0.19)
         ctx.fill_preserve()
         ctx.set_source_rgb(0.18, 0.25, 0.36)
-        ctx.set_line_width(1.0)
+        ctx.set_line_width(max(1.0, 1.0 * self.scale))
         ctx.stroke()
 
         # Title and element count
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(13.0)
+        ctx.set_font_size(max(10.0, 14.0 * self.scale))
         ctx.set_source_rgb(0.02, 0.71, 0.83)
-        ctx.move_to(x + 14.0, y + 24.0)
+        ctx.move_to(x + 14.0 * self.scale, y + 26.0 * self.scale)
         ctx.show_text("ACTIVE MEMORY: QUEUE (FIFO)")
 
-        ctx.set_font_size(11.0)
+        ctx.set_font_size(max(9.0, 12.0 * self.scale))
         ctx.set_source_rgb(0.60, 0.70, 0.85)
-        ctx.move_to(x + w - 120.0, y + 24.0)
+        ctx.move_to(x + w - 130.0 * self.scale, y + 26.0 * self.scale)
         ctx.show_text(f"Length: {len(step.frontier)}")
 
         # Track Rail Background
-        rail_y = y + 42.0
-        rail_h = 76.0
-        draw_rounded_rect(ctx, x + 10.0, rail_y, w - 20.0, rail_h, 6.0)
+        rail_y = y + 44.0 * self.scale
+        rail_h = 84.0 * self.scale
+        draw_rounded_rect(ctx, x + 10.0 * self.scale, rail_y, w - 20.0 * self.scale, rail_h, 6.0 * self.scale)
         ctx.set_source_rgba(0.04, 0.07, 0.12, 0.9)
         ctx.fill()
 
         # Labels: [FRONT] Dequeue <--- | --- Enqueue [REAR]
-        ctx.set_font_size(11.0)
+        ctx.set_font_size(max(8.5, 11.5 * self.scale))
         ctx.set_source_rgb(0.96, 0.62, 0.04)
-        ctx.move_to(x + 16.0, rail_y + 18.0)
+        ctx.move_to(x + 16.0 * self.scale, rail_y + 19.0 * self.scale)
         ctx.show_text("◀ FRONT (Dequeue)")
 
         ctx.set_source_rgb(0.02, 0.71, 0.83)
-        ctx.move_to(x + w - 150.0, rail_y + 18.0)
+        ctx.move_to(x + w - 160.0 * self.scale, rail_y + 19.0 * self.scale)
         ctx.show_text("REAR (Enqueue) ◀")
 
         # Draw Queue Cards
-        card_w, card_h = 44.0, 44.0
-        gap = 8.0
+        card_w, card_h = 48.0 * self.scale, 48.0 * self.scale
+        gap = 8.0 * self.scale
         items = step.frontier
 
         if not items:
@@ -914,21 +945,20 @@ class TraversalVideoRenderer:
                 ctx,
                 "(Queue Empty)",
                 x + w / 2.0,
-                rail_y + 44.0,
-                font_size=13.0,
+                rail_y + 50.0 * self.scale,
+                font_size=max(10.0, 13.5 * self.scale),
                 font_bold=False,
                 color=(0.40, 0.48, 0.60),
             )
         else:
-            start_x = x + 20.0
-            max_visible = min(len(items), int((w - 40.0) / (card_w + gap)))
+            start_x = x + 20.0 * self.scale
+            max_visible = min(len(items), max(1, int((w - 40.0 * self.scale) / (card_w + gap))))
             for i in range(max_visible):
                 cx = start_x + i * (card_w + gap)
-                cy = rail_y + 26.0
+                cy = rail_y + 26.0 * self.scale
 
-                # Front card highlight
                 is_front = i == 0
-                draw_rounded_rect(ctx, cx, cy, card_w, card_h, 6.0)
+                draw_rounded_rect(ctx, cx, cy, card_w, card_h, 6.0 * self.scale)
                 if is_front:
                     ctx.set_source_rgb(0.18, 0.10, 0.02)
                     ctx.fill_preserve()
@@ -937,7 +967,7 @@ class TraversalVideoRenderer:
                     ctx.set_source_rgb(0.04, 0.20, 0.28)
                     ctx.fill_preserve()
                     ctx.set_source_rgb(0.02, 0.71, 0.83)
-                ctx.set_line_width(1.8)
+                ctx.set_line_width(max(1.0, 1.8 * self.scale))
                 ctx.stroke()
 
                 draw_text_centered(
@@ -945,22 +975,22 @@ class TraversalVideoRenderer:
                     items[i],
                     cx + card_w / 2.0,
                     cy + card_h / 2.0,
-                    font_size=18.0,
+                    font_size=max(12.0, 19.0 * self.scale),
                     font_bold=True,
                     color=(1.0, 1.0, 1.0),
                 )
 
             if len(items) > max_visible:
                 overflow_text = f"+{len(items) - max_visible} more"
-                ctx.set_font_size(11.0)
+                ctx.set_font_size(max(8.5, 11.5 * self.scale))
                 ctx.set_source_rgb(0.60, 0.70, 0.85)
-                ctx.move_to(start_x + max_visible * (card_w + gap), rail_y + 52.0)
+                ctx.move_to(start_x + max_visible * (card_w + gap), rail_y + 54.0 * self.scale)
                 ctx.show_text(overflow_text)
 
         # Bottom descriptor
-        ctx.set_font_size(11.0)
+        ctx.set_font_size(max(8.5, 11.5 * self.scale))
         ctx.set_source_rgb(0.50, 0.60, 0.75)
-        ctx.move_to(x + 14.0, y + 145.0)
+        ctx.move_to(x + 14.0 * self.scale, y + container_h - 14.0 * self.scale)
         ctx.show_text("FIFO Policy: Oldest discovered node is dequeued first.")
 
         return y + container_h
@@ -973,67 +1003,67 @@ class TraversalVideoRenderer:
         w: float,
         step: TraversalStep,
     ) -> float:
-        """Draw the animated vertical LIFO Stack memory visualizer."""
-        container_h = 160.0
-        draw_rounded_rect(ctx, x, y, w, container_h, 10.0)
+        """Draw the animated vertical LIFO Stack memory visualizer with resolution scaling."""
+        container_h = 175.0 * self.scale
+        draw_rounded_rect(ctx, x, y, w, container_h, 10.0 * self.scale)
         ctx.set_source_rgb(0.08, 0.12, 0.19)
         ctx.fill_preserve()
         ctx.set_source_rgb(0.18, 0.25, 0.36)
-        ctx.set_line_width(1.0)
+        ctx.set_line_width(max(1.0, 1.0 * self.scale))
         ctx.stroke()
 
         # Header
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(13.0)
+        ctx.set_font_size(max(10.0, 14.0 * self.scale))
         ctx.set_source_rgb(0.85, 0.20, 0.50)
-        ctx.move_to(x + 14.0, y + 24.0)
+        ctx.move_to(x + 14.0 * self.scale, y + 26.0 * self.scale)
         ctx.show_text("ACTIVE MEMORY: STACK (LIFO)")
 
-        ctx.set_font_size(11.0)
+        ctx.set_font_size(max(9.0, 12.0 * self.scale))
         ctx.set_source_rgb(0.60, 0.70, 0.85)
-        ctx.move_to(x + w - 120.0, y + 24.0)
+        ctx.move_to(x + w - 130.0 * self.scale, y + 26.0 * self.scale)
         ctx.show_text(f"Depth: {len(step.frontier)}")
 
         # Stack Rack
-        rack_y = y + 42.0
-        rack_h = 76.0
-        draw_rounded_rect(ctx, x + 10.0, rack_y, w - 20.0, rack_h, 6.0)
+        rack_y = y + 44.0 * self.scale
+        rail_h = 84.0 * self.scale
+        draw_rounded_rect(ctx, x + 10.0 * self.scale, rack_y, w - 20.0 * self.scale, rail_h, 6.0 * self.scale)
         ctx.set_source_rgba(0.04, 0.07, 0.12, 0.9)
         ctx.fill()
 
         # Labels: TOP OF STACK (Push/Pop)
-        ctx.set_font_size(11.0)
+        ctx.set_font_size(max(8.5, 11.5 * self.scale))
         ctx.set_source_rgb(0.96, 0.62, 0.04)
-        ctx.move_to(x + 16.0, rack_y + 18.0)
+        ctx.move_to(x + 16.0 * self.scale, rack_y + 19.0 * self.scale)
         ctx.show_text("▲ TOP OF STACK (Next to Pop)")
 
         ctx.set_source_rgb(0.50, 0.58, 0.70)
-        ctx.move_to(x + w - 120.0, rack_y + 18.0)
+        ctx.move_to(x + w - 140.0 * self.scale, rack_y + 19.0 * self.scale)
         ctx.show_text("BOTTOM (Base)")
 
         items = list(reversed(step.frontier))  # Top of stack first!
-        card_w, card_h = 44.0, 44.0
-        gap = 8.0
+        card_w, card_h = 48.0 * self.scale, 48.0 * self.scale
+        gap = 8.0 * self.scale
 
         if not items:
             draw_text_centered(
                 ctx,
                 "(Stack Empty)",
                 x + w / 2.0,
-                rack_y + 44.0,
-                font_size=13.0,
+                rack_y + 50.0 * self.scale,
+                font_size=max(10.0, 13.5 * self.scale),
                 font_bold=False,
                 color=(0.40, 0.48, 0.60),
             )
         else:
-            start_x = x + 20.0
-            max_visible = min(len(items), int((w - 40.0) / (card_w + gap)))
+            start_x = x + 20.0 * self.scale
+            max_visible = min(len(items), max(1, int((w - 40.0 * self.scale) / (card_w + gap))))
             for i in range(max_visible):
                 cx = start_x + i * (card_w + gap)
-                cy = rack_y + 26.0
+                cy = rack_y + 26.0 * self.scale
                 is_top = i == 0
 
-                draw_rounded_rect(ctx, cx, cy, card_w, card_h, 6.0)
+                draw_rounded_rect(ctx, cx, cy, card_w, card_h, 6.0 * self.scale)
                 if is_top:
                     ctx.set_source_rgb(0.24, 0.08, 0.14)
                     ctx.fill_preserve()
@@ -1042,7 +1072,7 @@ class TraversalVideoRenderer:
                     ctx.set_source_rgb(0.12, 0.06, 0.16)
                     ctx.fill_preserve()
                     ctx.set_source_rgb(0.85, 0.20, 0.50)
-                ctx.set_line_width(1.8)
+                ctx.set_line_width(max(1.0, 1.8 * self.scale))
                 ctx.stroke()
 
                 draw_text_centered(
@@ -1050,22 +1080,22 @@ class TraversalVideoRenderer:
                     items[i],
                     cx + card_w / 2.0,
                     cy + card_h / 2.0,
-                    font_size=18.0,
+                    font_size=max(12.0, 19.0 * self.scale),
                     font_bold=True,
                     color=(1.0, 1.0, 1.0),
                 )
 
             if len(items) > max_visible:
                 overflow_text = f"+{len(items) - max_visible} more"
-                ctx.set_font_size(11.0)
+                ctx.set_font_size(max(8.5, 11.5 * self.scale))
                 ctx.set_source_rgb(0.60, 0.70, 0.85)
-                ctx.move_to(start_x + max_visible * (card_w + gap), rack_y + 52.0)
+                ctx.move_to(start_x + max_visible * (card_w + gap), rack_y + 54.0 * self.scale)
                 ctx.show_text(overflow_text)
 
         # Bottom descriptor
-        ctx.set_font_size(11.0)
+        ctx.set_font_size(max(8.5, 11.5 * self.scale))
         ctx.set_source_rgb(0.50, 0.60, 0.75)
-        ctx.move_to(x + 14.0, y + 145.0)
+        ctx.move_to(x + 14.0 * self.scale, y + container_h - 14.0 * self.scale)
         ctx.show_text("LIFO Policy: Most recently discovered node is popped first (depth plunge).")
 
         return y + container_h
@@ -1080,64 +1110,64 @@ class TraversalVideoRenderer:
         global_frame: int,
     ) -> float:
         """Draw the sequential order ribbon of visited nodes."""
-        container_h = 135.0
-        draw_rounded_rect(ctx, x, y, w, container_h, 10.0)
+        container_h = 145.0 * self.scale
+        draw_rounded_rect(ctx, x, y, w, container_h, 10.0 * self.scale)
         ctx.set_source_rgb(0.08, 0.12, 0.19)
         ctx.fill_preserve()
         ctx.set_source_rgb(0.18, 0.25, 0.36)
-        ctx.set_line_width(1.0)
+        ctx.set_line_width(max(1.0, 1.0 * self.scale))
         ctx.stroke()
 
         # Header
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(13.0)
+        ctx.set_font_size(max(10.0, 14.0 * self.scale))
         ctx.set_source_rgb(0.06, 0.73, 0.51)
-        ctx.move_to(x + 14.0, y + 24.0)
+        ctx.move_to(x + 14.0 * self.scale, y + 26.0 * self.scale)
         ctx.show_text("VISITED ORDER SEQUENCE")
 
-        ctx.set_font_size(11.0)
+        ctx.set_font_size(max(9.0, 12.0 * self.scale))
         ctx.set_source_rgb(0.60, 0.70, 0.85)
-        ctx.move_to(x + w - 160.0, y + 24.0)
+        ctx.move_to(x + w - 170.0 * self.scale, y + 26.0 * self.scale)
         ctx.show_text(f"Completed: {len(step.visited_order)} / {len(self.graph)}")
 
         # Ribbon rack
-        rack_y = y + 36.0
-        pill_w = 40.0
-        pill_h = 36.0
-        gap_x = 22.0
-        gap_y = 12.0
+        rack_y = y + 38.0 * self.scale
+        pill_w = 44.0 * self.scale
+        pill_h = 40.0 * self.scale
+        gap_x = 22.0 * self.scale
+        gap_y = 12.0 * self.scale
 
         if not step.visited_order:
             draw_text_centered(
                 ctx,
                 "(No nodes fully completed yet)",
                 x + w / 2.0,
-                rack_y + 40.0,
-                font_size=13.0,
+                rack_y + 44.0 * self.scale,
+                font_size=max(10.0, 13.5 * self.scale),
                 font_bold=False,
                 color=(0.40, 0.48, 0.60),
             )
         else:
-            max_per_row = max(1, int((w - 30.0) / (pill_w + gap_x)))
+            max_per_row = max(1, int((w - 30.0 * self.scale) / (pill_w + gap_x)))
             for idx, node in enumerate(step.visited_order):
                 row = idx // max_per_row
                 col = idx % max_per_row
-                px = x + 16.0 + col * (pill_w + gap_x)
-                py = rack_y + 8.0 + row * (pill_h + gap_y)
+                px = x + 16.0 * self.scale + col * (pill_w + gap_x)
+                py = rack_y + 8.0 * self.scale + row * (pill_h + gap_y)
 
                 is_latest = idx == len(step.visited_order) - 1
 
-                draw_rounded_rect(ctx, px, py, pill_w, pill_h, 6.0)
+                draw_rounded_rect(ctx, px, py, pill_w, pill_h, 6.0 * self.scale)
                 if is_latest:
                     ctx.set_source_rgb(0.04, 0.38, 0.24)
                     ctx.fill_preserve()
                     ctx.set_source_rgb(0.06, 0.90, 0.60)
-                    ctx.set_line_width(2.0)
+                    ctx.set_line_width(max(1.2, 2.0 * self.scale))
                 else:
                     ctx.set_source_rgb(0.02, 0.24, 0.15)
                     ctx.fill_preserve()
                     ctx.set_source_rgb(0.06, 0.73, 0.51)
-                    ctx.set_line_width(1.2)
+                    ctx.set_line_width(max(1.0, 1.2 * self.scale))
                 ctx.stroke()
 
                 draw_text_centered(
@@ -1145,19 +1175,19 @@ class TraversalVideoRenderer:
                     node,
                     px + pill_w / 2.0,
                     py + pill_h / 2.0,
-                    font_size=16.0,
+                    font_size=max(11.0, 17.0 * self.scale),
                     font_bold=True,
                     color=(1.0, 1.0, 1.0),
                 )
 
                 # Small connector arrow if not end of row and has next
                 if col < max_per_row - 1 and idx < len(step.visited_order) - 1:
-                    arrow_x = px + pill_w + 5.0
+                    arrow_x = px + pill_w + 5.0 * self.scale
                     arrow_y = py + pill_h / 2.0
                     ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-                    ctx.set_font_size(12.0)
+                    ctx.set_font_size(max(9.0, 13.0 * self.scale))
                     ctx.set_source_rgb(0.35, 0.45, 0.58)
-                    ctx.move_to(arrow_x, arrow_y + 4.0)
+                    ctx.move_to(arrow_x, arrow_y + 4.0 * self.scale)
                     ctx.show_text("→")
 
         return y + container_h
@@ -1185,35 +1215,35 @@ class TraversalVideoRenderer:
         item_w = w / len(legend)
         for i, (label, col) in enumerate(legend):
             lx = x + i * item_w
-            ctx.arc(lx + 8.0, y + 10.0, 5.0, 0.0, 2.0 * math.pi)
+            ctx.arc(lx + 8.0 * self.scale, y + 10.0 * self.scale, max(3.0, 5.5 * self.scale), 0.0, 2.0 * math.pi)
             ctx.set_source_rgb(*col)
             ctx.fill()
 
             ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-            ctx.set_font_size(11.5)
+            ctx.set_font_size(max(9.0, 12.0 * self.scale))
             ctx.set_source_rgb(0.70, 0.78, 0.88)
-            ctx.move_to(lx + 18.0, y + 14.0)
+            ctx.move_to(lx + 18.0 * self.scale, y + 14.0 * self.scale)
             ctx.show_text(label)
 
         # Traversal Progress Bar
-        bar_y = y + 36.0
-        bar_h = 10.0
+        bar_y = y + 34.0 * self.scale
+        bar_h = 10.0 * self.scale
         pct = min(1.0, max(0.0, step.step_number / max(1, total_steps)))
 
-        draw_rounded_rect(ctx, x, bar_y, w, bar_h, 5.0)
+        draw_rounded_rect(ctx, x, bar_y, w, bar_h, 5.0 * self.scale)
         ctx.set_source_rgba(0.12, 0.16, 0.24, 0.8)
         ctx.fill()
 
         if pct > 0.01:
-            draw_rounded_rect(ctx, x, bar_y, w * pct, bar_h, 5.0)
+            draw_rounded_rect(ctx, x, bar_y, w * pct, bar_h, 5.0 * self.scale)
             ctx.set_source_rgb(0.02, 0.71, 0.83)
             ctx.fill()
 
         # Progress text
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(11.0)
+        ctx.set_font_size(max(8.5, 11.5 * self.scale))
         ctx.set_source_rgb(0.50, 0.60, 0.75)
-        ctx.move_to(x, bar_y + 24.0)
+        ctx.move_to(x, bar_y + 24.0 * self.scale)
         ctx.show_text(f"Overall Walkthrough Progress: {int(pct * 100)}%")
 
     def _draw_wrapped_text(

@@ -1,0 +1,56 @@
+{
+  "topic": "RSA Key Generation and Foundational Number Theory",
+  "total_scenes": 5,
+  "scenes": [
+    {
+      "scene_name": "FermatsLittleTheoremScene",
+      "description": "Fermat's Little Theorem (Residue Set Permutation, Factorial Cancellation & Modulo Power Proof)",
+      "file_name": "FermatsLittleTheoremScene.mp4",
+      "theorem": "Fermat's Little Theorem",
+      "formula": "a^(p-1) = 1 (mod p)",
+      "file_path": "/home/aman/dev/ai-slop/2026-09-12/rsa_key_generation_manim/rendered_animations/FermatsLittleTheoremScene.mp4",
+      "size_bytes": 383962,
+      "size_mb": 0.37
+    },
+    {
+      "scene_name": "BezoutsIdentityScene",
+      "description": "B\u00e9zout's Identity & Extended Euclidean Algorithm (Forward Division & Backward Substitution)",
+      "file_name": "BezoutsIdentityScene.mp4",
+      "theorem": "B\u00e9zout's Identity",
+      "formula": "a*x + b*y = gcd(a, b)",
+      "file_path": "/home/aman/dev/ai-slop/2026-09-12/rsa_key_generation_manim/rendered_animations/BezoutsIdentityScene.mp4",
+      "size_bytes": 313548,
+      "size_mb": 0.3
+    },
+    {
+      "scene_name": "EulersTheoremScene",
+      "description": "Euler's Totient Theorem & Multiplicativity Grid (Visual Sieve of pq - p - q + 1 = (p-1)(q-1))",
+      "file_name": "EulersTheoremScene.mp4",
+      "theorem": "Euler's Totient Theorem",
+      "formula": "a^(phi(n)) = 1 (mod n)",
+      "file_path": "/home/aman/dev/ai-slop/2026-09-12/rsa_key_generation_manim/rendered_animations/EulersTheoremScene.mp4",
+      "size_bytes": 297871,
+      "size_mb": 0.28
+    },
+    {
+      "scene_name": "ModularInverseScene",
+      "description": "Modular Multiplicative Inverse (Clock Stepping, Target mod m = 1, Coprimality Failure Condition)",
+      "file_name": "ModularInverseScene.mp4",
+      "theorem": "Modular Multiplicative Inverse",
+      "formula": "a * x = 1 (mod m)",
+      "file_path": "/home/aman/dev/ai-slop/2026-09-12/rsa_key_generation_manim/rendered_animations/ModularInverseScene.mp4",
+      "size_bytes": 297160,
+      "size_mb": 0.28
+    },
+    {
+      "scene_name": "RSAKeyGenerationScene",
+      "description": "Complete RSA Cryptosystem (Key Generation, Encryption C=M^e, Decryption M'=C^d, and Proof)",
+      "file_name": "RSAKeyGenerationScene.mp4",
+      "theorem": "RSA Cryptosystem Protocol & Synthesis",
+      "formula": "M^(e*d) = M^(1 + k*phi(n)) = M (mod n)",
+      "file_path": "/home/aman/dev/ai-slop/2026-09-12/rsa_key_generation_manim/rendered_animations/RSAKeyGenerationScene.mp4",
+      "size_bytes": 669855,
+      "size_mb": 0.64
+    }
+  ]
+}

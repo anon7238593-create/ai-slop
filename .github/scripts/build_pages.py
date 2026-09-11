@@ -26,6 +26,7 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
         "voronoi": {"diagrams": [], "total": 0, "seed": None, "generated_at": ""},
         "traversal": {"files": [], "videos": [], "graph": {}, "total": 0},
         "matrix": {"videos": [], "configuration": {}, "total": 0},
+        "rsa": {"videos": [], "total": 0, "topic": ""},
     }
 
     # 1. Collision Videos
@@ -247,6 +248,49 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
         data["matrix"]["videos"] = mat_vids
         data["matrix"]["total"] = len(mat_vids)
 
+    # 6. RSA Key Generation & Number Theory Animations
+    rsa_candidates = [
+        os.path.join(artifacts_dir, "rsa-animations"),
+        os.path.join(artifacts_dir, "2026-09-12", "rsa_key_generation_manim", "rendered_animations"),
+        os.path.join(repo_root, "2026-09-12", "rsa_key_generation_manim", "rendered_animations"),
+    ]
+    rsa_dir = None
+    for cand in rsa_candidates:
+        if os.path.exists(cand) and any(f.endswith(".mp4") for f in os.listdir(cand)):
+            rsa_dir = cand
+            break
+
+    if rsa_dir and os.path.exists(rsa_dir):
+        rsa_manifest = os.path.join(rsa_dir, "rsa_manifest.json")
+        manifest_scenes = {}
+        if os.path.exists(rsa_manifest):
+            try:
+                with open(rsa_manifest, "r", encoding="utf-8") as f:
+                    r_data = json.load(f)
+                    data["rsa"]["topic"] = r_data.get("topic", "")
+                    data["rsa"]["release_tag"] = r_data.get("release_tag")
+                    data["rsa"]["release_url"] = r_data.get("release_url")
+                    for s in r_data.get("scenes", []):
+                        manifest_scenes[s.get("file_name")] = s
+            except Exception:
+                pass
+
+        rsa_vids = []
+        for f in sorted(os.listdir(rsa_dir)):
+            if f.endswith(".mp4"):
+                fpath = os.path.join(rsa_dir, f)
+                scene_meta = manifest_scenes.get(f, {})
+                pretty_title = scene_meta.get("theorem") or f.replace(".mp4", "").replace("_", " ").title()
+                rsa_vids.append({
+                    "filename": f"rsa-animations/{f}",
+                    "title": pretty_title,
+                    "description": scene_meta.get("description", "RSA Number Theory Manim Animation."),
+                    "formula": scene_meta.get("formula", ""),
+                    "size_mb": round(os.path.getsize(fpath) / (1024 * 1024), 2),
+                })
+        data["rsa"]["videos"] = rsa_vids
+        data["rsa"]["total"] = len(rsa_vids)
+
     return data
 
 
@@ -264,6 +308,7 @@ def generate_html(data: Dict[str, Any], template_path: str) -> str:
         + data["voronoi"]["total"]
         + data["traversal"]["total"]
         + data["matrix"]["total"]
+        + data["rsa"]["total"]
     )
 
     replacements = {
@@ -275,6 +320,7 @@ def generate_html(data: Dict[str, Any], template_path: str) -> str:
         "__VORONOI_TOTAL__": str(data["voronoi"]["total"]),
         "__TRAVERSAL_TOTAL__": str(data["traversal"]["total"]),
         "__MATRIX_TOTAL__": str(data["matrix"]["total"]),
+        "__RSA_TOTAL__": str(data["rsa"]["total"]),
     }
 
     for token, val in replacements.items():
@@ -304,9 +350,10 @@ def build_site(artifacts_dir: str, output_dir: str):
     print(f"  - Voronoi Diagrams: {data['voronoi']['total']} items")
     print(f"  - Traversal PDFs:   {data['traversal']['total']} items")
     print(f"  - Matrix Videos:    {data['matrix']['total']} items")
+    print(f"  - RSA Videos:       {data['rsa']['total']} items")
 
     # 2. Copy media directories to output_dir
-    subdirs = ["collision-videos", "gcd-grids", "voronoi", "generated", "matrix-animations"]
+    subdirs = ["collision-videos", "gcd-grids", "voronoi", "generated", "matrix-animations", "rsa-animations"]
     for sub in subdirs:
         src_path = os.path.join(artifacts_dir, sub)
         dst_path = os.path.join(output_dir, sub)
@@ -329,6 +376,23 @@ def build_site(artifacts_dir: str, output_dir: str):
                 for f in os.listdir(cand):
                     s = os.path.join(cand, f)
                     d = os.path.join(dst_mat, f)
+                    if os.path.isfile(s):
+                        shutil.copy2(s, d)
+                break
+
+    dst_rsa = os.path.join(output_dir, "rsa-animations")
+    if not os.path.exists(dst_rsa) or not os.listdir(dst_rsa):
+        os.makedirs(dst_rsa, exist_ok=True)
+        for cand in [
+            os.path.join(artifacts_dir, "rsa-animations"),
+            os.path.join(artifacts_dir, "2026-09-12", "rsa_key_generation_manim", "rendered_animations"),
+            os.path.join(repo_root, "2026-09-12", "rsa_key_generation_manim", "rendered_animations"),
+        ]:
+            if os.path.exists(cand) and any(f.endswith(".mp4") for f in os.listdir(cand)):
+                print(f"Copying rsa-animations from {cand} -> {dst_rsa}...")
+                for f in os.listdir(cand):
+                    s = os.path.join(cand, f)
+                    d = os.path.join(dst_rsa, f)
                     if os.path.isfile(s):
                         shutil.copy2(s, d)
                 break

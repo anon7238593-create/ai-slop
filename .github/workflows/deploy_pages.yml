@@ -8,6 +8,7 @@ on:
       - "Generate Voronoi diagrams"
       - "Generate traversal PDFs"
       - "Generate Matrix Multiplication Animations"
+      - "Generate RSA Key Generation Animations"
     types:
       - completed
   schedule:
