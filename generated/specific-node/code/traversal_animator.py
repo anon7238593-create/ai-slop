@@ -599,7 +599,7 @@ class TraversalVideoRenderer:
             graph_w,
             graph_h,
             title="GRAPH TOPOLOGY & EXPLORATION",
-            badge=f"{len(self.graph)} Nodes · {len(self.unique_edges)} Edges",
+            badge=f"{len(self.graph)} Nodes | {len(self.unique_edges)} Edges",
             badge_color=(0.55, 0.36, 0.96),
             scale=self.scale,
         )
@@ -811,7 +811,7 @@ class TraversalVideoRenderer:
 
         # Complexity Pills
         curr_y += 32.0 * self.scale
-        comp_text = "Time: O(V + E)  │  Space: O(V)"
+        comp_text = "Time: O(V + E)   |   Space: O(V)"
         pill_h = 30.0 * self.scale
         draw_rounded_rect(ctx, inner_x, curr_y, inner_w, pill_h, 6.0 * self.scale)
         ctx.set_source_rgba(0.12, 0.18, 0.28, 0.8)
@@ -925,15 +925,15 @@ class TraversalVideoRenderer:
         ctx.set_source_rgba(0.04, 0.07, 0.12, 0.9)
         ctx.fill()
 
-        # Labels: [FRONT] Dequeue <--- | --- Enqueue [REAR]
+        # Labels: FRONT Dequeue / REAR Enqueue
         ctx.set_font_size(max(8.5, 11.5 * self.scale))
         ctx.set_source_rgb(0.96, 0.62, 0.04)
         ctx.move_to(x + 16.0 * self.scale, rail_y + 19.0 * self.scale)
-        ctx.show_text("◀ FRONT (Dequeue)")
+        ctx.show_text("<< FRONT (Dequeue)")
 
         ctx.set_source_rgb(0.02, 0.71, 0.83)
         ctx.move_to(x + w - 160.0 * self.scale, rail_y + 19.0 * self.scale)
-        ctx.show_text("REAR (Enqueue) ◀")
+        ctx.show_text("REAR (Enqueue) <<")
 
         # Draw Queue Cards
         card_w, card_h = 48.0 * self.scale, 48.0 * self.scale
@@ -1035,7 +1035,7 @@ class TraversalVideoRenderer:
         ctx.set_font_size(max(8.5, 11.5 * self.scale))
         ctx.set_source_rgb(0.96, 0.62, 0.04)
         ctx.move_to(x + 16.0 * self.scale, rack_y + 19.0 * self.scale)
-        ctx.show_text("▲ TOP OF STACK (Next to Pop)")
+        ctx.show_text("[TOP] Stack (Next to Pop)")
 
         ctx.set_source_rgb(0.50, 0.58, 0.70)
         ctx.move_to(x + w - 140.0 * self.scale, rack_y + 19.0 * self.scale)
@@ -1182,13 +1182,18 @@ class TraversalVideoRenderer:
 
                 # Small connector arrow if not end of row and has next
                 if col < max_per_row - 1 and idx < len(step.visited_order) - 1:
-                    arrow_x = px + pill_w + 5.0 * self.scale
+                    arrow_x = px + pill_w + 4.0 * self.scale
                     arrow_y = py + pill_h / 2.0
-                    ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-                    ctx.set_font_size(max(9.0, 13.0 * self.scale))
                     ctx.set_source_rgb(0.35, 0.45, 0.58)
-                    ctx.move_to(arrow_x, arrow_y + 4.0 * self.scale)
-                    ctx.show_text("→")
+                    ctx.set_line_width(max(1.2, 1.8 * self.scale))
+                    ctx.move_to(arrow_x, arrow_y)
+                    ctx.line_to(arrow_x + 10.0 * self.scale, arrow_y)
+                    ctx.stroke()
+                    # Small arrowhead
+                    ctx.move_to(arrow_x + 7.0 * self.scale, arrow_y - 3.5 * self.scale)
+                    ctx.line_to(arrow_x + 10.5 * self.scale, arrow_y)
+                    ctx.line_to(arrow_x + 7.0 * self.scale, arrow_y + 3.5 * self.scale)
+                    ctx.stroke()
 
         return y + container_h
 
@@ -1465,9 +1470,9 @@ class ComparativeTraversalRenderer:
         ctx.show_text(desc)
 
         # Frontier sequence
-        ds_type = "Queue (Front → Rear)" if algorithm == "bfs" else "Stack (Top → Bottom)"
+        ds_type = "Queue (Front -> Rear)" if algorithm == "bfs" else "Stack (Top -> Bottom)"
         frontier_items = step.frontier if algorithm == "bfs" else list(reversed(step.frontier))
-        frontier_str = " → ".join(frontier_items) if frontier_items else "(empty)"
+        frontier_str = " -> ".join(frontier_items) if frontier_items else "(empty)"
 
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
         ctx.set_font_size(max(9.0, 12.0 * self.scale))
@@ -1479,7 +1484,7 @@ class ComparativeTraversalRenderer:
         ctx.show_text(frontier_str)
 
         # Visited sequence
-        vis_str = " → ".join(step.visited_order) if step.visited_order else "(none)"
+        vis_str = " -> ".join(step.visited_order) if step.visited_order else "(none)"
         ctx.set_source_rgb(0.06, 0.73, 0.51)
         ctx.move_to(x + 14.0 * self.scale, y + 102.0 * self.scale)
         ctx.show_text("Visited Order:  ")
@@ -1491,7 +1496,7 @@ class ComparativeTraversalRenderer:
         ctx.set_font_size(max(8.5, 11.5 * self.scale))
         ctx.set_source_rgb(0.55, 0.65, 0.80)
         ctx.move_to(x + 14.0 * self.scale, y + 132.0 * self.scale)
-        ctx.show_text(f"Spanning Tree Edges: {len(step.tree_edges)}  │  Total Visited: {len(step.visited_order)}")
+        ctx.show_text(f"Spanning Tree Edges: {len(step.tree_edges)}   |   Total Visited: {len(step.visited_order)}")
 
 
 def render_standalone_video(
@@ -1712,8 +1717,8 @@ def main() -> None:
     parser.add_argument(
         "--preset",
         choices=("720p", "1080p", "1440p", "2k", "4k"),
-        default="2k",
-        help="resolution preset: 2k (2560x1440, default), 4k (3840x2160), 1080p (1920x1080), 720p (1280x720)",
+        default="1080p",
+        help="resolution preset: 1080p (1920x1080, default), 2k / 1440p (2560x1440), 4k (3840x2160), 720p (1280x720)",
     )
     parser.add_argument("--width", type=int, help="video width in pixels (overrides preset)")
     parser.add_argument("--height", type=int, help="video height in pixels (overrides preset)")
@@ -1721,7 +1726,7 @@ def main() -> None:
         "--speed",
         choices=("slow", "normal", "fast"),
         default="normal",
-        help="pacing preset: slow (2.5s/step), normal (1.8s/step, default), fast (1.0s/step)",
+        help="pacing preset: slow (2.0s/step), normal (1.2s/step, default), fast (0.7s/step)",
     )
     parser.add_argument("--step-duration", type=float, help="duration in seconds for each traversal action step (overrides --speed)")
     parser.add_argument("--ffmpeg-bin", help="path to ffmpeg binary executable")
@@ -1737,17 +1742,17 @@ def main() -> None:
         "2k": (2560, 1440),
         "4k": (3840, 2160),
     }
-    preset_w, preset_h = RESOLUTION_PRESETS.get(args.preset, (2560, 1440))
+    preset_w, preset_h = RESOLUTION_PRESETS.get(args.preset, (1920, 1080))
     video_width = args.width if args.width is not None else preset_w
     video_height = args.height if args.height is not None else preset_h
 
     # Pacing calculation
     SPEED_PRESETS = {
-        "slow": 2.5,
-        "normal": 1.8,
-        "fast": 1.0,
+        "slow": 2.0,
+        "normal": 1.2,
+        "fast": 0.7,
     }
-    step_duration = args.step_duration if args.step_duration is not None else SPEED_PRESETS.get(args.speed, 1.8)
+    step_duration = args.step_duration if args.step_duration is not None else SPEED_PRESETS.get(args.speed, 1.2)
 
     # Determine Graph
     if args.graph_json and args.graph_json.exists():

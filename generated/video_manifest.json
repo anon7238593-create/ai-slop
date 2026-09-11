@@ -2,93 +2,101 @@
   "graph": {
     "A": [
       "B",
+      "C",
       "E",
-      "G"
+      "G",
+      "H",
+      "J"
     ],
     "B": [
       "A",
       "C",
       "D",
+      "E",
       "G",
-      "I",
-      "J"
+      "H"
     ],
     "C": [
+      "A",
       "B",
-      "D",
+      "E",
+      "F",
+      "H",
       "J"
     ],
     "D": [
       "B",
-      "C",
-      "E"
+      "E",
+      "F",
+      "G"
     ],
     "E": [
       "A",
+      "B",
+      "C",
       "D",
       "F",
-      "H",
       "I"
     ],
     "F": [
-      "E",
-      "G"
+      "C",
+      "D",
+      "E"
     ],
     "G": [
       "A",
       "B",
-      "F",
-      "H",
-      "J"
+      "D",
+      "I"
     ],
     "H": [
-      "E",
-      "G"
-    ],
-    "I": [
-      "B",
-      "E",
-      "J"
-    ],
-    "J": [
+      "A",
       "B",
       "C",
-      "G",
       "I"
+    ],
+    "I": [
+      "E",
+      "G",
+      "H"
+    ],
+    "J": [
+      "A",
+      "C"
     ]
   },
   "start_node": "A",
-  "seed": 1789155666,
+  "seed": 1789156335,
   "nodes": 10,
-  "edges": 18,
-  "resolution": "2560x1440",
+  "edges": 22,
+  "resolution": "1920x1080",
   "fps": 30,
-  "step_duration_seconds": 1.8,
-  "preset": "2k",
+  "step_duration_seconds": 1.2,
+  "preset": "1080p",
   "generated_videos": [
     {
       "algorithm": "bfs",
       "filename": "bfs_traversal.mp4",
       "title": "Breadth-First Search (BFS) Animation",
       "data_structure": "FIFO Queue",
-      "resolution": "2560x1440",
-      "step_duration": 1.8
+      "resolution": "1920x1080",
+      "step_duration": 1.2
     },
     {
       "algorithm": "dfs",
       "filename": "dfs_traversal.mp4",
       "title": "Depth-First Search (DFS) Animation",
       "data_structure": "LIFO Stack",
-      "resolution": "2560x1440",
-      "step_duration": 1.8
+      "resolution": "1920x1080",
+      "step_duration": 1.2
     },
     {
       "algorithm": "comparison",
       "filename": "bfs_dfs_comparison.mp4",
       "title": "Comparative Traversal: BFS vs DFS",
       "data_structure": "Queue vs Stack",
-      "resolution": "2560x1440",
-      "step_duration": 1.8
+      "resolution": "1920x1080",
+      "step_duration": 1.2
     }
   ]
 }
