@@ -462,6 +462,7 @@
         <span class="brand-sub">artifacts</span>
       </div>
       <div class="header-links">
+        <a href="probability.html" style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.4); color: #a5b4fc; padding: 4px 12px; border-radius: 6px; font-weight: 600; text-decoration: none;">🎲 Probability Lab &rarr;</a>
         <a href="https://github.com/anon7238593-create/ai-slop" target="_blank" rel="noopener">Repository &rarr;</a>
         <a href="https://github.com/anon7238593-create/ai-slop/releases" target="_blank" rel="noopener">Releases &rarr;</a>
         <a href="https://github.com/anon7238593-create/ai-slop/tree/artifacts" target="_blank" rel="noopener">artifacts branch &rarr;</a>
@@ -491,6 +492,10 @@
         <button class="tab-link" data-tab="matrix">
           Matrix Multiplication
           <span class="count-tag" id="badge-matrix">__MATRIX_TOTAL__</span>
+        </button>
+        <button class="tab-link" data-tab="probability">
+          Probability Lab
+          <span class="count-tag" id="badge-probability">10 Labs</span>
         </button>
       </nav>
     </div>
@@ -698,6 +703,27 @@
       <div class="grid grid-2" id="matrix-video-grid" style="margin-bottom: 2rem;"></div>
     </section>
 
+    <!-- 6. Probability Lab -->
+    <section id="tab-probability" class="tab-content">
+      <div class="section-intro">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2>🎲 Interactive Probability Lab</h2>
+            <p>
+              Explore 10 interactive probability modules: Law of Large Numbers, Galton Board Physics, Dice Central Limit Theorem, Monty Hall Paradox, Bayes' Theorem Screener, Birthday Paradox, Buffon's Needle, Gambler's Ruin, Distributions Sandbox, and Marble Urn Sampling.
+            </p>
+          </div>
+          <a href="probability.html" target="_blank" class="btn" style="background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; padding: 0.6rem 1.2rem; border-radius: 8px;">
+            Open Fullscreen Lab &rarr;
+          </a>
+        </div>
+      </div>
+
+      <div style="border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #090d16; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); margin-bottom: 2rem;">
+        <iframe src="probability.html" style="width: 100%; height: 860px; border: none; display: block;" title="Interactive Probability Lab"></iframe>
+      </div>
+    </section>
+
   </main>
 
   <footer>
@@ -734,7 +760,7 @@
 
     if (window.location.hash) {
       const hash = window.location.hash.replace('#', '');
-      if (['collision', 'gcd', 'voronoi', 'traversal', 'matrix'].includes(hash)) {
+      if (['collision', 'gcd', 'voronoi', 'traversal', 'matrix', 'probability'].includes(hash)) {
         selectTab(hash);
       }
     }

@@ -59,6 +59,21 @@ class TestTraversalAnimator(unittest.TestCase):
         self.assertIsNotNone(ffmpeg_path)
         self.assertTrue(os.path.exists(ffmpeg_path))
 
+    def test_render_standalone_encoding(self):
+        ffmpeg_path = find_ffmpeg()
+        if not ffmpeg_path:
+            self.skipTest("ffmpeg not found")
+        tiny_graph = {"A": ["B"], "B": []}
+        layout = {"A": (50.0, 50.0), "B": (150.0, 50.0)}
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_file = Path(tmpdir) / "test_mini.mp4"
+            render_standalone_video(
+                tiny_graph, layout, "bfs", out_file,
+                start_node="A", fps=10, width=320, height=240
+            )
+            self.assertTrue(out_file.exists())
+            self.assertGreater(out_file.stat().st_size, 1000)
+
 
 if __name__ == "__main__":
     unittest.main()

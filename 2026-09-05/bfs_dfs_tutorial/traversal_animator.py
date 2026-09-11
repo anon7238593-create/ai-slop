@@ -1515,10 +1515,13 @@ def render_standalone_video(
         global_frame += 1
 
     proc.stdin.close()
-    _, err = proc.communicate()
+    err = proc.stderr.read() if proc.stderr else b""
+    if proc.stderr:
+        proc.stderr.close()
+    proc.wait()
 
     if proc.returncode != 0:
-        raise RuntimeError(f"FFmpeg encoding failed with code {proc.returncode}:\n{err.decode()[-600:]}")
+        raise RuntimeError(f"FFmpeg encoding failed with code {proc.returncode}:\n{err.decode('utf-8', errors='replace')[-600:]}")
 
     size_mb = os.path.getsize(output_path) / (1024 * 1024)
     print(f"[{algorithm.upper()}] Successfully created {output_path} ({size_mb:.2f} MB)")
@@ -1607,10 +1610,13 @@ def render_comparative_video(
         global_frame += 1
 
     proc.stdin.close()
-    _, err = proc.communicate()
+    err = proc.stderr.read() if proc.stderr else b""
+    if proc.stderr:
+        proc.stderr.close()
+    proc.wait()
 
     if proc.returncode != 0:
-        raise RuntimeError(f"FFmpeg encoding failed with code {proc.returncode}:\n{err.decode()[-600:]}")
+        raise RuntimeError(f"FFmpeg encoding failed with code {proc.returncode}:\n{err.decode('utf-8', errors='replace')[-600:]}")
 
     size_mb = os.path.getsize(output_path) / (1024 * 1024)
     print(f"[COMPARISON] Successfully created {output_path} ({size_mb:.2f} MB)")

@@ -200,11 +200,19 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
         data["traversal"]["total"] = len(pdf_items) + len(video_items)
 
     # 5. Matrix Multiplication Animations
-    mat_dir = os.path.join(artifacts_dir, "matrix-animations")
-    if not os.path.exists(mat_dir):
-        mat_dir = os.path.join(artifacts_dir, "2026-09-12", "matrix_multiplication_manim", "rendered_animations")
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    mat_candidates = [
+        os.path.join(artifacts_dir, "matrix-animations"),
+        os.path.join(artifacts_dir, "2026-09-12", "matrix_multiplication_manim", "rendered_animations"),
+        os.path.join(repo_root, "2026-09-12", "matrix_multiplication_manim", "rendered_animations"),
+    ]
+    mat_dir = None
+    for cand in mat_candidates:
+        if os.path.exists(cand) and any(f.endswith(".mp4") for f in os.listdir(cand)):
+            mat_dir = cand
+            break
 
-    if os.path.exists(mat_dir):
+    if mat_dir and os.path.exists(mat_dir):
         mat_manifest = os.path.join(mat_dir, "animation_manifest.json")
         if os.path.exists(mat_manifest):
             try:
@@ -277,6 +285,9 @@ def generate_html(data: Dict[str, Any], template_path: str) -> str:
 
 def build_site(artifacts_dir: str, output_dir: str):
     """Main build orchestrator: copy assets and generate index.html."""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.abspath(os.path.join(script_dir, "..", ".."))
+
     print("=" * 65)
     print("GITHUB PAGES ARTIFACTS WEBSITE BUILDER")
     print(f"Source Artifacts: {artifacts_dir}")
@@ -306,11 +317,31 @@ def build_site(artifacts_dir: str, output_dir: str):
             shutil.copytree(src_path, dst_path)
 
     dst_mat = os.path.join(output_dir, "matrix-animations")
-    if not os.path.exists(dst_mat):
-        fallback_mat = os.path.join(artifacts_dir, "2026-09-12", "matrix_multiplication_manim", "rendered_animations")
-        if os.path.exists(fallback_mat):
-            print(f"Copying fallback matrix-animations -> {dst_mat}...")
-            shutil.copytree(fallback_mat, dst_mat)
+    if not os.path.exists(dst_mat) or not os.listdir(dst_mat):
+        os.makedirs(dst_mat, exist_ok=True)
+        for cand in [
+            os.path.join(artifacts_dir, "matrix-animations"),
+            os.path.join(artifacts_dir, "2026-09-12", "matrix_multiplication_manim", "rendered_animations"),
+            os.path.join(repo_root, "2026-09-12", "matrix_multiplication_manim", "rendered_animations"),
+        ]:
+            if os.path.exists(cand) and any(f.endswith(".mp4") for f in os.listdir(cand)):
+                print(f"Copying matrix-animations from {cand} -> {dst_mat}...")
+                for f in os.listdir(cand):
+                    s = os.path.join(cand, f)
+                    d = os.path.join(dst_mat, f)
+                    if os.path.isfile(s):
+                        shutil.copy2(s, d)
+                break
+
+    # 3b. Copy Interactive Probability Lab
+    prob_src = os.path.join(script_dir, "probability.html")
+    if not os.path.exists(prob_src):
+        prob_src = os.path.join(repo_root, "probability", "index.html")
+    if os.path.exists(prob_src):
+        print(f"Copying Interactive Probability Lab -> {output_dir}/probability.html...")
+        shutil.copy2(prob_src, os.path.join(output_dir, "probability.html"))
+        os.makedirs(os.path.join(output_dir, "probability"), exist_ok=True)
+        shutil.copy2(prob_src, os.path.join(output_dir, "probability", "index.html"))
 
     # 3. Create .nojekyll to prevent GitHub Pages from ignoring files
     nojekyll_path = os.path.join(output_dir, ".nojekyll")

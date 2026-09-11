@@ -1,0 +1,2672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Probability Lab &middot; ai-slop</title>
+  <meta name="description" content="Comprehensive interactive probability lab: Law of Large Numbers, Galton Board, Central Limit Theorem, Monty Hall, Bayes Theorem, Birthday Paradox, Buffons Needle, Gamblers Ruin, Distributions, and Urn Sampling.">
+  <style>
+    :root {
+      --bg: #090d16;
+      --bg-card: #111827;
+      --bg-card-hover: #182235;
+      --bg-card-alt: #0c1220;
+      --border: #1f293d;
+      --border-bright: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-heading: #ffffff;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --mono: "JetBrains Mono", "Fira Code", Menlo, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 5rem;
+    }
+
+    /* Navigation Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(9, 13, 22, 0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--text-heading);
+      text-decoration: none;
+    }
+
+    .brand span.tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      font-weight: 600;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      color: #ffffff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 3rem 1rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .hero h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 70%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .module-pill-nav {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .pill-link {
+      padding: 0.4rem 0.9rem;
+      border-radius: 9999px;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .pill-link:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Lab Card Component */
+    .lab-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 3rem;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.2s ease;
+    }
+
+    .lab-card:hover {
+      border-color: var(--border-bright);
+    }
+
+    .lab-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.015);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .lab-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .lab-header h2 {
+      font-size: 1.6rem;
+      color: var(--text-heading);
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .lab-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 900px;
+    }
+
+    .lab-body {
+      padding: 1.5rem;
+    }
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .lab-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .lab-visual {
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 380px;
+      position: relative;
+    }
+
+    .lab-controls {
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .control-val {
+      color: var(--cyan);
+      font-family: var(--mono);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--cyan);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    button.btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    button.btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-bright);
+      color: #fff;
+    }
+
+    button.btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    button.btn.primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+    }
+
+    button.btn.active {
+      background: var(--emerald);
+      border-color: var(--emerald);
+      color: #fff;
+    }
+
+    /* Metric Badges */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      font-family: var(--mono);
+    }
+
+    .metric-val.cyan { color: var(--cyan); }
+    .metric-val.emerald { color: var(--emerald); }
+    .metric-val.amber { color: var(--amber); }
+    .metric-val.rose { color: var(--rose); }
+
+    /* Takeaway Box */
+    .takeaway-box {
+      margin-top: 1.25rem;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      background: rgba(99, 102, 241, 0.06);
+      border-left: 4px solid var(--accent);
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .takeaway-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    /* Canvas styling */
+    canvas {
+      border-radius: 6px;
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Custom Module Styles */
+    .coin-stage {
+      perspective: 800px;
+      width: 100px;
+      height: 100px;
+      margin: 1rem auto;
+    }
+
+    .coin-3d {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 2, 0.55, 0.44);
+      border-radius: 50%;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .coin-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 2.2rem;
+      backface-visibility: hidden;
+      border: 4px solid #fef08a;
+    }
+
+    .coin-heads {
+      background: radial-gradient(circle at 30% 30%, #fef08a, #ca8a04);
+      color: #713f12;
+    }
+
+    .coin-tails {
+      background: radial-gradient(circle at 30% 30%, #93c5fd, #2563eb);
+      color: #1e3a8a;
+      transform: rotateY(180deg);
+      border-color: #bfdbfe;
+    }
+
+    /* Monty Hall Doors */
+    .doors-container {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      width: 100%;
+      padding: 1rem 0;
+    }
+
+    .door-wrapper {
+      flex: 1;
+      max-width: 180px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .door-frame {
+      background: #1e293b;
+      border: 3px solid #334155;
+      border-radius: 10px 10px 0 0;
+      height: 240px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .door-wrapper:hover .door-frame {
+      border-color: var(--cyan);
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .door-wrapper.selected .door-frame {
+      border-color: var(--amber);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .door-leaf {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #2a374a 0%, #1e293b 100%);
+      transform-origin: left;
+      transition: transform 0.8s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .door-wrapper.open .door-leaf {
+      transform: rotateY(-110deg);
+    }
+
+    .door-handle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      background: #fbbf24;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    .door-number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #94a3b8;
+    }
+
+    .door-prize {
+      font-size: 3.5rem;
+      z-index: 1;
+      user-select: none;
+    }
+
+    /* Waffle chart */
+    .waffle-grid {
+      display: grid;
+      grid-template-columns: repeat(40, 1fr);
+      gap: 3px;
+      width: 100%;
+      max-width: 600px;
+      margin: 1rem auto;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+    }
+
+    .waffle-dot {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 2px;
+      transition: transform 0.1s;
+    }
+
+    .waffle-dot:hover {
+      transform: scale(2);
+      z-index: 10;
+    }
+
+    .dot-tp { background: #10b981; box-shadow: 0 0 4px #10b981; }
+    .dot-fp { background: #f43f5e; }
+    .dot-fn { background: #8b5cf6; }
+    .dot-tn { background: #334155; }
+
+    /* Birthday grid */
+    .room-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 0.5rem;
+      width: 100%;
+      max-height: 280px;
+      overflow-y: auto;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+    }
+
+    .person-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.35rem;
+      text-align: center;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .person-chip.match {
+      background: rgba(244, 63, 94, 0.25);
+      border-color: #f43f5e;
+      color: #fecdd3;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+      transform: scale(1.05);
+    }
+
+    /* Marble Urn */
+    .urn-container {
+      width: 220px;
+      height: 220px;
+      border: 4px solid #64748b;
+      border-top: none;
+      border-radius: 0 0 110px 110px;
+      margin: 1rem auto;
+      position: relative;
+      background: rgba(255, 255, 255, 0.02);
+      box-shadow: inset 0 -20px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-end;
+      justify-content: center;
+      padding: 15px;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .marble {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0,0,0,0.3);
+      transition: transform 0.3s;
+    }
+
+    .marble.red { background: radial-gradient(circle at 35% 35%, #f87171, #dc2626); }
+    .marble.green { background: radial-gradient(circle at 35% 35%, #4ade80, #16a34a); }
+    .marble.blue { background: radial-gradient(circle at 35% 35%, #60a5fa, #2563eb); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    footer a { color: var(--accent-hover); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="topbar">
+    <div class="topbar-inner">
+      <a href="./" class="brand">
+        🎲 Interactive Probability Lab
+        <span class="tag">10 Labs</span>
+      </a>
+      <div class="nav-links">
+        <a href="#lab-lln" class="nav-btn">Coin LLN</a>
+        <a href="#lab-galton" class="nav-btn">Galton Board</a>
+        <a href="#lab-clt" class="nav-btn">Dice CLT</a>
+        <a href="#lab-monty" class="nav-btn">Monty Hall</a>
+        <a href="#lab-bayes" class="nav-btn">Bayes Screener</a>
+        <a href="#lab-birthday" class="nav-btn">Birthday Paradox</a>
+        <a href="#lab-buffon" class="nav-btn">Buffons Needle</a>
+        <a href="#lab-ruin" class="nav-btn">Gamblers Ruin</a>
+        <a href="#lab-dist" class="nav-btn">Distributions</a>
+        <a href="#lab-urn" class="nav-btn">Marble Urn</a>
+        <a href="./" class="nav-btn primary">&larr; Return to ai-slop</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Header -->
+  <header class="hero">
+    <div class="container">
+      <h1>The Visual &amp; Interactive Guide to Probability</h1>
+      <p>
+        Explore how order emerges from randomness. Run real-time physics simulations, test famous counter-intuitive paradoxes, manipulate statistical distributions, and discover the mathematical laws governing chance.
+      </p>
+      <div class="module-pill-nav">
+        <a href="#lab-lln" class="pill-link">🪙 1. Law of Large Numbers</a>
+        <a href="#lab-galton" class="pill-link">⚪ 2. Galton Board Physics</a>
+        <a href="#lab-clt" class="pill-link">🎲 3. Dice &amp; Central Limit Theorem</a>
+        <a href="#lab-monty" class="pill-link">🚪 4. Monty Hall Paradox</a>
+        <a href="#lab-bayes" class="pill-link">🧬 5. Bayes Base Rate Fallacy</a>
+        <a href="#lab-birthday" class="pill-link">🎂 6. Birthday Collision Paradox</a>
+        <a href="#lab-buffon" class="pill-link">📏 7. Buffons Needle (&pi;)</a>
+        <a href="#lab-ruin" class="pill-link">🎰 8. Gamblers Ruin</a>
+        <a href="#lab-dist" class="pill-link">📊 9. Continuous &amp; Discrete Distributions</a>
+        <a href="#lab-urn" class="pill-link">🔮 10. Urn Sampling &amp; Conditionals</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- LAB 1: Law of Large Numbers -->
+    <section class="lab-card" id="lab-lln">
+      <div class="lab-header">
+        <div>
+          <span class="lab-badge">Lab 1 &middot; Foundation</span>
+          <h2>The Law of Large Numbers (LLN)</h2>
+          <p>
+            As the number of independent trials $n$ grows, the sample proportion $\hat{p}_n = \frac{H}{n}$ converges almost surely to the theoretical probability $p$. In small samples, streaks and wild swings are common; over large samples, random fluctuations cancel out with mathematical certainty.
+          </p>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="lab-grid">
+          <div class="lab-visual">
+            <canvas id="canvas-coin-lln" width="760" height="320"></canvas>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-label">Total Flips</div>
+                <div class="metric-val" id="lln-total">0</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Heads Count</div>
+                <div class="metric-val emerald" id="lln-heads">0</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Heads Ratio</div>
+                <div class="metric-val cyan" id="lln-ratio">0.00%</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Max Streak</div>
+                <div class="metric-val amber" id="lln-streak">0</div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <div class="coin-stage">
+              <div class="coin-3d" id="coin-element">
+                <div class="coin-face coin-heads">H</div>
+                <div class="coin-face coin-tails">T</div>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Theoretical Probability P(H)</span>
+                <span class="control-val" id="coin-p-val">0.50</span>
+              </div>
+              <input type="range" id="coin-p" min="0.05" max="0.95" step="0.05" value="0.50">
+            </div>
+            <div class="btn-row">
+              <button class="btn" onclick="flipCoins(1)">Flip 1</button>
+              <button class="btn" onclick="flipCoins(10)">+10</button>
+              <button class="btn" onclick="flipCoins(100)">+100</button>
+              <button class="btn primary" onclick="flipCoins(1000)">+1,000</button>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="btn-coin-stream" onclick="toggleCoinStream()">▶ Stream Auto-Flip</button>
+              <button class="btn" onclick="resetCoinLab()">Reset</button>
+            </div>
+          </div>
+        </div>
+        <div class="takeaway-box">
+          <span class="takeaway-icon">💡</span>
+          <div>
+            <strong>Intuition:</strong> The dashed orange line represents theoretical $p$. The shaded band shows the 95% error margin $\pm 1.96 \sqrt{p(1-p)/n}$. Notice that while the <em>percentage</em> deviation shrinks towards 0 as $n \to \infty$, the <em>absolute difference</em> $|H - n \cdot p|$ typically grows as $\mathcal{O}(\sqrt{n})$!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB 2: Galton Board -->
+    <section class="lab-card" id="lab-galton">
+      <div class="lab-header">
+        <div>
+          <span class="lab-badge">Lab 2 &middot; Physics Simulation</span>
+          <h2>The Galton Board (Quincunx / Bean Machine)</h2>
+          <p>
+            Invented by Sir Francis Galton in 1873 to demonstrate the Central Limit Theorem. As thousands of individual marbles tumble through triangular rows of pegs, each independent left/right deflection accumulates into an exact Binomial distribution $B(R, p)$ that smoothly morphs into the Gaussian Bell Curve.
+          </p>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="lab-grid">
+          <div class="lab-visual" style="padding: 0.5rem; background: #080c14;">
+            <canvas id="canvas-galton" width="760" height="460"></canvas>
+            <div class="metric-grid" style="margin-top: 0.5rem;">
+              <div class="metric-card">
+                <div class="metric-label">Dropped Balls</div>
+                <div class="metric-val" id="galton-count">0</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Active Physics Particles</div>
+                <div class="metric-val cyan" id="galton-active">0</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Peg Rows (R)</div>
+                <div class="metric-val amber" id="galton-rows-metric">10</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Gaussian Fit R&sup2;</div>
+                <div class="metric-val emerald" id="galton-fit">&gt; 0.98</div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <div class="control-group">
+              <div class="control-label">
+                <span>Number of Peg Rows (R)</span>
+                <span class="control-val" id="galton-rows-val">10</span>
+              </div>
+              <input type="range" id="galton-rows" min="6" max="14" step="1" value="10">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Rightward Deflection Bias (p)</span>
+                <span class="control-val" id="galton-bias-val">0.50</span>
+              </div>
+              <input type="range" id="galton-bias" min="0.2" max="0.8" step="0.05" value="0.50">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Simulation Speed</span>
+                <span class="control-val" id="galton-speed-val">Fast</span>
+              </div>
+              <input type="range" id="galton-speed" min="1" max="5" step="1" value="3">
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" onclick="dropGaltonBalls(1)">Drop 1</button>
+              <button class="btn" onclick="dropGaltonBalls(25)">+25</button>
+              <button class="btn" onclick="dropGaltonBalls(100)">+100</button>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="btn-galton-flow" onclick="toggleGaltonFlow()">▶ Continuous Flow</button>
+              <button class="btn" onclick="resetGalton()">Reset Bins</button>
+            </div>
+          </div>
+        </div>
+        <div class="takeaway-box">
+          <span class="takeaway-icon">💡</span>
+          <div>
+            <strong>Physics to Mathematics:</strong> Each marble makes $R$ independent binary decisions. Landing in bin $k$ requires choosing "Right" exactly $k$ times and "Left" $R-k$ times. The probability of landing in bin $k$ is given exactly by the binomial coefficient: $P(X=k) = \binom{R}{k} p^k (1-p)^{R-k}$.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB 3: Dice Rolling & CLT -->
+    <section class="lab-card" id="lab-clt">
+      <div class="lab-header">
+        <div>
+          <span class="lab-badge">Lab 3 &middot; Limit Theorem</span>
+          <h2>Sum of Random Variables &amp; The Central Limit Theorem</h2>
+          <p>
+            The Central Limit Theorem (CLT) states that the sum (or average) of $k$ independent and identically distributed random variables approaches a Normal distribution $\mathcal{N}(\mu, \sigma^2)$, <em>regardless of the underlying distributions shape</em>. Watch a flat uniform die or a skewed distribution transform into a bell curve!
+          </p>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="lab-grid">
+          <div class="lab-visual">
+            <div id="dice-display" style="display: flex; gap: 8px; margin-bottom: 0.75rem; min-height: 44px; align-items: center;"></div>
+            <canvas id="canvas-dice-clt" width="760" height="320"></canvas>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-label">Rolls Sampled</div>
+                <div class="metric-val" id="clt-rolls">0</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Observed Mean</div>
+                <div class="metric-val cyan" id="clt-mean">0.00</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Theoretical Mean</div>
+                <div class="metric-val" id="clt-theo-mean">7.00</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Standard Deviation</div>
+                <div class="metric-val emerald" id="clt-std">0.00</div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <div class="control-group">
+              <div class="control-label">
+                <span>Number of Dice (k)</span>
+                <span class="control-val" id="clt-dice-val">2 Dice</span>
+              </div>
+              <input type="range" id="clt-dice" min="1" max="8" step="1" value="2">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Input Distribution Type</span>
+              </div>
+              <select id="clt-dist-type" style="background: var(--bg-card); color: var(--text); border: 1px solid var(--border); padding: 0.4rem; border-radius: 6px;" onchange="resetDiceCLT()">
+                <option value="fair">Standard Fair Die (1-6 Uniform)</option>
+                <option value="loaded">Loaded Die (Skewed 6s)</option>
+                <option value="bimodal">Bimodal (Only 1s and 6s)</option>
+                <option value="exponential">Exponential / High Skew</option>
+              </select>
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" onclick="rollDice(1)">Roll 1</button>
+              <button class="btn" onclick="rollDice(100)">+100</button>
+              <button class="btn" onclick="rollDice(1000)">+1,000</button>
+              <button class="btn" onclick="rollDice(10000)">+10,000</button>
+            </div>
+            <div class="btn-row">
+              <button class="btn" onclick="resetDiceCLT()">Clear Data</button>
+            </div>
+          </div>
+        </div>
+        <div class="takeaway-box">
+          <span class="takeaway-icon">💡</span>
+          <div>
+            <strong>Look at $k=1$ vs $k=2$ vs $k \ge 3$:</strong> With $k=1$, the histogram is flat (uniform). With $k=2$, it forms a perfect triangle (summing two uniforms yields Irwin-Hall triangular). At $k \ge 3$, the shoulders round out into a Gaussian bell curve overlaid in gold!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB 4: Monty Hall Paradox -->
+    <section class="lab-card" id="lab-monty">
+      <div class="lab-header">
+        <div>
+          <span class="lab-badge">Lab 4 &middot; Conditional Paradox</span>
+          <h2>The Monty Hall Paradox</h2>
+          <p>
+            You are on a game show with 3 doors. Behind one is a Sports Car 🚗; behind the other two are Goats 🐐. You choose a door. The host, Monty, who knows what is behind every door, opens one of the remaining doors to reveal a goat. He then asks: <em>"Do you want to switch doors?"</em> Should you switch?
+          </p>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="lab-grid">
+          <div class="lab-visual" style="justify-content: flex-start;">
+            <div id="monty-status-banner" style="font-size: 1.1rem; font-weight: 700; color: var(--cyan); margin-bottom: 1rem; text-align: center;">
+              Step 1: Pick any door below!
+            </div>
+            <div class="doors-container">
+              <div class="door-wrapper" id="door-0" onclick="handleDoorClick(0)">
+                <div class="door-frame">
+                  <div class="door-leaf">
+                    <span class="door-number">1</span>
+                    <div class="door-handle"></div>
+                  </div>
+                  <div class="door-prize" id="prize-0">🐐</div>
+                </div>
+              </div>
+              <div class="door-wrapper" id="door-1" onclick="handleDoorClick(1)">
+                <div class="door-frame">
+                  <div class="door-leaf">
+                    <span class="door-number">2</span>
+                    <div class="door-handle"></div>
+                  </div>
+                  <div class="door-prize" id="prize-1">🚗</div>
+                </div>
+              </div>
+              <div class="door-wrapper" id="door-2" onclick="handleDoorClick(2)">
+                <div class="door-frame">
+                  <div class="door-leaf">
+                    <span class="door-number">3</span>
+                    <div class="door-handle"></div>
+                  </div>
+                  <div class="door-prize" id="prize-2">🐐</div>
+                </div>
+              </div>
+            </div>
+            <div id="monty-choice-actions" style="margin-top: 1rem; display: none; gap: 1rem;">
+              <button class="btn primary" onclick="resolveMontyChoice(true)">Switch Door &rarr;</button>
+              <button class="btn" onclick="resolveMontyChoice(false)">Stay with Original Door</button>
+            </div>
+            <div class="metric-grid" style="margin-top: 1.5rem;">
+              <div class="metric-card">
+                <div class="metric-label">Stay Win Rate</div>
+                <div class="metric-val rose" id="monty-stay-rate">33.3%</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Switch Win Rate</div>
+                <div class="metric-val emerald" id="monty-switch-rate">66.7%</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Simulated Rounds</div>
+                <div class="metric-val" id="monty-total-sims">0</div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <h4 style="color: var(--text-heading); font-size: 1rem;">High-Speed Monte Carlo Simulation</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              Run thousands of simulated automated rounds to mathematically prove the probability of both strategies.
+            </p>
+            <div class="btn-row">
+              <button class="btn" onclick="simulateMontyRounds(100)">Simulate 100</button>
+              <button class="btn primary" onclick="simulateMontyRounds(1000)">Simulate 1,000</button>
+              <button class="btn" onclick="simulateMontyRounds(10000)">Simulate 10,000</button>
+            </div>
+            <div style="background: rgba(0,0,0,0.25); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">STRATEGY COMPARISON</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 3px;">
+                <span>Always Switch (Theoretical 66.7%)</span>
+                <span class="control-val" id="bar-switch-val">0%</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 0.75rem;">
+                <div id="bar-switch" style="width: 0%; height: 100%; background: var(--emerald); transition: width 0.3s;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 3px;">
+                <span>Always Stay (Theoretical 33.3%)</span>
+                <span class="control-val" id="bar-stay-val">0%</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;">
+                <div id="bar-stay" style="width: 0%; height: 100%; background: var(--rose); transition: width 0.3s;"></div>
+              </div>
+            </div>
+            <button class="btn" onclick="resetMontyGame()">Play Again</button>
+          </div>
+        </div>
+        <div class="takeaway-box">
+          <span class="takeaway-icon">💡</span>
+          <div>
+            <strong>Why Switching Doubles Your Odds:</strong> Your initial pick has a $1/3$ chance of hiding the car, meaning there is a $2/3$ chance the car is behind one of the other two doors. Montys goat reveal gives you new information by eliminating the losing door among the two. The full $2/3$ probability is transferred to the single unopened door!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB 5: Bayes Theorem -->
+    <section class="lab-card" id="lab-bayes">
+      <div class="lab-header">
+        <div>
+          <span class="lab-badge">Lab 5 &middot; Bayesian Reasoning</span>
+          <h2>Bayes Theorem &amp; The Base Rate Fallacy</h2>
+          <p>
+            If a medical test is 99% accurate and you test positive, what is the probability that you are actually sick? Counter-intuitively, if the disease is rare (e.g. 1 in 1,000), the answer is only <strong>~9%</strong>! Because healthy people vastly outnumber sick people, false positives drastically overwhelm true positives.
+          </p>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="lab-grid">
+          <div class="lab-visual">
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; text-align: center;">
+              1,000-Person Population Matrix (Hover dots to inspect individual clinical outcomes)
+            </div>
+            <div class="waffle-grid" id="bayes-waffle"></div>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; font-size: 0.8rem; margin-top: 0.75rem;">
+              <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; background: #10b981; border-radius: 2px;"></span> True Positive (<span id="count-tp">10</span>)</span>
+              <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; background: #f43f5e; border-radius: 2px;"></span> False Positive (<span id="count-fp">99</span>)</span>
+              <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; background: #8b5cf6; border-radius: 2px;"></span> False Negative (<span id="count-fn">0</span>)</span>
+              <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; background: #334155; border-radius: 2px;"></span> True Negative (<span id="count-tn">891</span>)</span>
+            </div>
+            <div class="metric-grid" style="margin-top: 1rem;">
+              <div class="metric-card">
+                <div class="metric-label">Posterior P(Sick | +)</div>
+                <div class="metric-val emerald" id="bayes-posterior">9.17%</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Total Positive Tests</div>
+                <div class="metric-val amber" id="bayes-total-pos">109</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">False Discovery Rate</div>
+                <div class="metric-val rose" id="bayes-fdr">90.83%</div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <div class="control-group">
+              <div class="control-label">
+                <span>Disease Prevalence P(D)</span>
+                <span class="control-val" id="bayes-prev-val">1.0%</span>
+              </div>
+              <input type="range" id="bayes-prev" min="0.1" max="10.0" step="0.1" value="1.0">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Test Sensitivity P(+ | D)</span>
+                <span class="control-val" id="bayes-sens-val">99%</span>
+              </div>
+              <input type="range" id="bayes-sens" min="70" max="100" step="1" value="99">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Test Specificity P(- | &not;D)</span>
+                <span class="control-val" id="bayes-spec-val">90%</span>
+              </div>
+              <input type="range" id="bayes-spec" min="70" max="100" step="1" value="90">
+            </div>
+            <div style="background: rgba(0,0,0,0.25); padding: 0.75rem; border-radius: 6px; font-size: 0.8rem; font-family: var(--mono); color: #cbd5e1; line-height: 1.5;">
+              <div><strong>Bayes Formula:</strong></div>
+              <div style="margin-top: 4px; color: var(--cyan);">P(D|+) = [P(+|D)&middot;P(D)] / P(+)</div>
+              <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 2px;">
+                = (<span id="calc-num">0.0099</span>) / (<span id="calc-den">0.1089</span>)
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn" onclick="setBayesPreset(0.1, 99, 99)">Rare Disease (0.1%)</button>
+              <button class="btn" onclick="setBayesPreset(5.0, 95, 95)">Moderate (5.0%)</button>
+            </div>
+          </div>
+        </div>
+        <div class="takeaway-box">
+          <span class="takeaway-icon">💡</span>
+          <div>
+            <strong>The Takeaway:</strong> Never interpret test accuracy in a vacuum without the <em>base rate (prior probability)</em>. Even with an exceptionally accurate test, when screening for rare conditions, the majority of positive results will still be false alarms!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB 6: Birthday Paradox -->
+    <section class="lab-card" id="lab-birthday">
+      <div class="lab-header">
+        <div>
+          <span class="lab-badge">Lab 6 &middot; Combinatorics</span>
+          <h2>The Birthday Paradox &amp; Hash Collisions</h2>
+          <p>
+            How many people must be in a room before there is a &gt;50% chance that two share the exact same birthday? Most people guess 183 (half of 365). The real answer is just <strong>23 people</strong>! With 70 people, the chance reaches <strong>99.9%</strong>. This fundamental principle governs hash table collisions and cryptographic security.
+          </p>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="lab-grid">
+          <div class="lab-visual">
+            <canvas id="canvas-birthday-curve" width="760" height="260"></canvas>
+            <div id="birthday-match-alert" style="margin: 0.5rem 0; font-size: 0.9rem; font-weight: 700; color: var(--rose); min-height: 24px; text-align: center;"></div>
+            <div class="room-grid" id="room-people-grid"></div>
+            <div class="metric-grid" style="margin-top: 0.75rem;">
+              <div class="metric-card">
+                <div class="metric-label">Room Size (N)</div>
+                <div class="metric-val cyan" id="bday-n-val">23</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Pairs Compared &binom;(N, 2)</div>
+                <div class="metric-val amber" id="bday-pairs">253</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Theoretical P(&ge; 1 match)</div>
+                <div class="metric-val emerald" id="bday-theo-prob">50.73%</div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <div class="control-group">
+              <div class="control-label">
+                <span>Number of People in Room (N)</span>
+                <span class="control-val" id="slider-bday-val">23</span>
+              </div>
+              <input type="range" id="bday-slider" min="2" max="80" step="1" value="23" oninput="updateBirthdayRoom()">
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" onclick="generateNewBirthdayRoom()">Generate New Room</button>
+              <button class="btn" onclick="simulate1000Rooms()">Simulate 1,000 Rooms</button>
+            </div>
+            <div class="btn-row">
+              <button class="btn" onclick="setBirthdayPreset(23)">Preset: N=23 (50.7%)</button>
+              <button class="btn" onclick="setBirthdayPreset(50)">Preset: N=50 (97.0%)</button>
+              <button class="btn" onclick="setBirthdayPreset(70)">Preset: N=70 (99.9%)</button>
+            </div>
+            <div style="background: rgba(0,0,0,0.25); padding: 0.75rem; border-radius: 6px; font-size: 0.8rem; color: #cbd5e1; line-height: 1.5;">
+              <strong>Why 23?</strong>
+              <div>We compare every pair: $\binom{23}{2} = 253$ distinct pairings! The probability that <em>none</em> match is:</div>
+              <div style="color: var(--cyan); font-family: var(--mono); margin-top: 4px;">P(No Match) = 365/365 &times; 364/365 &times; ... &times; 343/365 &asymp; 49.27%</div>
+              <div style="margin-top: 2px;">Therefore: $P(\ge 1) = 1 - 0.4927 = 50.73\%$.</div>
+            </div>
+          </div>
+        </div>
+        <div class="takeaway-box">
+          <span class="takeaway-icon">💡</span>
+          <div>
+            <strong>Human Intuition Trap:</strong> We intuitively ask: <em>"What are the odds someone shares MY birthday?"</em> (which requires 253 people for 50%). But the paradox asks if <em>ANY two people</em> share a birthday, which scales quadratically $\mathcal{O}(N^2)$ with the number of pairs!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB 7: Buffons Needle -->
+    <section class="lab-card" id="lab-buffon">
+      <div class="lab-header">
+        <div>
+          <span class="lab-badge">Lab 7 &middot; Geometric Probability</span>
+          <h2>Buffons Needle (&pi; via Monte Carlo)</h2>
+          <p>
+            In 1777, Georges-Louis Leclerc, Comte de Buffon proved that if a needle of length $L$ is dropped onto floorboards of width $D$ ($L \le D$), the probability that the needle intersects a line is exactly $P = \frac{2L}{\pi D}$. Dropping needles allows you to calculate the digits of $\pi$ through pure physical randomness!
+          </p>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="lab-grid">
+          <div class="lab-visual" style="background: #141a29;">
+            <canvas id="canvas-buffon" width="760" height="340"></canvas>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-label">Total Needles Dropped</div>
+                <div class="metric-val" id="buffon-total">0</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Line Crossings</div>
+                <div class="metric-val cyan" id="buffon-crossings">0</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Estimated &pi;</div>
+                <div class="metric-val emerald" id="buffon-pi">&mdash;</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Absolute Error</div>
+                <div class="metric-val amber" id="buffon-err">&mdash;</div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <div class="control-group">
+              <div class="control-label">
+                <span>Needle Length (L)</span>
+                <span class="control-val" id="buffon-len-val">45 px</span>
+              </div>
+              <input type="range" id="buffon-len" min="20" max="60" step="5" value="45">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Floorboard Width (D)</span>
+                <span class="control-val">60 px</span>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn" onclick="dropNeedles(1)">Drop 1</button>
+              <button class="btn" onclick="dropNeedles(50)">+50</button>
+              <button class="btn primary" onclick="dropNeedles(500)">+500</button>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="btn-buffon-stream" onclick="toggleBuffonStream()">▶ Stream Needles</button>
+              <button class="btn" onclick="resetBuffon()">Clear Board</button>
+            </div>
+          </div>
+        </div>
+        <div class="takeaway-box">
+          <span class="takeaway-icon">💡</span>
+          <div>
+            <strong>The Formula:</strong> Rearranging Buffons equation yields $\pi \approx \frac{2L \cdot N_{\text{total}}}{D \cdot N_{\text{cross}}}$. Cyan needles cross a boundary line; slate needles do not.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB 8: Gamblers Ruin -->
+    <section class="lab-card" id="lab-ruin">
+      <div class="lab-header">
+        <div>
+          <span class="lab-badge">Lab 8 &middot; Stochastic Processes</span>
+          <h2>Gamblers Ruin &amp; The House Edge</h2>
+          <p>
+            A gambler starts with $\$k$ and bets $\$1$ at each step with win probability $p$ against an adversary (the casino) with goal $\$N$. Even with a minuscule 1% house edge ($p = 0.49$), the absorbing barrier at $\$0$ makes eventual financial ruin virtually certain over time.
+          </p>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="lab-grid">
+          <div class="lab-visual">
+            <canvas id="canvas-ruin" width="760" height="320"></canvas>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-label">Starting Wealth (k)</div>
+                <div class="metric-val cyan" id="ruin-k-metric">$20</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Casino Goal (N)</div>
+                <div class="metric-val" id="ruin-n-metric">$50</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Theoretical Ruin Prob</div>
+                <div class="metric-val rose" id="ruin-theo-prob">88.1%</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Simulated Ruin Rate</div>
+                <div class="metric-val amber" id="ruin-emp-prob">&mdash;</div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <div class="control-group">
+              <div class="control-label">
+                <span>Player Win Probability (p)</span>
+                <span class="control-val" id="ruin-p-val">0.49 (Roulette)</span>
+              </div>
+              <input type="range" id="ruin-p" min="0.45" max="0.55" step="0.01" value="0.49" oninput="updateRuinParameters()">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Gambler Starting Bankroll (k)</span>
+                <span class="control-val" id="ruin-k-val">$20</span>
+              </div>
+              <input type="range" id="ruin-k" min="5" max="40" step="5" value="20" oninput="updateRuinParameters()">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Target Bankroll (N)</span>
+                <span class="control-val" id="ruin-n-val">$50</span>
+              </div>
+              <input type="range" id="ruin-n" min="25" max="100" step="5" value="50" oninput="updateRuinParameters()">
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" onclick="runSingleRuinGame()">Run 1 Game</button>
+              <button class="btn" onclick="simulate100RuinGames()">Simulate 100 Games</button>
+            </div>
+          </div>
+        </div>
+        <div class="takeaway-box">
+          <span class="takeaway-icon">💡</span>
+          <div>
+            <strong>Absorbing Markov Chains:</strong> The exact probability of bankruptcy is $P(\text{Ruin}) = \frac{(q/p)^N - (q/p)^k}{(q/p)^N - 1}$ where $q = 1-p$. When $p < 0.5$, exponential drift relentlessly drags the gambler towards 0.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB 9: Distributions Sandbox -->
+    <section class="lab-card" id="lab-dist">
+      <div class="lab-header">
+        <div>
+          <span class="lab-badge">Lab 9 &middot; Statistical Sandbox</span>
+          <h2>Probability Distributions Explorer (PDF, PMF &amp; CDF)</h2>
+          <p>
+            Interact directly with continuous and discrete probability distributions. Slide parameter knobs in real-time, inspect analytical expected values $\mathbb{E}[X]$ and variance $\text{Var}(X)$, and dynamically compute the shaded area under the curve $P(x_1 \le X \le x_2)$.
+          </p>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="lab-grid">
+          <div class="lab-visual">
+            <canvas id="canvas-dist" width="760" height="340"></canvas>
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-label">Mean E[X]</div>
+                <div class="metric-val cyan" id="dist-mean">0.00</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Variance &sigma;&sup2;</div>
+                <div class="metric-val emerald" id="dist-var">1.00</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Shaded Area P(x1 &le; X &le; x2)</div>
+                <div class="metric-val amber" id="dist-area">0.6827</div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <div class="control-group">
+              <div class="control-label">
+                <span>Distribution Family</span>
+              </div>
+              <select id="dist-select" style="background: var(--bg-card); color: var(--text); border: 1px solid var(--border); padding: 0.45rem; border-radius: 6px;" onchange="switchDistribution()">
+                <option value="normal">Normal (Gaussian) N(&mu;, &sigma;)</option>
+                <option value="binomial">Binomial B(n, p)</option>
+                <option value="poisson">Poisson Pois(&lambda;)</option>
+                <option value="exponential">Exponential Exp(&lambda;)</option>
+                <option value="uniform">Continuous Uniform U(a, b)</option>
+              </select>
+            </div>
+            <div id="param-group-1" class="control-group">
+              <div class="control-label">
+                <span id="param-lbl-1">Mean &mu;</span>
+                <span class="control-val" id="param-val-1">0.0</span>
+              </div>
+              <input type="range" id="param-slider-1" min="-3" max="3" step="0.1" value="0.0" oninput="updateDistPlot()">
+            </div>
+            <div id="param-group-2" class="control-group">
+              <div class="control-label">
+                <span id="param-lbl-2">Std Dev &sigma;</span>
+                <span class="control-val" id="param-val-2">1.0</span>
+              </div>
+              <input type="range" id="param-slider-2" min="0.3" max="2.5" step="0.1" value="1.0" oninput="updateDistPlot()">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Lower Bound x1</span>
+                <span class="control-val" id="dist-x1-val">-1.00</span>
+              </div>
+              <input type="range" id="dist-x1" min="-4" max="4" step="0.1" value="-1.0" oninput="updateDistPlot()">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>Upper Bound x2</span>
+                <span class="control-val" id="dist-x2-val">1.00</span>
+              </div>
+              <input type="range" id="dist-x2" min="-4" max="4" step="0.1" value="1.0" oninput="updateDistPlot()">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAB 10: Marble Urn -->
+    <section class="lab-card" id="lab-urn">
+      <div class="lab-header">
+        <div>
+          <span class="lab-badge">Lab 10 &middot; Sampling Models</span>
+          <h2>Marble Urn: Sampling With vs. Without Replacement</h2>
+          <p>
+            Sampling <strong>with replacement</strong> keeps the urn composition identical on every draw, creating <em>independent</em> events (Binomial / Multinomial). Sampling <strong>without replacement</strong> removes picked marbles, creating <em>dependent</em> events where probabilities update after every single pick (Hypergeometric distribution).
+          </p>
+        </div>
+      </div>
+      <div class="lab-body">
+        <div class="lab-grid">
+          <div class="lab-visual">
+            <div class="urn-container" id="urn-display"></div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Recent Drawn Sequence:</div>
+            <div id="drawn-tray" style="display: flex; gap: 8px; min-height: 28px; align-items: center; justify-content: center;"></div>
+            <div class="metric-grid" style="margin-top: 1rem;">
+              <div class="metric-card">
+                <div class="metric-label">P(Next is Red)</div>
+                <div class="metric-val rose" id="urn-p-red">50.0%</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">P(Next is Green)</div>
+                <div class="metric-val emerald" id="urn-p-green">30.0%</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">P(Next is Blue)</div>
+                <div class="metric-val cyan" id="urn-p-blue">20.0%</div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-controls">
+            <div class="control-group">
+              <div class="control-label">
+                <span>Sampling Mode</span>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn active" id="btn-mode-without" onclick="setUrnMode(false)">Without Replacement</button>
+                <button class="btn" id="btn-mode-with" onclick="setUrnMode(true)">With Replacement</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>🔴 Red Marbles</span>
+                <span class="control-val" id="urn-red-val">5</span>
+              </div>
+              <input type="range" id="urn-red" min="1" max="15" step="1" value="5" oninput="resetUrn()">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>🟢 Green Marbles</span>
+                <span class="control-val" id="urn-green-val">3</span>
+              </div>
+              <input type="range" id="urn-green" min="1" max="15" step="1" value="3" oninput="resetUrn()">
+            </div>
+            <div class="control-group">
+              <div class="control-label">
+                <span>🔵 Blue Marbles</span>
+                <span class="control-val" id="urn-blue-val">2</span>
+              </div>
+              <input type="range" id="urn-blue" min="1" max="15" step="1" value="2" oninput="resetUrn()">
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" onclick="drawMarble()">Draw 1 Marble</button>
+              <button class="btn" onclick="drawMarbles(5)">Draw 5</button>
+              <button class="btn" onclick="resetUrn()">Reset Urn</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>ai-slop &middot; Interactive Mathematical Explorations &middot; Built with native HTML5 Canvas &amp; ES6</p>
+      <p style="margin-top: 0.5rem;">
+        <a href="./">Return to Main Media Dashboard &rarr;</a>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // 1. COIN LLN
+    let coinHistory = [];
+    let coinTotalHeads = 0;
+    let coinStreamInterval = null;
+    let maxStreak = 0;
+    let currentStreak = 0;
+    let lastFlip = null;
+
+    const canvasCoin = document.getElementById("canvas-coin-lln");
+    const ctxCoin = canvasCoin.getContext("2d");
+
+    function flipCoins(count) {
+      const p = parseFloat(document.getElementById("coin-p").value);
+      const coinEl = document.getElementById("coin-element");
+
+      for (let i = 0; i < count; i++) {
+        const isHead = Math.random() < p;
+        if (isHead) coinTotalHeads++;
+        coinHistory.push(isHead);
+
+        if (lastFlip === isHead) {
+          currentStreak++;
+        } else {
+          currentStreak = 1;
+          lastFlip = isHead;
+        }
+        if (currentStreak > maxStreak) maxStreak = currentStreak;
+      }
+
+      const total = coinHistory.length;
+      const ratio = total > 0 ? (coinTotalHeads / total) : 0;
+
+      if (count === 1) {
+        const isHead = coinHistory[total - 1];
+        coinEl.style.transform = `rotateY(${isHead ? 0 : 180}deg) rotateX(${Math.floor(Math.random() * 4) * 360}deg)`;
+      }
+
+      document.getElementById("lln-total").textContent = total.toLocaleString();
+      document.getElementById("lln-heads").textContent = coinTotalHeads.toLocaleString();
+      document.getElementById("lln-ratio").textContent = (ratio * 100).toFixed(2) + "%";
+      document.getElementById("lln-streak").textContent = maxStreak;
+
+      drawCoinChart();
+    }
+
+    function drawCoinChart() {
+      const w = canvasCoin.width;
+      const h = canvasCoin.height;
+      const p = parseFloat(document.getElementById("coin-p").value);
+      ctxCoin.clearRect(0, 0, w, h);
+
+      ctxCoin.strokeStyle = "#1e293b";
+      ctxCoin.lineWidth = 1;
+      for (let y = 0.2; y <= 0.8; y += 0.2) {
+        const py = h - y * h;
+        ctxCoin.beginPath();
+        ctxCoin.moveTo(40, py);
+        ctxCoin.lineTo(w - 20, py);
+        ctxCoin.stroke();
+        ctxCoin.fillStyle = "#64748b";
+        ctxCoin.font = "11px monospace";
+        ctxCoin.fillText((y * 100).toFixed(0) + "%", 10, py + 4);
+      }
+
+      const py = h - p * h;
+      ctxCoin.strokeStyle = "#f59e0b";
+      ctxCoin.setLineDash([6, 6]);
+      ctxCoin.lineWidth = 2;
+      ctxCoin.beginPath();
+      ctxCoin.moveTo(40, py);
+      ctxCoin.lineTo(w - 20, py);
+      ctxCoin.stroke();
+      ctxCoin.setLineDash([]);
+      ctxCoin.fillStyle = "#f59e0b";
+      ctxCoin.fillText("Theoretical p = " + p.toFixed(2), w - 160, py - 6);
+
+      if (coinHistory.length === 0) return;
+
+      const total = coinHistory.length;
+      const startX = 40;
+      const graphW = w - 60;
+
+      ctxCoin.fillStyle = "rgba(6, 182, 212, 0.08)";
+      ctxCoin.beginPath();
+      let first = true;
+      for (let i = 1; i <= Math.min(total, 500); i++) {
+        const x = startX + (i / total) * graphW;
+        const err = 1.96 * Math.sqrt((p * (1 - p)) / i);
+        const yTop = h - Math.min(1, p + err) * h;
+        if (first) { ctxCoin.moveTo(x, yTop); first = false; }
+        else ctxCoin.lineTo(x, yTop);
+      }
+      for (let i = Math.min(total, 500); i >= 1; i--) {
+        const x = startX + (i / total) * graphW;
+        const err = 1.96 * Math.sqrt((p * (1 - p)) / i);
+        const yBot = h - Math.max(0, p - err) * h;
+        ctxCoin.lineTo(x, yBot);
+      }
+      ctxCoin.closePath();
+      ctxCoin.fill();
+
+      ctxCoin.beginPath();
+      ctxCoin.strokeStyle = "#06b6d4";
+      ctxCoin.lineWidth = 2;
+      let cumHeads = 0;
+      const step = Math.max(1, Math.floor(total / 800));
+
+      for (let i = 0; i < total; i++) {
+        if (coinHistory[i]) cumHeads++;
+        if (i % step === 0 || i === total - 1) {
+          const ratio = cumHeads / (i + 1);
+          const x = startX + ((i + 1) / total) * graphW;
+          const y = h - ratio * h;
+          if (i === 0) ctxCoin.moveTo(x, y);
+          else ctxCoin.lineTo(x, y);
+        }
+      }
+      ctxCoin.stroke();
+    }
+
+    function toggleCoinStream() {
+      const btn = document.getElementById("btn-coin-stream");
+      if (coinStreamInterval) {
+        clearInterval(coinStreamInterval);
+        coinStreamInterval = null;
+        btn.textContent = "▶ Stream Auto-Flip";
+        btn.classList.remove("active");
+      } else {
+        btn.textContent = "⏹ Stop Stream";
+        btn.classList.add("active");
+        coinStreamInterval = setInterval(() => flipCoins(25), 50);
+      }
+    }
+
+    function resetCoinLab() {
+      if (coinStreamInterval) toggleCoinStream();
+      coinHistory = [];
+      coinTotalHeads = 0;
+      maxStreak = 0;
+      currentStreak = 0;
+      lastFlip = null;
+      document.getElementById("lln-total").textContent = "0";
+      document.getElementById("lln-heads").textContent = "0";
+      document.getElementById("lln-ratio").textContent = "0.00%";
+      document.getElementById("lln-streak").textContent = "0";
+      drawCoinChart();
+    }
+
+    document.getElementById("coin-p").addEventListener("input", (e) => {
+      document.getElementById("coin-p-val").textContent = parseFloat(e.target.value).toFixed(2);
+      drawCoinChart();
+    });
+
+    // 2. GALTON BOARD
+    const canvasGalton = document.getElementById("canvas-galton");
+    const ctxGalton = canvasGalton.getContext("2d");
+    let galtonRows = 10;
+    let galtonBins = new Array(galtonRows + 1).fill(0);
+    let galtonParticles = [];
+    let galtonTotalDropped = 0;
+    let galtonFlowInterval = null;
+
+    function getGaltonGeometry() {
+      const w = canvasGalton.width;
+      const h = canvasGalton.height;
+      const startY = 60;
+      const pegSpacingY = 22;
+      const pegSpacingX = 32;
+      const binTopY = startY + galtonRows * pegSpacingY + 30;
+      const binBottomY = h - 20;
+      const centerX = w / 2;
+      return { w, h, startY, pegSpacingY, pegSpacingX, binTopY, binBottomY, centerX };
+    }
+
+    function dropGaltonBalls(count) {
+      const geom = getGaltonGeometry();
+      const p = parseFloat(document.getElementById("galton-bias").value);
+
+      for (let i = 0; i < count; i++) {
+        galtonParticles.push({
+          x: geom.centerX + (Math.random() - 0.5) * 4,
+          y: 20 + Math.random() * 10,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: 1.5 + Math.random() * 0.5,
+          row: 0,
+          col: 0,
+          radius: 3.5,
+          color: Math.random() > 0.5 ? "#38bdf8" : "#818cf8",
+          settled: false,
+          p: p
+        });
+        galtonTotalDropped++;
+      }
+      document.getElementById("galton-count").textContent = galtonTotalDropped.toLocaleString();
+    }
+
+    function updateAndRenderGalton() {
+      const geom = getGaltonGeometry();
+      ctxGalton.clearRect(0, 0, geom.w, geom.h);
+
+      ctxGalton.strokeStyle = "#475569";
+      ctxGalton.lineWidth = 3;
+      ctxGalton.beginPath();
+      ctxGalton.moveTo(geom.centerX - 40, 10);
+      ctxGalton.lineTo(geom.centerX - 10, 45);
+      ctxGalton.lineTo(geom.centerX - 10, 55);
+      ctxGalton.moveTo(geom.centerX + 40, 10);
+      ctxGalton.lineTo(geom.centerX + 10, 45);
+      ctxGalton.lineTo(geom.centerX + 10, 55);
+      ctxGalton.stroke();
+
+      ctxGalton.fillStyle = "#94a3b8";
+      for (let r = 0; r < galtonRows; r++) {
+        const y = geom.startY + r * geom.pegSpacingY;
+        const rowStartX = geom.centerX - (r * geom.pegSpacingX) / 2;
+        for (let c = 0; c <= r; c++) {
+          const x = rowStartX + c * geom.pegSpacingX;
+          ctxGalton.beginPath();
+          ctxGalton.arc(x, y, 2.5, 0, Math.PI * 2);
+          ctxGalton.fill();
+        }
+      }
+
+      const numBins = galtonRows + 1;
+      const totalWidth = galtonRows * geom.pegSpacingX;
+      const binWidth = totalWidth / (numBins - 1);
+      const binStartX = geom.centerX - totalWidth / 2;
+
+      ctxGalton.strokeStyle = "#334155";
+      ctxGalton.lineWidth = 1.5;
+      for (let b = 0; b <= numBins; b++) {
+        const bx = binStartX + (b - 0.5) * binWidth;
+        ctxGalton.beginPath();
+        ctxGalton.moveTo(bx, geom.binTopY);
+        ctxGalton.lineTo(bx, geom.binBottomY);
+        ctxGalton.stroke();
+      }
+
+      ctxGalton.beginPath();
+      ctxGalton.moveTo(binStartX - binWidth / 2, geom.binBottomY);
+      ctxGalton.lineTo(binStartX + totalWidth + binWidth / 2, geom.binBottomY);
+      ctxGalton.stroke();
+
+      const maxBinVal = Math.max(...galtonBins, 1);
+      const availableHeight = geom.binBottomY - geom.binTopY - 10;
+      for (let b = 0; b < numBins; b++) {
+        const val = galtonBins[b];
+        if (val === 0) continue;
+        const barH = (val / Math.max(maxBinVal, 10)) * availableHeight;
+        const bx = binStartX + b * binWidth - binWidth * 0.4;
+        const by = geom.binBottomY - barH;
+
+        ctxGalton.fillStyle = "rgba(6, 182, 212, 0.4)";
+        ctxGalton.strokeStyle = "#06b6d4";
+        ctxGalton.lineWidth = 1;
+        ctxGalton.beginPath();
+        ctxGalton.roundRect(bx, by, binWidth * 0.8, barH, [4, 4, 0, 0]);
+        ctxGalton.fill();
+        ctxGalton.stroke();
+
+        ctxGalton.fillStyle = "#cbd5e1";
+        ctxGalton.font = "10px monospace";
+        ctxGalton.textAlign = "center";
+        ctxGalton.fillText(val, binStartX + b * binWidth, by - 4);
+      }
+
+      if (galtonTotalDropped > 10) {
+        ctxGalton.strokeStyle = "#f59e0b";
+        ctxGalton.lineWidth = 2.5;
+        ctxGalton.beginPath();
+        const p = parseFloat(document.getElementById("galton-bias").value);
+
+        for (let b = 0; b < numBins; b++) {
+          let coeff = 1;
+          for (let i = 0; i < b; i++) {
+            coeff = (coeff * (galtonRows - i)) / (i + 1);
+          }
+          const prob = coeff * Math.pow(p, b) * Math.pow(1 - p, galtonRows - b);
+          const expectedVal = prob * galtonTotalDropped;
+          const barH = (expectedVal / Math.max(maxBinVal, 10)) * availableHeight;
+          const cx = binStartX + b * binWidth;
+          const cy = geom.binBottomY - barH;
+
+          if (b === 0) ctxGalton.moveTo(cx, cy);
+          else ctxGalton.lineTo(cx, cy);
+        }
+        ctxGalton.stroke();
+      }
+
+      const remainingParticles = [];
+      for (let p of galtonParticles) {
+        p.vy += 0.15;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.row < galtonRows) {
+          const pegY = geom.startY + p.row * geom.pegSpacingY;
+          if (p.y >= pegY - 2 && p.y <= pegY + 6) {
+            const goRight = Math.random() < p.p;
+            p.vx = (goRight ? 1 : -1) * (1.2 + Math.random() * 0.4);
+            p.vy = 1.0;
+            p.col += goRight ? 1 : 0;
+            p.row++;
+          }
+        }
+
+        if (p.y >= geom.binBottomY - 4) {
+          const clampedCol = Math.max(0, Math.min(galtonRows, p.col));
+          galtonBins[clampedCol]++;
+        } else {
+          remainingParticles.push(p);
+          ctxGalton.fillStyle = p.color;
+          ctxGalton.beginPath();
+          ctxGalton.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctxGalton.fill();
+        }
+      }
+
+      galtonParticles = remainingParticles;
+      document.getElementById("galton-active").textContent = galtonParticles.length;
+
+      requestAnimationFrame(updateAndRenderGalton);
+    }
+
+    function toggleGaltonFlow() {
+      const btn = document.getElementById("btn-galton-flow");
+      if (galtonFlowInterval) {
+        clearInterval(galtonFlowInterval);
+        galtonFlowInterval = null;
+        btn.textContent = "▶ Continuous Flow";
+        btn.classList.remove("active");
+      } else {
+        btn.textContent = "⏹ Stop Flow";
+        btn.classList.add("active");
+        galtonFlowInterval = setInterval(() => dropGaltonBalls(4), 80);
+      }
+    }
+
+    function resetGalton() {
+      if (galtonFlowInterval) toggleGaltonFlow();
+      galtonParticles = [];
+      galtonBins = new Array(galtonRows + 1).fill(0);
+      galtonTotalDropped = 0;
+      document.getElementById("galton-count").textContent = "0";
+    }
+
+    document.getElementById("galton-rows").addEventListener("input", (e) => {
+      galtonRows = parseInt(e.target.value);
+      document.getElementById("galton-rows-val").textContent = galtonRows;
+      document.getElementById("galton-rows-metric").textContent = galtonRows;
+      resetGalton();
+    });
+
+    document.getElementById("galton-bias").addEventListener("input", (e) => {
+      document.getElementById("galton-bias-val").textContent = parseFloat(e.target.value).toFixed(2);
+    });
+
+    requestAnimationFrame(updateAndRenderGalton);
+
+    // 3. DICE ROLLING & CLT
+    const canvasCLT = document.getElementById("canvas-dice-clt");
+    const ctxCLT = canvasCLT.getContext("2d");
+    let cltSums = {};
+    let cltTotalRolls = 0;
+
+    function sampleDie(distType) {
+      if (distType === "fair") return Math.floor(Math.random() * 6) + 1;
+      if (distType === "loaded") {
+        const r = Math.random();
+        if (r < 0.4) return 6;
+        return Math.floor(r * 5) + 1;
+      }
+      if (distType === "bimodal") return Math.random() < 0.5 ? 1 : 6;
+      return Math.min(6, Math.max(1, Math.floor(-Math.log(1 - Math.random() * 0.9) * 2) + 1));
+    }
+
+    function rollDice(count) {
+      const k = parseInt(document.getElementById("clt-dice").value);
+      const distType = document.getElementById("clt-dist-type").value;
+      const display = document.getElementById("dice-display");
+
+      let lastRollValues = [];
+      for (let r = 0; r < count; r++) {
+        let sum = 0;
+        let currentValues = [];
+        for (let d = 0; d < k; d++) {
+          const val = sampleDie(distType);
+          sum += val;
+          currentValues.push(val);
+        }
+        cltSums[sum] = (cltSums[sum] || 0) + 1;
+        cltTotalRolls++;
+        if (r === count - 1) lastRollValues = currentValues;
+      }
+
+      display.innerHTML = "";
+      lastRollValues.forEach(val => {
+        const die = document.createElement("div");
+        die.style.cssText = "width:36px; height:36px; background:#fff; color:#0f172a; border-radius:6px; font-weight:800; font-size:1.2rem; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 6px rgba(0,0,0,0.4); border:2px solid #cbd5e1;";
+        die.textContent = val;
+        display.appendChild(die);
+      });
+
+      let weightedSum = 0;
+      let weightedSqSum = 0;
+      for (let s in cltSums) {
+        const val = parseFloat(s);
+        const cnt = cltSums[s];
+        weightedSum += val * cnt;
+        weightedSqSum += val * val * cnt;
+      }
+      const mean = cltTotalRolls > 0 ? weightedSum / cltTotalRolls : 0;
+      const variance = cltTotalRolls > 1 ? (weightedSqSum - (weightedSum * weightedSum) / cltTotalRolls) / (cltTotalRolls - 1) : 0;
+      const std = Math.sqrt(Math.max(0, variance));
+
+      document.getElementById("clt-rolls").textContent = cltTotalRolls.toLocaleString();
+      document.getElementById("clt-mean").textContent = mean.toFixed(2);
+      document.getElementById("clt-theo-mean").textContent = (k * 3.5).toFixed(2);
+      document.getElementById("clt-std").textContent = std.toFixed(2);
+
+      drawCLTHistogram(k, mean, std);
+    }
+
+    function drawCLTHistogram(k, mean, std) {
+      const w = canvasCLT.width;
+      const h = canvasCLT.height;
+      ctxCLT.clearRect(0, 0, w, h);
+
+      const minSum = k * 1;
+      const maxSum = k * 6;
+      const range = maxSum - minSum + 1;
+      const padLeft = 45;
+      const padBottom = 30;
+      const plotW = w - padLeft - 20;
+      const plotH = h - padBottom - 20;
+
+      let maxCnt = 0;
+      for (let s in cltSums) {
+        if (cltSums[s] > maxCnt) maxCnt = cltSums[s];
+      }
+      if (maxCnt === 0) maxCnt = 1;
+
+      const barW = plotW / range;
+      for (let s = minSum; s <= maxSum; s++) {
+        const cnt = cltSums[s] || 0;
+        const barH = (cnt / maxCnt) * (plotH - 20);
+        const x = padLeft + (s - minSum) * barW;
+        const y = h - padBottom - barH;
+
+        ctxCLT.fillStyle = "rgba(99, 102, 241, 0.6)";
+        ctxCLT.strokeStyle = "#818cf8";
+        ctxCLT.lineWidth = 1;
+        ctxCLT.fillRect(x + 2, y, barW - 4, barH);
+        ctxCLT.strokeRect(x + 2, y, barW - 4, barH);
+
+        if (range <= 25 || s % 2 === 0) {
+          ctxCLT.fillStyle = "#64748b";
+          ctxCLT.font = "10px monospace";
+          ctxCLT.textAlign = "center";
+          ctxCLT.fillText(s, x + barW / 2, h - 10);
+        }
+      }
+
+      if (cltTotalRolls > 50 && std > 0) {
+        ctxCLT.strokeStyle = "#f59e0b";
+        ctxCLT.lineWidth = 2.5;
+        ctxCLT.beginPath();
+
+        for (let px = 0; px <= plotW; px += 2) {
+          const s = minSum + (px / plotW) * range;
+          const z = (s - mean) / std;
+          const pdf = (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
+          const maxPdf = 1 / (std * Math.sqrt(2 * Math.PI));
+          const curveH = (pdf / maxPdf) * (plotH - 20) * 0.95;
+          const x = padLeft + px;
+          const y = h - padBottom - curveH;
+
+          if (px === 0) ctxCLT.moveTo(x, y);
+          else ctxCLT.lineTo(x, y);
+        }
+        ctxCLT.stroke();
+      }
+    }
+
+    function resetDiceCLT() {
+      cltSums = {};
+      cltTotalRolls = 0;
+      document.getElementById("clt-rolls").textContent = "0";
+      document.getElementById("clt-mean").textContent = "0.00";
+      document.getElementById("clt-std").textContent = "0.00";
+      document.getElementById("dice-display").innerHTML = "";
+      drawCLTHistogram(parseInt(document.getElementById("clt-dice").value), 0, 0);
+    }
+
+    document.getElementById("clt-dice").addEventListener("input", (e) => {
+      const k = e.target.value;
+      document.getElementById("clt-dice-val").textContent = k + " Dice";
+      document.getElementById("clt-theo-mean").textContent = (k * 3.5).toFixed(2);
+      resetDiceCLT();
+    });
+
+    // 4. MONTY HALL
+    let montyCarDoor = 1;
+    let montyUserPick = null;
+    let montyHostOpen = null;
+    let montyStep = 1;
+    let montyStayWins = 0;
+    let montyStayTotal = 0;
+    let montySwitchWins = 0;
+    let montySwitchTotal = 0;
+
+    function initMontyGame() {
+      montyCarDoor = Math.floor(Math.random() * 3);
+      montyUserPick = null;
+      montyHostOpen = null;
+      montyStep = 1;
+
+      for (let i = 0; i < 3; i++) {
+        const wrap = document.getElementById(`door-${i}`);
+        wrap.classList.remove("selected", "open");
+        document.getElementById(`prize-${i}`).textContent = (i === montyCarDoor) ? "🚗" : "🐐";
+      }
+
+      document.getElementById("monty-choice-actions").style.display = "none";
+      document.getElementById("monty-status-banner").textContent = "Step 1: Pick any door below!";
+      document.getElementById("monty-status-banner").style.color = "var(--cyan)";
+    }
+
+    function handleDoorClick(doorIndex) {
+      if (montyStep !== 1) return;
+
+      montyUserPick = doorIndex;
+      document.getElementById(`door-${doorIndex}`).classList.add("selected");
+
+      const candidates = [0, 1, 2].filter(d => d !== montyUserPick && d !== montyCarDoor);
+      montyHostOpen = candidates[Math.floor(Math.random() * candidates.length)];
+
+      document.getElementById(`door-${montyHostOpen}`).classList.add("open");
+      montyStep = 2;
+
+      document.getElementById("monty-status-banner").textContent =
+        `Monty reveals a GOAT behind Door ${montyHostOpen + 1}! Do you want to Switch?`;
+      document.getElementById("monty-status-banner").style.color = "var(--amber)";
+      document.getElementById("monty-choice-actions").style.display = "flex";
+    }
+
+    function resolveMontyChoice(didSwitch) {
+      if (montyStep !== 2) return;
+
+      let finalPick = montyUserPick;
+      if (didSwitch) {
+        finalPick = [0, 1, 2].find(d => d !== montyUserPick && d !== montyHostOpen);
+        montySwitchTotal++;
+      } else {
+        montyStayTotal++;
+      }
+
+      const won = (finalPick === montyCarDoor);
+      if (didSwitch && won) montySwitchWins++;
+      if (!didSwitch && won) montyStayWins++;
+
+      for (let i = 0; i < 3; i++) {
+        document.getElementById(`door-${i}`).classList.add("open");
+      }
+
+      montyStep = 3;
+      document.getElementById("monty-choice-actions").style.display = "none";
+
+      if (won) {
+        document.getElementById("monty-status-banner").textContent = `🎉 YOU WON THE CAR! (${didSwitch ? "Switched" : "Stayed"})`;
+        document.getElementById("monty-status-banner").style.color = "var(--emerald)";
+      } else {
+        document.getElementById("monty-status-banner").textContent = `You got a GOAT! (${didSwitch ? "Switched" : "Stayed"})`;
+        document.getElementById("monty-status-banner").style.color = "var(--rose)";
+      }
+
+      updateMontyMetrics();
+    }
+
+    function simulateMontyRounds(count) {
+      for (let i = 0; i < count; i++) {
+        const car = Math.floor(Math.random() * 3);
+        const pick = Math.floor(Math.random() * 3);
+        montyStayTotal++;
+        if (pick === car) montyStayWins++;
+        montySwitchTotal++;
+        if (pick !== car) montySwitchWins++;
+      }
+      updateMontyMetrics();
+    }
+
+    function updateMontyMetrics() {
+      const stayRate = montyStayTotal > 0 ? (montyStayWins / montyStayTotal) * 100 : 33.3;
+      const switchRate = montySwitchTotal > 0 ? (montySwitchWins / montySwitchTotal) * 100 : 66.7;
+
+      document.getElementById("monty-stay-rate").textContent = stayRate.toFixed(1) + "%";
+      document.getElementById("monty-switch-rate").textContent = switchRate.toFixed(1) + "%";
+      document.getElementById("monty-total-sims").textContent = (montyStayTotal + montySwitchTotal).toLocaleString();
+
+      document.getElementById("bar-switch-val").textContent = switchRate.toFixed(1) + "%";
+      document.getElementById("bar-switch").style.width = switchRate + "%";
+      document.getElementById("bar-stay-val").textContent = stayRate.toFixed(1) + "%";
+      document.getElementById("bar-stay").style.width = stayRate + "%";
+    }
+
+    function resetMontyGame() {
+      initMontyGame();
+    }
+
+    initMontyGame();
+
+    // 5. BAYES THEOREM
+    function updateBayesCalculation() {
+      const prev = parseFloat(document.getElementById("bayes-prev").value) / 100;
+      const sens = parseFloat(document.getElementById("bayes-sens").value) / 100;
+      const spec = parseFloat(document.getElementById("bayes-spec").value) / 100;
+
+      document.getElementById("bayes-prev-val").textContent = (prev * 100).toFixed(1) + "%";
+      document.getElementById("bayes-sens-val").textContent = (sens * 100).toFixed(0) + "%";
+      document.getElementById("bayes-spec-val").textContent = (spec * 100).toFixed(0) + "%";
+
+      const N = 1000;
+      const sickCount = Math.round(N * prev);
+      const healthyCount = N - sickCount;
+
+      const tp = Math.round(sickCount * sens);
+      const fn = sickCount - tp;
+      const tn = Math.round(healthyCount * spec);
+      const fp = healthyCount - tn;
+
+      const totalPos = tp + fp;
+      const posterior = totalPos > 0 ? (tp / totalPos) * 100 : 0;
+      const fdr = totalPos > 0 ? (fp / totalPos) * 100 : 0;
+
+      document.getElementById("count-tp").textContent = tp;
+      document.getElementById("count-fp").textContent = fp;
+      document.getElementById("count-fn").textContent = fn;
+      document.getElementById("count-tn").textContent = tn;
+
+      document.getElementById("bayes-posterior").textContent = posterior.toFixed(2) + "%";
+      document.getElementById("bayes-total-pos").textContent = totalPos;
+      document.getElementById("bayes-fdr").textContent = fdr.toFixed(2) + "%";
+
+      document.getElementById("calc-num").textContent = (prev * sens).toFixed(4);
+      document.getElementById("calc-den").textContent = ((prev * sens) + ((1 - prev) * (1 - spec))).toFixed(4);
+
+      const waffle = document.getElementById("bayes-waffle");
+      waffle.innerHTML = "";
+      const fragment = document.createDocumentFragment();
+
+      for (let i = 0; i < N; i++) {
+        const dot = document.createElement("div");
+        dot.className = "waffle-dot";
+        if (i < tp) dot.className += " dot-tp";
+        else if (i < tp + fp) dot.className += " dot-fp";
+        else if (i < tp + fp + fn) dot.className += " dot-fn";
+        else dot.className += " dot-tn";
+        fragment.appendChild(dot);
+      }
+      waffle.appendChild(fragment);
+    }
+
+    function setBayesPreset(prev, sens, spec) {
+      document.getElementById("bayes-prev").value = prev;
+      document.getElementById("bayes-sens").value = sens;
+      document.getElementById("bayes-spec").value = spec;
+      updateBayesCalculation();
+    }
+
+    document.getElementById("bayes-prev").addEventListener("input", updateBayesCalculation);
+    document.getElementById("bayes-sens").addEventListener("input", updateBayesCalculation);
+    document.getElementById("bayes-spec").addEventListener("input", updateBayesCalculation);
+    updateBayesCalculation();
+
+    // 6. BIRTHDAY PARADOX
+    const canvasBday = document.getElementById("canvas-birthday-curve");
+    const ctxBday = canvasBday.getContext("2d");
+    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    function dayOfYearToDate(day) {
+      let d = day;
+      for (let m = 0; m < 12; m++) {
+        if (d <= DAYS_IN_MONTH[m]) return `${MONTHS[m]} ${d}`;
+        d -= DAYS_IN_MONTH[m];
+      }
+      return "Dec 31";
+    }
+
+    function calculateBirthdayProb(n) {
+      let probNoMatch = 1.0;
+      for (let i = 0; i < n; i++) {
+        probNoMatch *= (365 - i) / 365;
+      }
+      return 1.0 - probNoMatch;
+    }
+
+    function drawBirthdayCurve(currentN) {
+      const w = canvasBday.width;
+      const h = canvasBday.height;
+      ctxBday.clearRect(0, 0, w, h);
+
+      const padL = 40, padR = 20, padT = 20, padB = 30;
+      const plotW = w - padL - padR;
+      const plotH = h - padT - padB;
+
+      const y50 = padT + plotH * 0.5;
+      ctxBday.strokeStyle = "rgba(255, 255, 255, 0.15)";
+      ctxBday.setLineDash([4, 4]);
+      ctxBday.beginPath();
+      ctxBday.moveTo(padL, y50);
+      ctxBday.lineTo(padL + plotW, y50);
+      ctxBday.stroke();
+      ctxBday.setLineDash([]);
+      ctxBday.fillStyle = "#94a3b8";
+      ctxBday.font = "10px monospace";
+      ctxBday.fillText("50% Probability", padL + 10, y50 - 4);
+
+      ctxBday.strokeStyle = "#06b6d4";
+      ctxBday.lineWidth = 2.5;
+      ctxBday.beginPath();
+      for (let n = 2; n <= 80; n++) {
+        const p = calculateBirthdayProb(n);
+        const x = padL + ((n - 2) / 78) * plotW;
+        const y = padT + (1 - p) * plotH;
+        if (n === 2) ctxBday.moveTo(x, y);
+        else ctxBday.lineTo(x, y);
+      }
+      ctxBday.stroke();
+
+      const curP = calculateBirthdayProb(currentN);
+      const curX = padL + ((currentN - 2) / 78) * plotW;
+      const curY = padT + (1 - curP) * plotH;
+
+      ctxBday.fillStyle = "#f43f5e";
+      ctxBday.beginPath();
+      ctxBday.arc(curX, curY, 6, 0, Math.PI * 2);
+      ctxBday.fill();
+      ctxBday.strokeStyle = "#fff";
+      ctxBday.lineWidth = 2;
+      ctxBday.stroke();
+
+      ctxBday.fillStyle = "#fff";
+      ctxBday.font = "11px sans-serif";
+      ctxBday.fillText(`N=${currentN} (${(curP * 100).toFixed(1)}%)`, curX + 10, curY - 5);
+    }
+
+    function updateBirthdayRoom() {
+      const n = parseInt(document.getElementById("bday-slider").value);
+      document.getElementById("slider-bday-val").textContent = n;
+      document.getElementById("bday-n-val").textContent = n;
+      document.getElementById("bday-pairs").textContent = ((n * (n - 1)) / 2).toLocaleString();
+      const prob = calculateBirthdayProb(n);
+      document.getElementById("bday-theo-prob").textContent = (prob * 100).toFixed(2) + "%";
+
+      drawBirthdayCurve(n);
+      generateNewBirthdayRoom();
+    }
+
+    function generateNewBirthdayRoom() {
+      const n = parseInt(document.getElementById("bday-slider").value);
+      const grid = document.getElementById("room-people-grid");
+      grid.innerHTML = "";
+
+      const birthdays = [];
+      const counts = {};
+      let matchFound = false;
+
+      for (let i = 0; i < n; i++) {
+        const day = Math.floor(Math.random() * 365) + 1;
+        birthdays.push(day);
+        counts[day] = (counts[day] || 0) + 1;
+        if (counts[day] > 1) matchFound = true;
+      }
+
+      birthdays.forEach((day, idx) => {
+        const chip = document.createElement("div");
+        chip.className = "person-chip";
+        const isMatch = counts[day] > 1;
+        if (isMatch) chip.className += " match";
+        chip.innerHTML = `<div>#${idx + 1}</div><div style="font-weight:600;">${dayOfYearToDate(day)}</div>`;
+        grid.appendChild(chip);
+      });
+
+      const alertEl = document.getElementById("birthday-match-alert");
+      if (matchFound) {
+        alertEl.textContent = "🎉 MATCH FOUND! Two or more people share the exact same birthday!";
+        alertEl.style.color = "var(--emerald)";
+      } else {
+        alertEl.textContent = "No shared birthday in this specific room.";
+        alertEl.style.color = "var(--text-muted)";
+      }
+    }
+
+    function simulate1000Rooms() {
+      const n = parseInt(document.getElementById("bday-slider").value);
+      let matchRooms = 0;
+      for (let r = 0; r < 1000; r++) {
+        const seen = new Set();
+        let matched = false;
+        for (let i = 0; i < n; i++) {
+          const day = Math.floor(Math.random() * 365) + 1;
+          if (seen.has(day)) { matched = true; break; }
+          seen.add(day);
+        }
+        if (matched) matchRooms++;
+      }
+      alert(`1,000 Rooms Simulated (N = ${n}):\nFound shared birthday in ${matchRooms} of 1,000 rooms (${(matchRooms / 10).toFixed(1)}%).\nTheoretical probability: ${(calculateBirthdayProb(n) * 100).toFixed(1)}%`);
+    }
+
+    function setBirthdayPreset(n) {
+      document.getElementById("bday-slider").value = n;
+      updateBirthdayRoom();
+    }
+
+    updateBirthdayRoom();
+
+    // 7. BUFFONS NEEDLE
+    const canvasBuffon = document.getElementById("canvas-buffon");
+    const ctxBuffon = canvasBuffon.getContext("2d");
+    let buffonTotal = 0;
+    let buffonCrossings = 0;
+    let buffonStreamInterval = null;
+    const BUFFON_D = 60;
+
+    function dropNeedles(count) {
+      const w = canvasBuffon.width;
+      const h = canvasBuffon.height;
+      const L = parseFloat(document.getElementById("buffon-len").value);
+
+      for (let i = 0; i < count; i++) {
+        const cx = Math.random() * (w - 40) + 20;
+        const cy = Math.random() * (h - 40) + 20;
+        const theta = Math.random() * Math.PI;
+
+        const x1 = cx - (L / 2) * Math.cos(theta);
+        const y1 = cy - (L / 2) * Math.sin(theta);
+        const x2 = cx + (L / 2) * Math.cos(theta);
+        const y2 = cy + (L / 2) * Math.sin(theta);
+
+        const lineIdx1 = Math.floor(y1 / BUFFON_D);
+        const lineIdx2 = Math.floor(y2 / BUFFON_D);
+        const crossed = (lineIdx1 !== lineIdx2);
+
+        if (crossed) buffonCrossings++;
+        buffonTotal++;
+
+        ctxBuffon.strokeStyle = crossed ? "rgba(6, 182, 212, 0.85)" : "rgba(148, 163, 184, 0.25)";
+        ctxBuffon.lineWidth = crossed ? 2 : 1;
+        ctxBuffon.beginPath();
+        ctxBuffon.moveTo(x1, y1);
+        ctxBuffon.lineTo(x2, y2);
+        ctxBuffon.stroke();
+      }
+
+      document.getElementById("buffon-total").textContent = buffonTotal.toLocaleString();
+      document.getElementById("buffon-crossings").textContent = buffonCrossings.toLocaleString();
+
+      if (buffonCrossings > 0) {
+        const estPi = (2 * L * buffonTotal) / (BUFFON_D * buffonCrossings);
+        document.getElementById("buffon-pi").textContent = estPi.toFixed(4);
+        document.getElementById("buffon-err").textContent = Math.abs(estPi - Math.PI).toFixed(4);
+      }
+    }
+
+    function initBuffonFloor() {
+      const w = canvasBuffon.width;
+      const h = canvasBuffon.height;
+      ctxBuffon.fillStyle = "#0f172a";
+      ctxBuffon.fillRect(0, 0, w, h);
+
+      ctxBuffon.strokeStyle = "#334155";
+      ctxBuffon.lineWidth = 1.5;
+      for (let y = BUFFON_D; y < h; y += BUFFON_D) {
+        ctxBuffon.beginPath();
+        ctxBuffon.moveTo(0, y);
+        ctxBuffon.lineTo(w, y);
+        ctxBuffon.stroke();
+      }
+    }
+
+    function toggleBuffonStream() {
+      const btn = document.getElementById("btn-buffon-stream");
+      if (buffonStreamInterval) {
+        clearInterval(buffonStreamInterval);
+        buffonStreamInterval = null;
+        btn.textContent = "▶ Stream Needles";
+        btn.classList.remove("active");
+      } else {
+        btn.textContent = "⏹ Stop Stream";
+        btn.classList.add("active");
+        buffonStreamInterval = setInterval(() => dropNeedles(25), 60);
+      }
+    }
+
+    function resetBuffon() {
+      if (buffonStreamInterval) toggleBuffonStream();
+      buffonTotal = 0;
+      buffonCrossings = 0;
+      document.getElementById("buffon-total").textContent = "0";
+      document.getElementById("buffon-crossings").textContent = "0";
+      document.getElementById("buffon-pi").textContent = "—";
+      document.getElementById("buffon-err").textContent = "—";
+      initBuffonFloor();
+    }
+
+    document.getElementById("buffon-len").addEventListener("input", (e) => {
+      document.getElementById("buffon-len-val").textContent = e.target.value + " px";
+    });
+
+    initBuffonFloor();
+
+    // 8. GAMBLERS RUIN
+    const canvasRuin = document.getElementById("canvas-ruin");
+    const ctxRuin = canvasRuin.getContext("2d");
+
+    function getRuinParams() {
+      return {
+        p: parseFloat(document.getElementById("ruin-p").value),
+        k: parseInt(document.getElementById("ruin-k").value),
+        N: parseInt(document.getElementById("ruin-n").value),
+      };
+    }
+
+    function updateRuinParameters() {
+      const { p, k, N } = getRuinParams();
+      document.getElementById("ruin-p-val").textContent = p.toFixed(2);
+      document.getElementById("ruin-k-val").textContent = "$" + k;
+      document.getElementById("ruin-n-val").textContent = "$" + N;
+      document.getElementById("ruin-k-metric").textContent = "$" + k;
+      document.getElementById("ruin-n-metric").textContent = "$" + N;
+
+      const q = 1 - p;
+      let ruinProb = 0;
+      if (Math.abs(p - 0.5) < 1e-6) {
+        ruinProb = 1 - k / N;
+      } else {
+        const r = q / p;
+        ruinProb = (Math.pow(r, N) - Math.pow(r, k)) / (Math.pow(r, N) - 1);
+      }
+      document.getElementById("ruin-theo-prob").textContent = (ruinProb * 100).toFixed(1) + "%";
+      drawRuinBackground(N);
+    }
+
+    function drawRuinBackground(N) {
+      const w = canvasRuin.width;
+      const h = canvasRuin.height;
+      ctxRuin.clearRect(0, 0, w, h);
+
+      ctxRuin.strokeStyle = "#ef4444";
+      ctxRuin.lineWidth = 2;
+      ctxRuin.beginPath();
+      ctxRuin.moveTo(40, h - 25);
+      ctxRuin.lineTo(w - 20, h - 25);
+      ctxRuin.stroke();
+      ctxRuin.fillStyle = "#ef4444";
+      ctxRuin.font = "11px monospace";
+      ctxRuin.fillText("$0 (Ruin)", 5, h - 20);
+
+      ctxRuin.strokeStyle = "#10b981";
+      ctxRuin.beginPath();
+      ctxRuin.moveTo(40, 25);
+      ctxRuin.lineTo(w - 20, 25);
+      ctxRuin.stroke();
+      ctxRuin.fillStyle = "#10b981";
+      ctxRuin.fillText(`$${N} (Goal)`, 5, 30);
+    }
+
+    function runSingleRuinGame() {
+      const { p, k, N } = getRuinParams();
+      drawRuinBackground(N);
+
+      let current = k;
+      const path = [current];
+      while (current > 0 && current < N && path.length < 5000) {
+        current += Math.random() < p ? 1 : -1;
+        path.push(current);
+      }
+
+      const w = canvasRuin.width;
+      const h = canvasRuin.height;
+      const plotW = w - 60;
+      const plotH = h - 50;
+
+      ctxRuin.strokeStyle = (current >= N) ? "#10b981" : "#f43f5e";
+      ctxRuin.lineWidth = 2;
+      ctxRuin.beginPath();
+
+      for (let i = 0; i < path.length; i++) {
+        const x = 40 + (i / path.length) * plotW;
+        const y = (h - 25) - (path[i] / N) * plotH;
+        if (i === 0) ctxRuin.moveTo(x, y);
+        else ctxRuin.lineTo(x, y);
+      }
+      ctxRuin.stroke();
+    }
+
+    function simulate100RuinGames() {
+      const { p, k, N } = getRuinParams();
+      let ruins = 0;
+      for (let g = 0; g < 100; g++) {
+        let cur = k;
+        while (cur > 0 && cur < N) {
+          cur += Math.random() < p ? 1 : -1;
+        }
+        if (cur === 0) ruins++;
+      }
+      document.getElementById("ruin-emp-prob").textContent = ruins + "% (100 runs)";
+      runSingleRuinGame();
+    }
+
+    updateRuinParameters();
+
+    // 9. PROBABILITY DISTRIBUTIONS
+    const canvasDist = document.getElementById("canvas-dist");
+    const ctxDist = canvasDist.getContext("2d");
+
+    function switchDistribution() {
+      const dist = document.getElementById("dist-select").value;
+      const lbl1 = document.getElementById("param-lbl-1");
+      const lbl2 = document.getElementById("param-lbl-2");
+      const s1 = document.getElementById("param-slider-1");
+      const s2 = document.getElementById("param-slider-2");
+      const g2 = document.getElementById("param-group-2");
+
+      g2.style.display = "flex";
+
+      if (dist === "normal") {
+        lbl1.textContent = "Mean μ"; s1.min = -3; s1.max = 3; s1.step = 0.1; s1.value = 0;
+        lbl2.textContent = "Std Dev σ"; s2.min = 0.3; s2.max = 2.5; s2.step = 0.1; s2.value = 1.0;
+      } else if (dist === "binomial") {
+        lbl1.textContent = "Trials n"; s1.min = 5; s1.max = 30; s1.step = 1; s1.value = 20;
+        lbl2.textContent = "Success Prob p"; s2.min = 0.05; s2.max = 0.95; s2.step = 0.05; s2.value = 0.5;
+      } else if (dist === "poisson") {
+        lbl1.textContent = "Rate λ"; s1.min = 1; s1.max = 15; s1.step = 0.5; s1.value = 4;
+        g2.style.display = "none";
+      } else if (dist === "exponential") {
+        lbl1.textContent = "Rate λ"; s1.min = 0.2; s1.max = 3.0; s1.step = 0.1; s1.value = 1.0;
+        g2.style.display = "none";
+      } else if (dist === "uniform") {
+        lbl1.textContent = "Lower Bound a"; s1.min = -4; s1.max = 0; s1.step = 0.5; s1.value = -2;
+        lbl2.textContent = "Upper Bound b"; s2.min = 1; s2.max = 4; s2.step = 0.5; s2.value = 2;
+      }
+
+      updateDistPlot();
+    }
+
+    function updateDistPlot() {
+      const dist = document.getElementById("dist-select").value;
+      const p1 = parseFloat(document.getElementById("param-slider-1").value);
+      const p2 = parseFloat(document.getElementById("param-slider-2").value);
+      const x1 = parseFloat(document.getElementById("dist-x1").value);
+      const x2 = parseFloat(document.getElementById("dist-x2").value);
+
+      document.getElementById("param-val-1").textContent = p1;
+      document.getElementById("param-val-2").textContent = p2;
+      document.getElementById("dist-x1-val").textContent = x1.toFixed(1);
+      document.getElementById("dist-x2-val").textContent = x2.toFixed(1);
+
+      const w = canvasDist.width;
+      const h = canvasDist.height;
+      ctxDist.clearRect(0, 0, w, h);
+
+      const padL = 40, padB = 30, plotW = w - 60, plotH = h - 50;
+
+      ctxDist.strokeStyle = "#334155";
+      ctxDist.beginPath();
+      ctxDist.moveTo(padL, h - padB);
+      ctxDist.lineTo(w - 20, h - padB);
+      ctxDist.stroke();
+
+      let mean = 0, variance = 0, area = 0;
+
+      if (dist === "normal") {
+        mean = p1;
+        variance = p2 * p2;
+        const normPDF = (x) => (1 / (p2 * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - p1) / p2, 2));
+
+        ctxDist.beginPath();
+        for (let px = 0; px <= plotW; px++) {
+          const x = -5 + (px / plotW) * 10;
+          const yVal = normPDF(x);
+          const py = (h - padB) - (yVal / 1.0) * plotH;
+          if (px === 0) ctxDist.moveTo(padL + px, py);
+          else ctxDist.lineTo(padL + px, py);
+        }
+        ctxDist.strokeStyle = "#38bdf8";
+        ctxDist.lineWidth = 2.5;
+        ctxDist.stroke();
+
+        ctxDist.fillStyle = "rgba(56, 189, 248, 0.3)";
+        ctxDist.beginPath();
+        const startPx = Math.max(0, Math.min(plotW, ((x1 - (-5)) / 10) * plotW));
+        const endPx = Math.max(0, Math.min(plotW, ((x2 - (-5)) / 10) * plotW));
+        ctxDist.moveTo(padL + startPx, h - padB);
+        for (let px = startPx; px <= endPx; px++) {
+          const x = -5 + (px / plotW) * 10;
+          const yVal = normPDF(x);
+          ctxDist.lineTo(padL + px, (h - padB) - (yVal / 1.0) * plotH);
+        }
+        ctxDist.lineTo(padL + endPx, h - padB);
+        ctxDist.closePath();
+        ctxDist.fill();
+
+        let sum = 0;
+        const lower = Math.min(x1, x2), upper = Math.max(x1, x2);
+        const steps = 200;
+        const dx = (upper - lower) / steps;
+        for (let i = 0; i < steps; i++) sum += normPDF(lower + i * dx) * dx;
+        area = sum;
+      }
+
+      document.getElementById("dist-mean").textContent = mean.toFixed(2);
+      document.getElementById("dist-var").textContent = variance.toFixed(2);
+      document.getElementById("dist-area").textContent = area.toFixed(4);
+    }
+
+    switchDistribution();
+
+    // 10. MARBLE URN
+    let urnRed = 5;
+    let urnGreen = 3;
+    let urnBlue = 2;
+    let urnWithReplacement = false;
+    let urnMarbles = [];
+    let urnDrawn = [];
+
+    function resetUrn() {
+      urnRed = parseInt(document.getElementById("urn-red").value);
+      urnGreen = parseInt(document.getElementById("urn-green").value);
+      urnBlue = parseInt(document.getElementById("urn-blue").value);
+
+      document.getElementById("urn-red-val").textContent = urnRed;
+      document.getElementById("urn-green-val").textContent = urnGreen;
+      document.getElementById("urn-blue-val").textContent = urnBlue;
+
+      urnMarbles = [];
+      for (let i = 0; i < urnRed; i++) urnMarbles.push("red");
+      for (let i = 0; i < urnGreen; i++) urnMarbles.push("green");
+      for (let i = 0; i < urnBlue; i++) urnMarbles.push("blue");
+
+      urnDrawn = [];
+      renderUrn();
+      updateUrnMetrics();
+    }
+
+    function setUrnMode(withReplacement) {
+      urnWithReplacement = withReplacement;
+      document.getElementById("btn-mode-without").classList.toggle("active", !withReplacement);
+      document.getElementById("btn-mode-with").classList.toggle("active", withReplacement);
+      resetUrn();
+    }
+
+    function renderUrn() {
+      const container = document.getElementById("urn-display");
+      container.innerHTML = "";
+      urnMarbles.forEach(color => {
+        const m = document.createElement("div");
+        m.className = `marble ${color}`;
+        container.appendChild(m);
+      });
+
+      const tray = document.getElementById("drawn-tray");
+      tray.innerHTML = "";
+      urnDrawn.forEach(color => {
+        const m = document.createElement("div");
+        m.className = `marble ${color}`;
+        tray.appendChild(m);
+      });
+    }
+
+    function drawMarble() {
+      if (urnMarbles.length === 0) {
+        alert("Urn is empty! Resetting urn.");
+        resetUrn();
+        return;
+      }
+
+      const idx = Math.floor(Math.random() * urnMarbles.length);
+      const picked = urnMarbles[idx];
+
+      urnDrawn.push(picked);
+      if (!urnWithReplacement) {
+        urnMarbles.splice(idx, 1);
+      }
+
+      renderUrn();
+      updateUrnMetrics();
+    }
+
+    function drawMarbles(count) {
+      for (let i = 0; i < count; i++) {
+        if (urnMarbles.length === 0) break;
+        drawMarble();
+      }
+    }
+
+    function updateUrnMetrics() {
+      const total = urnMarbles.length;
+      let r = 0, g = 0, b = 0;
+      urnMarbles.forEach(c => {
+        if (c === "red") r++;
+        if (c === "green") g++;
+        if (c === "blue") b++;
+      });
+
+      document.getElementById("urn-p-red").textContent = total > 0 ? ((r / total) * 100).toFixed(1) + "%" : "0.0%";
+      document.getElementById("urn-p-green").textContent = total > 0 ? ((g / total) * 100).toFixed(1) + "%" : "0.0%";
+      document.getElementById("urn-p-blue").textContent = total > 0 ? ((b / total) * 100).toFixed(1) + "%" : "0.0%";
+    }
+
+    resetUrn();
+  </script>
+</body>
+</html>
