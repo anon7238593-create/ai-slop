@@ -142,8 +142,8 @@ Location: [`2026-09-05/voronoi_diagram/`](2026-09-05/voronoi_diagram/)
 
 - **`voronoi_svg_generator.py`**: Dependency-free geometric Voronoi diagram generator.
 - Implements polygon half-plane clipping against perpendicular bisectors of site pairs.
-- Generates 19 distinct diagrams for site counts $N = 2$ through $N = 20$.
-- Fully styled with distinct translucent cell fills, site coordinate markers, and SVG metadata.
+- Generates **100 distinct diagrams** for site counts $N = 1$ through $N = 100$ at **very high 4K resolution ($3840 \times 2400$)**.
+- Fully styled with a rich 20-color pastel palette, adaptive site dispersion, scalable typography, site coordinate markers, and SVG metadata.
 
 ---
 
@@ -167,7 +167,7 @@ Workflows reside in [`.github/workflows/`](.github/workflows/) with a structured
 | Workflow | File | Output Path on `artifacts` | Description |
 |---|---|---|---|
 | **GCD Grid Visualizations** | [`generate_gcd_grids.yml`](.github/workflows/generate_gcd_grids.yml) | `gcd-grids/` | Generates **100 unique GCD grid SVGs** with large dimensions (up to ~15,000) on each run. Avoids duplicates from prior runs via manifest inspection. Runs at `0 * * * *` and on push. |
-| **Voronoi Diagrams** | [`generate_voronoi_diagrams.yml`](.github/workflows/generate_voronoi_diagrams.yml) | `voronoi/` | Generates 19 Voronoi diagrams (2–20 sites) with timestamp-derived seeds. Runs at `0 * * * *` and on push. |
+| **Voronoi Diagrams** | [`generate_voronoi_diagrams.yml`](.github/workflows/generate_voronoi_diagrams.yml) | `voronoi/` | Generates **100 high-resolution (3840x2400 4K UHD)** Voronoi diagrams (1–100 sites) with timestamp-derived seeds. Runs at `0 * * * *` and on push. |
 | **Traversal Walkthrough PDFs** | [`generate_pdf_for_traversel.yml`](.github/workflows/generate_pdf_for_traversel.yml) | `generated/` | Generates random graphs, runs BFS/DFS step walkthroughs, and combines them into single unified PDFs using `pdfunite`. Runs at `0 * * * *` and on push. |
 | **Ball Collision Videos** | [`generate_collision_videos.yml`](.github/workflows/generate_collision_videos.yml) | `collision-videos/` | Generates **20 randomized 1920x1080 Full HD ball collision MP4 videos** varying in ball count, starting angle, video duration, and speeds with spatial audio. Runs at `5 * * * *`. |
 | **500-Ball Collision Videos Release** | [`generate_500_ball_collision_videos.yml`](.github/workflows/generate_500_ball_collision_videos.yml) | GitHub Releases (`collision-500-balls-*`) | Generates **20 videos with exactly 500 balls** at 1920x1080 resolution. Publishes directly as unique GitHub Releases without pushing to the `artifacts` branch. Runs hourly (`0 * * * *`). |
@@ -192,7 +192,7 @@ Workflows reside in [`.github/workflows/`](.github/workflows/) with a structured
 3. **Dedicated Showcase Views**:
    - **Collision Videos (`#collision`)**: Spotlight HTML5 video player with real-time metadata badges (ball count $N$, speed in px/s, launch angle, canvas dimensions, file size), instant keyword filter, aspect ratio dropdown, sorting, and 12-item pagination.
    - **GCD Grids (`#gcd`)**: Interactive SVG inspector displaying Euclidean step counts and square totals, GCD size filters (Small, Medium, Large), and responsive tile cards.
-   - **Voronoi Diagrams (`#voronoi`)**: Interactive site count slider ($N = 2 \dots 20$) with live SVG display, download links, and a thumbnail gallery.
+   - **Voronoi Diagrams (`#voronoi`)**: Interactive site count slider ($N = 1 \dots 100$), quick jump presets, and scrollable site buttons with live 4K SVG display, download links, and direct viewing.
    - **Graph Traversals (`#traversal`)**: Cards for complete BFS/DFS walkthrough PDFs with direct browser viewing and downloading.
 4. **Zero Heavy Dependencies**:
    - Completely vanilla HTML5, CSS3, and JavaScript with embedded JSON manifest payload.
@@ -285,5 +285,14 @@ artifacts
    - Generates 20 full-scale simulations at 1920x1080 resolution featuring exactly 500 balls per video.
    - Completely bypasses the `artifacts` branch to eliminate Git repository bloat from heavy high-density media, publishing assets directly as unique timestamped GitHub Releases (`collision-500-balls-<timestamp>-run<id>`).
    - Generates unique release names / titles on every run (with optional manual tag and release name overrides via `workflow_dispatch`).
+
+13. **High-Resolution 100-Diagram 4K Voronoi Pipeline**:
+   - Scaled diagram generation from 20 to **100 diagrams** ($N = 1 \dots 100$ sites).
+   - Upgraded canvas resolution from $1200 \times 760$ to **4K UHD+ ($3840 \times 2400$)**, a $10.1\times$ increase in total pixel resolution.
+   - Built resolution-aware proportional scaling across typography, drop shadows, card margins, cell stroke borders, and adaptive site markers.
+   - Implemented dynamic Poisson-area site spacing calculation ensuring fast placement without clustering even at 100 sites.
+   - Expanded color palette to 20 vibrant cohesive pastel shades.
+   - Upgraded web explorer with interactive site slider, quick presets ($2, 10, 25, 50, 75, 100$), and dynamic button generation.
+
 
 

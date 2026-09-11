@@ -40,18 +40,18 @@ jobs:
         env:
           TARGET_DIR: voronoi
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/voronoi-diagrams
-          RELEASE_TITLE: "Generate Voronoi diagrams"
+          RELEASE_TITLE: "Generate 100 high-resolution Voronoi diagrams (4K UHD)"
           GH_TOKEN: ${{ github.token }}
         run: |
-          export COMMIT_DESCRIPTION="Voronoi seed: $(jq -r .seed "$ARTIFACT_DIRECTORY"/manifest.json)"
+          export COMMIT_DESCRIPTION="Generated $(jq -r '.total // (.files | length)' "$ARTIFACT_DIRECTORY"/manifest.json) high-resolution 4K UHD (3840x2400) Voronoi diagrams. Seed: $(jq -r .seed "$ARTIFACT_DIRECTORY"/manifest.json)"
           bash .github/scripts/create_release.sh
 
       - name: Commit and push SVGs to the artifacts branch
         env:
           TARGET_DIR: voronoi
           ARTIFACT_DIRECTORY: ${{ runner.temp }}/voronoi-diagrams
-          COMMIT_TITLE: "Generate Voronoi diagrams"
+          COMMIT_TITLE: "Generate 100 high-resolution Voronoi diagrams (4K UHD)"
           GH_TOKEN: ${{ github.token }}
         run: |
-          export COMMIT_DESCRIPTION="Voronoi seed: $(jq -r .seed "$ARTIFACT_DIRECTORY"/manifest.json)"
+          export COMMIT_DESCRIPTION="Generated $(jq -r '.total // (.files | length)' "$ARTIFACT_DIRECTORY"/manifest.json) high-resolution 4K UHD (3840x2400) Voronoi diagrams. Seed: $(jq -r .seed "$ARTIFACT_DIRECTORY"/manifest.json)"
           bash .github/scripts/push_artifacts.sh

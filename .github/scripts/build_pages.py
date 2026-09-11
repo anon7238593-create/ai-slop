@@ -12,6 +12,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 import os
+import re
 import shutil
 import sys
 from typing import Any, Dict
@@ -115,9 +116,11 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
     if not data["voronoi"]["diagrams"] and os.path.exists(vor_dir):
         v_svgs = sorted([f for f in os.listdir(vor_dir) if f.endswith(".svg") and "sites" in f])
         data["voronoi"]["total"] = len(v_svgs)
-        for idx, f in enumerate(v_svgs, 2):
+        for f in v_svgs:
+            match = re.search(r"(\d+)", f)
+            site_num = int(match.group(1)) if match else len(data["voronoi"]["diagrams"]) + 1
             data["voronoi"]["diagrams"].append({
-                "sites": idx,
+                "sites": site_num,
                 "file": f,
             })
 
