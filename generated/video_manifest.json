@@ -2,83 +2,93 @@
   "graph": {
     "A": [
       "B",
-      "C",
-      "D",
-      "J"
+      "E",
+      "G"
     ],
     "B": [
       "A",
+      "C",
       "D",
       "G",
+      "I",
+      "J"
+    ],
+    "C": [
+      "B",
+      "D",
+      "J"
+    ],
+    "D": [
+      "B",
+      "C",
+      "E"
+    ],
+    "E": [
+      "A",
+      "D",
+      "F",
       "H",
       "I"
     ],
-    "C": [
-      "A"
-    ],
-    "D": [
-      "A",
-      "B",
-      "E",
-      "H"
-    ],
-    "E": [
-      "D",
-      "F",
-      "I",
-      "J"
-    ],
     "F": [
       "E",
-      "G",
+      "G"
+    ],
+    "G": [
+      "A",
+      "B",
+      "F",
       "H",
       "J"
     ],
-    "G": [
-      "B",
-      "F",
-      "I",
-      "J"
-    ],
     "H": [
-      "B",
-      "D",
-      "F"
+      "E",
+      "G"
     ],
     "I": [
       "B",
       "E",
-      "G"
+      "J"
     ],
     "J": [
-      "A",
-      "E",
-      "F",
-      "G"
+      "B",
+      "C",
+      "G",
+      "I"
     ]
   },
   "start_node": "A",
-  "seed": 1789155335,
+  "seed": 1789155666,
   "nodes": 10,
   "edges": 18,
+  "resolution": "2560x1440",
+  "fps": 30,
+  "step_duration_seconds": 1.8,
+  "preset": "2k",
   "generated_videos": [
     {
       "algorithm": "bfs",
       "filename": "bfs_traversal.mp4",
       "title": "Breadth-First Search (BFS) Animation",
-      "data_structure": "FIFO Queue"
+      "data_structure": "FIFO Queue",
+      "resolution": "2560x1440",
+      "step_duration": 1.8
     },
     {
       "algorithm": "dfs",
       "filename": "dfs_traversal.mp4",
       "title": "Depth-First Search (DFS) Animation",
-      "data_structure": "LIFO Stack"
+      "data_structure": "LIFO Stack",
+      "resolution": "2560x1440",
+      "step_duration": 1.8
     },
     {
       "algorithm": "comparison",
       "filename": "bfs_dfs_comparison.mp4",
       "title": "Comparative Traversal: BFS vs DFS",
-      "data_structure": "Queue vs Stack"
+      "data_structure": "Queue vs Stack",
+      "resolution": "2560x1440",
+      "step_duration": 1.8
     }
   ]
 }
