@@ -25,6 +25,7 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
         "gcd": {"grids": [], "total": 0, "generated_at": ""},
         "voronoi": {"diagrams": [], "total": 0, "seed": None, "generated_at": ""},
         "traversal": {"files": [], "videos": [], "graph": {}, "total": 0},
+        "matrix": {"videos": [], "configuration": {}, "total": 0},
     }
 
     # 1. Collision Videos
@@ -198,6 +199,46 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
         data["traversal"]["videos"] = video_items
         data["traversal"]["total"] = len(pdf_items) + len(video_items)
 
+    # 5. Matrix Multiplication Animations
+    mat_dir = os.path.join(artifacts_dir, "matrix-animations")
+    if not os.path.exists(mat_dir):
+        mat_dir = os.path.join(artifacts_dir, "2026-09-12", "matrix_multiplication_manim", "rendered_animations")
+
+    if os.path.exists(mat_dir):
+        mat_manifest = os.path.join(mat_dir, "animation_manifest.json")
+        if os.path.exists(mat_manifest):
+            try:
+                with open(mat_manifest, "r", encoding="utf-8") as f:
+                    m_data = json.load(f)
+                    data["matrix"]["configuration"] = m_data.get("configuration", {})
+                    data["matrix"]["generated_at"] = m_data.get("generated_at", "")
+                    data["matrix"]["release_tag"] = m_data.get("release_tag")
+                    data["matrix"]["release_url"] = m_data.get("release_url")
+                    data["matrix"]["release_archive_url"] = m_data.get("release_archive_url")
+            except Exception:
+                pass
+
+        descriptions = {
+            "space_transformations.mp4": "Grid transformation under scaling, shearing, and general stretching.",
+            "eigenvectors_invariant_directions.mp4": "Visualizing invariant eigen-lines and vectors that only scale (Av = lambda*v).",
+            "matrix_multiplication_composition.mp4": "Sequential composition: A then B vs one-shot product matrix C = B @ A.",
+            "master_matrix_multiplication_story.mp4": "Master cinematic story connecting basis vectors, eigenvectors, and matrix multiplication.",
+        }
+
+        mat_vids = []
+        for f in sorted(os.listdir(mat_dir)):
+            if f.endswith(".mp4"):
+                fpath = os.path.join(mat_dir, f)
+                pretty_title = f.replace(".mp4", "").replace("_", " ").title()
+                mat_vids.append({
+                    "filename": f"matrix-animations/{f}",
+                    "title": pretty_title,
+                    "description": descriptions.get(f, "Linear transformation animation generated with Manim."),
+                    "size_mb": round(os.path.getsize(fpath) / (1024 * 1024), 2),
+                })
+        data["matrix"]["videos"] = mat_vids
+        data["matrix"]["total"] = len(mat_vids)
+
     return data
 
 
@@ -214,6 +255,7 @@ def generate_html(data: Dict[str, Any], template_path: str) -> str:
         + data["gcd"]["total"]
         + data["voronoi"]["total"]
         + data["traversal"]["total"]
+        + data["matrix"]["total"]
     )
 
     replacements = {
@@ -224,6 +266,7 @@ def generate_html(data: Dict[str, Any], template_path: str) -> str:
         "__GCD_TOTAL__": str(data["gcd"]["total"]),
         "__VORONOI_TOTAL__": str(data["voronoi"]["total"]),
         "__TRAVERSAL_TOTAL__": str(data["traversal"]["total"]),
+        "__MATRIX_TOTAL__": str(data["matrix"]["total"]),
     }
 
     for token, val in replacements.items():
@@ -249,9 +292,10 @@ def build_site(artifacts_dir: str, output_dir: str):
     print(f"  - GCD Grids:        {data['gcd']['total']} items")
     print(f"  - Voronoi Diagrams: {data['voronoi']['total']} items")
     print(f"  - Traversal PDFs:   {data['traversal']['total']} items")
+    print(f"  - Matrix Videos:    {data['matrix']['total']} items")
 
     # 2. Copy media directories to output_dir
-    subdirs = ["collision-videos", "gcd-grids", "voronoi", "generated"]
+    subdirs = ["collision-videos", "gcd-grids", "voronoi", "generated", "matrix-animations"]
     for sub in subdirs:
         src_path = os.path.join(artifacts_dir, sub)
         dst_path = os.path.join(output_dir, sub)
@@ -260,6 +304,13 @@ def build_site(artifacts_dir: str, output_dir: str):
             if os.path.exists(dst_path):
                 shutil.rmtree(dst_path)
             shutil.copytree(src_path, dst_path)
+
+    dst_mat = os.path.join(output_dir, "matrix-animations")
+    if not os.path.exists(dst_mat):
+        fallback_mat = os.path.join(artifacts_dir, "2026-09-12", "matrix_multiplication_manim", "rendered_animations")
+        if os.path.exists(fallback_mat):
+            print(f"Copying fallback matrix-animations -> {dst_mat}...")
+            shutil.copytree(fallback_mat, dst_mat)
 
     # 3. Create .nojekyll to prevent GitHub Pages from ignoring files
     nojekyll_path = os.path.join(output_dir, ".nojekyll")

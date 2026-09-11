@@ -1,0 +1,83 @@
+name: Generate Matrix Multiplication Animations
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - artifacts
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install System Dependencies for Manim
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libcairo2-dev libpango1.0-dev pkg-config \
+            texlive-latex-base texlive-latex-extra texlive-fonts-recommended dvisvgm
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install manim numpy scipy
+
+      - name: Run Matrix Math Unit Tests
+        run: |
+          python3 2026-09-12/matrix_multiplication_manim/test_matrix_math.py
+
+      - name: Generate Randomized Manim Matrix Animations
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/matrix-animations
+        run: |
+          seed="$(date -u +%s)"
+          mkdir -p "$ARTIFACT_DIRECTORY"
+          python3 2026-09-12/matrix_multiplication_manim/generate_matrix_animation.py \
+            --seed "$seed" \
+            --quality m \
+            --scene all \
+            --output-dir "$ARTIFACT_DIRECTORY"
+
+          mkdir -p "$ARTIFACT_DIRECTORY/code"
+          cp 2026-09-12/matrix_multiplication_manim/random_matrix_generator.py \
+            2026-09-12/matrix_multiplication_manim/matrix_scenes.py \
+            2026-09-12/matrix_multiplication_manim/generate_matrix_animation.py \
+            2026-09-12/matrix_multiplication_manim/test_matrix_math.py \
+            "$ARTIFACT_DIRECTORY/code/"
+
+      - name: Create GitHub Release for Matrix Animations
+        env:
+          TARGET_DIR: matrix-animations
+          RELEASE_TAG_PREFIX: matrix-animations
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/matrix-animations
+          RELEASE_TITLE: "Generate Matrix Multiplication Animations"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export COMMIT_DESCRIPTION="Random matrix seed: $(jq -r .configuration.seed "$ARTIFACT_DIRECTORY"/animation_manifest.json)"
+          bash .github/scripts/create_release.sh
+
+      - name: Commit and push videos to the artifacts branch
+        env:
+          TARGET_DIR: matrix-animations
+          RELEASE_TAG_PREFIX: matrix-animations
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/matrix-animations
+          COMMIT_TITLE: "Generate Matrix Multiplication Animations"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export COMMIT_DESCRIPTION="Random matrix seed: $(jq -r .configuration.seed "$ARTIFACT_DIRECTORY"/animation_manifest.json)"
+          bash .github/scripts/push_artifacts.sh

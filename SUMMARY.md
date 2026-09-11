@@ -222,11 +222,21 @@ artifacts
 │   │   ├── specific_node_bfs_dfs_walkthrough.pdf
 │   │   └── code/                      # Bundled generator scripts
 │   ├── bfs/ and dfs/                  # Step-by-step PDF slides
+│   ├── bfs_traversal.mp4              # Queue-driven BFS animation video
+│   ├── dfs_traversal.mp4              # Stack-driven DFS animation video
+│   ├── bfs_dfs_comparison.mp4         # Side-by-side synchronized comparison video
 │   └── graph.json                     # Seed and graph metadata
+├── matrix-animations/
+│   ├── animation_manifest.json        # Manifest with matrix configs, eigenvalues, eigenvectors, seeds
+│   ├── space_transformations.mp4      # Scaling, shearing, and general stretching animations
+│   ├── eigenvectors_invariant_directions.mp4 # Invariant eigen-lines (Av = λv)
+│   ├── matrix_multiplication_composition.mp4 # Spatial composition: A then B vs C = B · A
+│   ├── master_matrix_multiplication_story.mp4 # Master cinematic pedagogical film
+│   └── code/                          # Bundled generator scripts
 └── voronoi/
     ├── README.md
     ├── manifest.json
-    └── voronoi_02_sites.svg ... voronoi_20_sites.svg
+    └── voronoi_001_sites.svg ... voronoi_100_sites.svg
 ```
 
 ---
@@ -293,6 +303,20 @@ artifacts
    - Implemented dynamic Poisson-area site spacing calculation ensuring fast placement without clustering even at 100 sites.
    - Expanded color palette to 20 vibrant cohesive pastel shades.
    - Upgraded web explorer with interactive site slider, quick presets ($2, 10, 25, 50, 75, 100$), and dynamic button generation.
+
+14. **Graph Traversal Animations (BFS & DFS Walkthroughs)**:
+   - Built an end-to-end graph traversal animation engine ([`2026-09-05/bfs_dfs_tutorial/traversal_animator.py`](2026-09-05/bfs_dfs_tutorial/traversal_animator.py)) rendering high-definition 1080p 60fps videos via PyCairo and FFmpeg.
+   - Implemented force-directed spring graph layouts, animated signal packet pulses traveling across edges, active traversal path edge glows, and live real-time data structure HUDs (FIFO Queue for BFS, LIFO Stack for DFS).
+   - Produced single-algorithm exploration videos (`bfs_traversal.mp4`, `dfs_traversal.mp4`) as well as a synchronized side-by-side comparative video (`bfs_dfs_comparison.mp4`) contrasting breadth-oriented wavefront expansion against depth-oriented branch exploration on the identical topology.
+   - Integrated with automated unit tests ([`test_traversal_animator.py`](2026-09-05/bfs_dfs_tutorial/test_traversal_animator.py)), GitHub Actions workflow ([`generate_pdf_for_traversel.yml`](.github/workflows/generate_pdf_for_traversel.yml)), and the GitHub Pages media showcase website.
+
+15. **Manim Matrix Multiplication & Linear Transformation Animations (`2026-09-12`)**:
+   - Built a comprehensive mathematical animation suite using Manim Community (`v0.21.0`) located in [`2026-09-12/matrix_multiplication_manim/`](2026-09-12/matrix_multiplication_manim/).
+   - **Space Transformations**: Visualizes 2D space deformation under non-uniform scaling ($S = \begin{bmatrix} s_x & 0 \\ 0 & s_y \end{bmatrix}$), horizontal/vertical shearing ($H_x = \begin{bmatrix} 1 & k \\ 0 & 1 \end{bmatrix}$), and general stretching. Highlights that grid lines remain parallel and evenly spaced, basis vectors $\hat{i}, \hat{j}$ transform into matrix columns, and determinant $\det(M)$ dictates signed area scaling.
+   - **Eigenvectors & Invariant Directions**: Constructs randomized symmetric transformations via spectral decomposition $A = P D P^T$ with guaranteed real, distinct eigenvalues $\lambda_1, \lambda_2 \in [0.5, 2.0]$ and orthogonal eigenvectors $\vec{v}_1, \vec{v}_2$. Illustrates invariant eigen-lines along which vectors scale without rotating ($A\vec{v} = \lambda\vec{v}$), contrasted against arbitrary test vectors that tilt and rotate off their span.
+   - **Matrix Multiplication as Spatial Composition**: Visually demonstrates that multiplying two matrices $C = B \cdot A$ represents sequential linear transformations. Compares applying transformation $A$ followed by $B$ step-by-step against applying composite matrix $C$ directly, proving that both yield the identical space deformation.
+   - **Procedural Randomization**: Generates fresh random transformation parameters, shear coefficients, rotation angles, eigenvalues, and matrices on every run unless explicitly seeded.
+   - **Automated Hourly Workflow & Site Integration**: Added dedicated hourly GitHub Actions workflow ([`generate_matrix_multiplication_animation.yml`](.github/workflows/generate_matrix_multiplication_animation.yml)), mathematical unit tests ([`test_matrix_math.py`](2026-09-12/matrix_multiplication_manim/test_matrix_math.py)), standalone CLI driver ([`generate_matrix_animation.py`](2026-09-12/matrix_multiplication_manim/generate_matrix_animation.py)), technical guide ([`README.md`](2026-09-12/matrix_multiplication_manim/README.md)), and web explorer integration.
 
 
 

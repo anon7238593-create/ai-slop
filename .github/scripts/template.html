@@ -488,6 +488,10 @@
           Graph Traversals
           <span class="count-tag" id="badge-traversal">__TRAVERSAL_TOTAL__</span>
         </button>
+        <button class="tab-link" data-tab="matrix">
+          Matrix Multiplication
+          <span class="count-tag" id="badge-matrix">__MATRIX_TOTAL__</span>
+        </button>
       </nav>
     </div>
   </div>
@@ -664,6 +668,36 @@
       <div class="doc-list" id="pdf-container"></div>
     </section>
 
+    <!-- 5. Matrix Multiplication -->
+    <section id="tab-matrix" class="tab-content">
+      <div class="section-intro">
+        <h2>Matrix Multiplication & Linear Transformations</h2>
+        <p>
+          High-definition mathematical animations produced with Manim Community (v0.21.0) visualizing how 2D space deforms under scaling, shearing, and stretching, demonstrating invariant eigenvector directions (A·v = λ·v), and proving why matrix multiplication represents spatial composition (C = B · A).
+        </p>
+      </div>
+
+      <div class="viewer" id="matrix-viewer">
+        <div class="viewer-display">
+          <video id="matrix-video-player" controls preload="metadata">
+            <source src="" type="video/mp4">
+          </video>
+        </div>
+        <div class="viewer-info">
+          <div>
+            <div class="viewer-title" id="spotlight-matrix-title">master_matrix_multiplication_story.mp4</div>
+            <div class="viewer-meta" id="spotlight-matrix-meta"></div>
+          </div>
+          <div>
+            <a id="spotlight-matrix-link" href="#" target="_blank" class="btn">Open file &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.1rem; color: var(--text-heading);">Manim Transformation Animations</h3>
+      <div class="grid grid-2" id="matrix-video-grid" style="margin-bottom: 2rem;"></div>
+    </section>
+
   </main>
 
   <footer>
@@ -700,7 +734,7 @@
 
     if (window.location.hash) {
       const hash = window.location.hash.replace('#', '');
-      if (['collision', 'gcd', 'voronoi', 'traversal'].includes(hash)) {
+      if (['collision', 'gcd', 'voronoi', 'traversal', 'matrix'].includes(hash)) {
         selectTab(hash);
       }
     }
@@ -1065,6 +1099,81 @@
       });
     }
 
+    // =========================================================================
+    // 5. Matrix Multiplication Animations
+    // =========================================================================
+    function showMatrixSpotlight(video) {
+      if (!video) return;
+      document.getElementById('spotlight-matrix-title').textContent = video.title || video.filename;
+      document.getElementById('spotlight-matrix-meta').textContent =
+        `${video.description || ''} | Size: ${video.size_mb || 0} MB`;
+
+      const player = document.getElementById('matrix-video-player');
+      player.src = video.filename;
+      player.load();
+
+      const link = document.getElementById('spotlight-matrix-link');
+      link.href = video.filename;
+    }
+
+    function renderMatrix() {
+      const videoGrid = document.getElementById('matrix-video-grid');
+      if (!videoGrid) return;
+      videoGrid.innerHTML = '';
+
+      const videos = (DATA.matrix && DATA.matrix.videos && DATA.matrix.videos.length > 0)
+        ? DATA.matrix.videos
+        : [
+          {
+            title: "1. Space Transformations (Scaling, Shearing, Stretching)",
+            filename: "matrix-animations/space_transformations.mp4",
+            description: "Coordinate grid warping under scaling, shearing, and stretching.",
+            size_mb: 1.37
+          },
+          {
+            title: "2. Eigenvectors & Invariant Directions",
+            filename: "matrix-animations/eigenvectors_invariant_directions.mp4",
+            description: "Vectors satisfying A·v = λ·v scale purely along their span without rotating.",
+            size_mb: 0.89
+          },
+          {
+            title: "3. Matrix Multiplication as Composition",
+            filename: "matrix-animations/matrix_multiplication_composition.mp4",
+            description: "Sequential transformations A then B yield the exact same space deformation as C = B · A.",
+            size_mb: 2.05
+          },
+          {
+            title: "4. Master Matrix Multiplication Story",
+            filename: "matrix-animations/master_matrix_multiplication_story.mp4",
+            description: "Unified pedagogical film covering space deformation, invariant eigenspaces, and composite transformations.",
+            size_mb: 2.26
+          }
+        ];
+
+      videos.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-title">${v.title}</div>
+          <div class="card-desc">${v.description}</div>
+          <div class="card-meta">File: ${v.filename} (${v.size_mb || 0} MB)</div>
+          <div style="margin-top: 1rem; display: flex; gap: 8px;">
+            <button class="btn btn-play" style="flex: 1;">▶ Play in Viewer</button>
+            <a href="${v.filename}" class="btn" target="_blank" download>Download</a>
+          </div>
+        `;
+        card.querySelector('.btn-play').addEventListener('click', () => {
+          showMatrixSpotlight(v);
+          document.getElementById('matrix-viewer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+        videoGrid.appendChild(card);
+      });
+
+      if (videos.length > 0) {
+        showMatrixSpotlight(videos[0]);
+      }
+    }
+
     // Generic Pagination Helper
     function renderPagination(containerId, currentPage, totalPages, onSelect) {
       const container = document.getElementById(containerId);
@@ -1115,6 +1224,7 @@
       initVoronoiButtons();
       setVoronoiSites(10);
       renderTraversals();
+      renderMatrix();
     });
   </script>
 </body>
