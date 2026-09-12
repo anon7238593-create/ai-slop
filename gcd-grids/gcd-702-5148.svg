@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="2713" viewBox="0 0 1400 2713" style="max-width: 100%; height: auto;">
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+  <text x="700.0" y="43" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#172033">Euclidean algorithm: gcd(702, 5148) = 234</text>
+  <text x="700.0" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#475569">Take the biggest squares first; each remaining strip creates a smaller square size. Seed 1679209187.</text>
+  <g>
+    <rect x="570.00" y="2195.00" width="330.00" height="330.00" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="735.00" y="2376.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">702×702</text>
+    <rect x="570.00" y="1865.00" width="330.00" height="330.00" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="735.00" y="2046.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">702×702</text>
+    <rect x="570.00" y="1535.00" width="330.00" height="330.00" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="735.00" y="1716.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">702×702</text>
+    <rect x="570.00" y="1205.00" width="330.00" height="330.00" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="735.00" y="1386.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">702×702</text>
+    <rect x="570.00" y="875.00" width="330.00" height="330.00" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="735.00" y="1056.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">702×702</text>
+    <rect x="570.00" y="545.00" width="330.00" height="330.00" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="735.00" y="726.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">702×702</text>
+    <rect x="570.00" y="215.00" width="330.00" height="330.00" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="735.00" y="396.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">702×702</text>
+    <rect x="570.00" y="105.00" width="110.00" height="110.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="625.00" y="166.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#172033">234×234</text>
+    <rect x="680.00" y="105.00" width="110.00" height="110.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="735.00" y="166.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#172033">234×234</text>
+    <rect x="790.00" y="105.00" width="110.00" height="110.00" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="845.00" y="166.00" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#172033">234×234</text>
+  </g>
+  <rect x="150.0" y="2613.0" width="21" height="21" fill="#ff6b6b" stroke="#172033" stroke-width="1.5"/>
+  <text x="181.0" y="2630.0" font-family="Arial, sans-serif" font-size="17" fill="#172033">Step 1: 7 square(s) of 702×702</text>
+  <rect x="540.0" y="2613.0" width="21" height="21" fill="#4dabf7" stroke="#172033" stroke-width="1.5"/>
+  <text x="571.0" y="2630.0" font-family="Arial, sans-serif" font-size="17" fill="#172033">Step 2: 3 square(s) of 234×234</text>
+  <text x="735.0" y="2575.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="bold" fill="#172033">Width = 702</text>
+  <text x="525.0" y="1315.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="bold" fill="#172033" transform="rotate(-90 525.0 1315.0)">Height = 5148</text>
+</svg>
