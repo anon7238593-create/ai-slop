@@ -87,11 +87,14 @@ def render_scene(
         print(f"STDOUT:\n{res.stdout[-800:]}")
         raise RuntimeError(f"Failed to render scene {scene_name} (exit code {res.returncode})")
 
-    # Manim saves videos under current_dir / media / videos / rsa_scenes / <res> / <scene_name>.mp4
-    found_videos = list(current_dir.glob(f"media/videos/rsa_scenes/**/{scene_name}.mp4"))
+    # Manim saves videos under media/videos/<module>/<res>/<scene_name>.mp4
+    found_videos = list(current_dir.glob(f"media/videos/**/{scene_name}.mp4"))
     if not found_videos:
-        # Check parent media directory
-        found_videos = list(Path("media").glob(f"videos/rsa_scenes/**/{scene_name}.mp4"))
+        found_videos = list(Path("media").glob(f"videos/**/{scene_name}.mp4"))
+    if not found_videos:
+        # Check global root media
+        repo_root = current_dir.parent.parent
+        found_videos = list(repo_root.glob(f"media/videos/**/{scene_name}.mp4"))
 
     if not found_videos:
         raise FileNotFoundError(f"Could not locate output video file for scene {scene_name}")

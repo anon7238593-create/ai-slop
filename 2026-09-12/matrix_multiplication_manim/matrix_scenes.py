@@ -158,25 +158,28 @@ def create_hud_card(
     formula: Mobject | None = None,
     extra_text: str | None = None,
     title_color: str = BLUE_C,
-    font_scale: float = 1.0,
+    font_scale: float = 0.88,
 ) -> VGroup:
     """Create a high-contrast HUD card enclosed with BackgroundRectangle."""
     elements: list[Mobject] = [
-        Text(title, font_size=int(18 * font_scale), weight=BOLD, color=title_color)
+        Text(title, font_size=int(16 * font_scale), weight=BOLD, color=title_color)
     ]
     if subtitle:
-        elements.append(Text(subtitle, font_size=int(14 * font_scale), color=LIGHT_GRAY))
+        elements.append(Text(subtitle, font_size=int(13 * font_scale), color=LIGHT_GRAY))
     if formula:
         elements.append(formula)
     if extra_text:
-        elements.append(Text(extra_text, font_size=int(13 * font_scale), color=YELLOW_B))
+        if any(tok in extra_text for tok in ["\\", "\\det", "\\lambda", "\\text", "\\quad", "_", "^"]):
+            elements.append(MathTex(extra_text, font_size=int(16 * font_scale), color=YELLOW_B))
+        else:
+            elements.append(Text(extra_text, font_size=int(12 * font_scale), color=YELLOW_B))
 
-    content = VGroup(*elements).arrange(DOWN, aligned_edge=LEFT, buff=0.12 * font_scale)
+    content = VGroup(*elements).arrange(DOWN, aligned_edge=LEFT, buff=0.10 * font_scale)
     bg = BackgroundRectangle(
         content,
         color=COLOR_PANEL_BG,
         fill_opacity=0.92,
-        buff=0.22,
+        buff=0.18,
         stroke_width=1.0,
         stroke_color=COLOR_PANEL_BORDER,
     )
@@ -194,9 +197,10 @@ class SpaceTransformationsScene(Scene):
         pack = get_current_matrix_pack()
 
         # Title Card
-        title = Text("Linear Transformations: How Space Transforms", font_size=28, weight=BOLD, color=WHITE).to_edge(UP, buff=0.35)
-        subtitle = Text(f"Random Seed: {pack.seed}  •  Multi-Shape Deformation & Basis Vectors", font_size=16, color=GRAY).next_to(title, DOWN, buff=0.12)
-        self.play(FadeIn(title), FadeIn(subtitle), run_time=1.0)
+        title = Text("Linear Transformations: How Space Transforms", font_size=24, weight=BOLD, color=WHITE).to_edge(UP, buff=0.20)
+        subtitle = Text(f"Random Seed: {pack.seed}  •  Multi-Shape Deformation & Basis Vectors", font_size=14, color=GRAY).next_to(title, DOWN, buff=0.08)
+        title_group = VGroup(title, subtitle)
+        self.play(FadeIn(title_group), run_time=1.0)
         self.wait(0.4)
 
         # Coordinate Plane
@@ -209,13 +213,13 @@ class SpaceTransformationsScene(Scene):
 
         # Shape Legend
         legend_content = VGroup(
-            Text("Geometric Probes:", font_size=15, weight=BOLD, color=WHITE),
-            Text("• Unit Square (Yellow): Area & Parallelogram Shear", font_size=12, color=YELLOW),
-            Text("• Unit Circle (Cyan): Curvature & Ellipse Axes", font_size=12, color=COLOR_CIRCLE),
-            Text("• Triangle (Purple): Collinearity & Asymmetry", font_size=12, color=COLOR_TRIANGLE),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.08)
-        legend_bg = BackgroundRectangle(legend_content, color=COLOR_PANEL_BG, fill_opacity=0.88, buff=0.18, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
-        legend_card = VGroup(legend_bg, legend_content).to_corner(UR, buff=0.45)
+            Text("Geometric Probes:", font_size=14, weight=BOLD, color=WHITE),
+            Text("• Unit Square (Yellow): Area & Parallelogram Shear", font_size=11, color=YELLOW),
+            Text("• Unit Circle (Cyan): Curvature & Ellipse Axes", font_size=11, color=COLOR_CIRCLE),
+            Text("• Triangle (Purple): Collinearity & Asymmetry", font_size=11, color=COLOR_TRIANGLE),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.07)
+        legend_bg = BackgroundRectangle(legend_content, color=COLOR_PANEL_BG, fill_opacity=0.88, buff=0.16, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
+        legend_card = VGroup(legend_bg, legend_content).next_to(title_group, DOWN, buff=0.15).to_edge(RIGHT, buff=0.35)
 
         self.play(
             FadeIn(unit_square),
@@ -237,10 +241,10 @@ class SpaceTransformationsScene(Scene):
         scale_card = create_hud_card(
             title="1. Scaling Transformation (Matrix S)",
             subtitle=f"Stretch x by {pack.scale_x:.2f}x, y by {pack.scale_y:.2f}x",
-            formula=MathTex(r"S = " + pack.latex_scale_matrix, font_size=22, color=YELLOW),
+            formula=MathTex(r"S = " + pack.latex_scale_matrix, font_size=21, color=YELLOW),
             extra_text=f"det(S) = {det_s:.2f} (Area Scaling Multiplier)",
             title_color=BLUE_C,
-        ).to_corner(UL, buff=0.5)
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
 
         self.play(FadeIn(scale_card), run_time=0.8)
 
@@ -288,17 +292,17 @@ class SpaceTransformationsScene(Scene):
         shear_card = create_hud_card(
             title="2. Shearing Transformation (Matrix H)",
             subtitle=f"Shear along {pack.shear_axis}-axis by factor k = {pack.shear_k:.2f}",
-            formula=MathTex(r"H = " + pack.latex_shear_matrix, font_size=22, color=PURPLE_A),
-            extra_text=r"det(H) = 1.00 (Area Strictly Preserved!)",
+            formula=MathTex(r"H = " + pack.latex_shear_matrix, font_size=21, color=PURPLE_A),
+            extra_text=r"\det(H) = 1.00 \text{ (Area Strictly Preserved!)}",
             title_color=PURPLE_B,
-        ).to_corner(UL, buff=0.5)
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
 
         self.play(FadeIn(shear_card), run_time=0.8)
 
         new_i_shear = mat_vec_mul(shear_mat, [1.0, 0.0])
         new_j_shear = mat_vec_mul(shear_mat, [0.0, 1.0])
 
-        obs_b_text = Text("Square tilts to parallelogram, circle to tilted ellipse — Area is 100% PRESERVED!", font_size=15, color=PURPLE_A)
+        obs_b_text = Text("Square tilts to parallelogram, circle to tilted ellipse — Area is 100% PRESERVED!", font_size=14, color=PURPLE_A)
         obs_b_bg = BackgroundRectangle(obs_b_text, color=COLOR_PANEL_BG, fill_opacity=0.9, buff=0.15)
         obs_b = VGroup(obs_b_bg, obs_b_text).to_edge(DOWN, buff=0.35)
 
@@ -339,10 +343,10 @@ class SpaceTransformationsScene(Scene):
         general_card = create_hud_card(
             title="3. General Linear Transformation (Matrix A)",
             subtitle="Matrix columns dictate where basis vectors land!",
-            formula=MathTex(r"A = " + pack.latex_matrix_a, font_size=22, color=GOLD_A),
+            formula=MathTex(r"A = " + pack.latex_matrix_a, font_size=21, color=GOLD_A),
             extra_text=rf"\det(A) = {pack.det_a:.2f}, \quad \text{{Trace}} = {pack.trace_a:.2f}",
             title_color=GOLD_B,
-        ).to_corner(UL, buff=0.5)
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
 
         self.play(FadeIn(general_card), run_time=0.8)
 
@@ -394,12 +398,13 @@ class EigenvectorsScene(Scene):
         v1, v2 = pack.v1, pack.v2
 
         # Title Card
-        title = Text("Eigenvectors: Invariant Directions in Space", font_size=28, weight=BOLD, color=WHITE).to_edge(UP, buff=0.35)
+        title = Text("Eigenvectors: Invariant Directions in Space", font_size=24, weight=BOLD, color=WHITE).to_edge(UP, buff=0.20)
         subtitle = MathTex(
             r"A\vec{v} = \lambda \vec{v} \quad \text{Vectors that ONLY scale along their line, never rotate!}",
-            font_size=19, color=GOLD_B
-        ).next_to(title, DOWN, buff=0.12)
-        self.play(FadeIn(title), FadeIn(subtitle), run_time=1.0)
+            font_size=17, color=GOLD_B
+        ).next_to(title, DOWN, buff=0.08)
+        title_group = VGroup(title, subtitle)
+        self.play(FadeIn(title_group), run_time=1.0)
 
         # Coordinate Plane
         plane = create_coordinate_plane()
@@ -413,9 +418,9 @@ class EigenvectorsScene(Scene):
         info_card = create_hud_card(
             title=f"Matrix A (det = {pack.det_a:.2f})",
             formula=MathTex(r"A = " + pack.latex_matrix_a, font_size=20, color=LIGHT_GRAY),
-            extra_text=rf"\lambda_1 = {l1:.2f} \text{ (Gold)}, \quad \lambda_2 = {l2:.2f} \text{ (Cyan)}",
+            extra_text=rf"\lambda_1 = {l1:.2f} \text{{ (Gold)}}, \quad \lambda_2 = {l2:.2f} \text{{ (Cyan)}}",
             title_color=WHITE,
-        ).to_corner(UL, buff=0.5)
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
         self.play(FadeIn(info_card), run_time=0.8)
 
         # Draw the two Eigen-Lines (infinite dashed lines through origin)
@@ -496,8 +501,8 @@ class EigenvectorsScene(Scene):
             Text(f"Ellipse principal axes align EXACTLY with eigenvectors v1 and v2!", font_size=14, color=WHITE),
             Text(f"Semi-major axis = {l1:.2f} along v1  •  Semi-minor axis = {l2:.2f} along v2", font_size=13, color=YELLOW_A),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.12)
-        callout_bg = BackgroundRectangle(callout_lines, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.22, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
-        callout_card = VGroup(callout_bg, callout_lines).to_corner(UR, buff=0.45)
+        callout_bg = BackgroundRectangle(callout_lines, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.20, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
+        callout_card = VGroup(callout_bg, callout_lines).next_to(title_group, DOWN, buff=0.15).to_edge(RIGHT, buff=0.35)
 
         self.play(FadeIn(callout_card), run_time=1.0)
         self.wait(2.5)
@@ -510,7 +515,7 @@ class EigenvectorsScene(Scene):
             FadeOut(i_hat), FadeOut(j_hat), FadeOut(i_label), FadeOut(j_label),
             FadeOut(v1_label), FadeOut(v2_label), FadeOut(w_label),
             FadeOut(info_card), FadeOut(callout_card), FadeOut(obs_banner),
-            FadeOut(title), FadeOut(subtitle),
+            FadeOut(title_group),
             run_time=1.2
         )
 
@@ -529,12 +534,13 @@ class MatrixMultiplicationScene(Scene):
         mat_c = pack.matrix_c
 
         # Title
-        title = Text("Matrix Multiplication: Composition of Transformations", font_size=28, weight=BOLD, color=WHITE).to_edge(UP, buff=0.35)
+        title = Text("Matrix Multiplication: Composition of Transformations", font_size=24, weight=BOLD, color=WHITE).to_edge(UP, buff=0.20)
         subtitle = MathTex(
             r"\text{Applying } A \text{ then } B \text{ is IDENTICAL to applying } C = B \cdot A \text{ directly in one step!}",
-            font_size=19, color=BLUE_C
-        ).next_to(title, DOWN, buff=0.12)
-        self.play(FadeIn(title), FadeIn(subtitle), run_time=1.0)
+            font_size=17, color=BLUE_C
+        ).next_to(title, DOWN, buff=0.08)
+        title_group = VGroup(title, subtitle)
+        self.play(FadeIn(title_group), run_time=1.0)
 
         # Coordinate Plane
         plane = create_coordinate_plane()
@@ -559,7 +565,7 @@ class MatrixMultiplicationScene(Scene):
             formula=MathTex(r"A = " + pack.latex_matrix_a, font_size=21, color=YELLOW_B),
             extra_text=rf"\det(A) = {pack.det_a:.2f}",
             title_color=YELLOW,
-        ).to_corner(UL, buff=0.5)
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
         self.play(FadeIn(step1_card), run_time=0.8)
 
         a_i = mat_vec_mul(mat_a, [1.0, 0.0])
@@ -639,8 +645,8 @@ class MatrixMultiplicationScene(Scene):
             ),
             Text("Now demonstrating ONE-STEP direct product transformation C...", font_size=14, color=YELLOW)
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.12)
-        formula_bg = BackgroundRectangle(formula_lines, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.22, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
-        formula_card = VGroup(formula_bg, formula_lines).to_corner(UR, buff=0.45)
+        formula_bg = BackgroundRectangle(formula_lines, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.20, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
+        formula_card = VGroup(formula_bg, formula_lines).next_to(title_group, DOWN, buff=0.15).to_edge(RIGHT, buff=0.35)
 
         self.play(FadeIn(formula_card), run_time=1.0)
         self.wait(1.5)
@@ -670,7 +676,7 @@ class MatrixMultiplicationScene(Scene):
             formula=MathTex(r"C = " + pack.latex_matrix_c, font_size=21, color=GREEN_A),
             extra_text=rf"\det(C) = {pack.det_c:.2f}",
             title_color=GREEN_C,
-        ).to_corner(UL, buff=0.5)
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
 
         self.play(FadeIn(direct_card), run_time=0.8)
 
@@ -703,7 +709,7 @@ class MatrixMultiplicationScene(Scene):
             FadeOut(plane), FadeOut(unit_square), FadeOut(unit_circle), FadeOut(triangle),
             FadeOut(i_hat), FadeOut(j_hat), FadeOut(i_label), FadeOut(j_label),
             FadeOut(ghost_group), FadeOut(formula_card), FadeOut(direct_card),
-            FadeOut(verification), FadeOut(title), FadeOut(subtitle),
+            FadeOut(verification), FadeOut(title_group),
             run_time=1.2
         )
 
@@ -737,7 +743,7 @@ class MasterMatrixMultiplicationStory(Scene):
         # -------------------------------------------------------------
         # Act 1: Basis Vectors & Multi-Shape Deformation
         # -------------------------------------------------------------
-        act1_title = Text("Part 1: Basis Vectors & Space Deformation", font_size=24, weight=BOLD, color=GOLD_B).to_edge(UP, buff=0.35)
+        act1_title = Text("Part 1: Basis Vectors & Space Deformation", font_size=24, weight=BOLD, color=GOLD_B).to_edge(UP, buff=0.20)
         self.play(FadeIn(act1_title), run_time=0.8)
 
         plane = create_coordinate_plane()
@@ -760,7 +766,7 @@ class MasterMatrixMultiplicationStory(Scene):
             formula=MathTex(r"A = " + pack.latex_matrix_a, font_size=21, color=GOLD_A),
             extra_text=rf"\det(A) = {pack.det_a:.2f}",
             title_color=GOLD_B,
-        ).to_corner(UL, buff=0.5)
+        ).next_to(act1_title, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
         self.play(FadeIn(a_card), run_time=0.8)
 
         a_i = mat_vec_mul(mat_a, [1.0, 0.0])
@@ -784,7 +790,7 @@ class MasterMatrixMultiplicationStory(Scene):
         # -------------------------------------------------------------
         self.play(FadeOut(a_card), FadeOut(act1_title), run_time=0.6)
 
-        act2_title = Text("Part 2: Eigenvectors & Invariant Directions", font_size=24, weight=BOLD, color=COLOR_V1).to_edge(UP, buff=0.35)
+        act2_title = Text("Part 2: Eigenvectors & Invariant Directions", font_size=24, weight=BOLD, color=COLOR_V1).to_edge(UP, buff=0.20)
         self.play(FadeIn(act2_title), run_time=0.6)
 
         # Reset back to identity to show eigenvectors clearly
@@ -819,12 +825,12 @@ class MasterMatrixMultiplicationStory(Scene):
         eigen_hud = create_hud_card(
             title="Eigenvalues & Invariant Directions",
             formula=MathTex(
-                rf"\lambda_1 = {l1:.2f}\ (\vec{{v}}_1\text{ Gold}), \quad \lambda_2 = {l2:.2f}\ (\vec{{v}}_2\text{ Cyan})",
+                rf"\lambda_1 = {l1:.2f}\ (\vec{{v}}_1\text{{ Gold}}), \quad \lambda_2 = {l2:.2f}\ (\vec{{v}}_2\text{{ Cyan}})",
                 font_size=18, color=LIGHT_GRAY
             ),
             extra_text="Circle transforms to ellipse whose axes align with v1 & v2!",
             title_color=COLOR_V1,
-        ).to_corner(UL, buff=0.5)
+        ).next_to(act2_title, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
 
         self.play(
             Create(eigen_line1), Create(eigen_line2),
@@ -870,7 +876,7 @@ class MasterMatrixMultiplicationStory(Scene):
             run_time=0.6
         )
 
-        act3_title = Text("Part 3: Matrix Multiplication is Transformation Composition", font_size=23, weight=BOLD, color=BLUE_B).to_edge(UP, buff=0.35)
+        act3_title = Text("Part 3: Matrix Multiplication is Transformation Composition", font_size=22, weight=BOLD, color=BLUE_B).to_edge(UP, buff=0.20)
         self.play(FadeIn(act3_title), run_time=0.6)
 
         # Apply second matrix B from state A
@@ -881,7 +887,7 @@ class MasterMatrixMultiplicationStory(Scene):
             formula=MathTex(r"B = " + pack.latex_matrix_b, font_size=21, color=RED_A),
             extra_text=rf"\det(B) = {pack.det_b:.2f}",
             title_color=RED_B,
-        ).to_corner(UL, buff=0.5)
+        ).next_to(act3_title, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
         self.play(FadeIn(b_hud), run_time=0.8)
 
         c_i = mat_vec_mul(mat_c, [1.0, 0.0])
@@ -917,8 +923,8 @@ class MasterMatrixMultiplicationStory(Scene):
             ),
             Text("Single-step transformation C exactly matches composite B · A!", font_size=14, color=YELLOW)
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.12)
-        prod_bg = BackgroundRectangle(prod_formula, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.22, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
-        prod_card = VGroup(prod_bg, prod_formula).to_corner(UR, buff=0.45)
+        prod_bg = BackgroundRectangle(prod_formula, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.20, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
+        prod_card = VGroup(prod_bg, prod_formula).next_to(act3_title, DOWN, buff=0.15).to_edge(RIGHT, buff=0.35)
 
         self.play(FadeIn(prod_card), run_time=1.0)
         self.wait(1.5)
@@ -945,7 +951,7 @@ class MasterMatrixMultiplicationStory(Scene):
             formula=MathTex(r"C = " + pack.latex_matrix_c, font_size=21, color=GREEN_A),
             extra_text="Shapes and basis vectors snap directly into ghost outlines!",
             title_color=GREEN_C,
-        ).to_corner(UL, buff=0.5)
+        ).next_to(act3_title, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
 
         self.play(FadeIn(direct_banner), run_time=0.8)
 

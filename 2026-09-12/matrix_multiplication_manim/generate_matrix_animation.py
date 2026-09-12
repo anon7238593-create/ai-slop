@@ -150,14 +150,28 @@ def main() -> None:
         else:
             print(f"Warning: could not locate produced file {target_filename}", file=sys.stderr)
 
-    # Save manifest
+    # Save manifest (merge with existing if present)
+    manifest_path = args.output_dir / "animation_manifest.json"
+    existing_videos: dict[str, dict] = {}
+    if manifest_path.exists():
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                old_data = json.load(f)
+                for v in old_data.get("videos", []):
+                    existing_videos[v["filename"]] = v
+        except Exception:
+            pass
+
+    for v in manifest_videos:
+        existing_videos[v["filename"]] = v
+
     manifest = {
         "configuration": pack.to_dict(),
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
         "quality": args.quality,
-        "videos": manifest_videos,
+        "videos": list(existing_videos.values()),
     }
-    with open(args.output_dir / "animation_manifest.json", "w", encoding="utf-8") as f:
+    with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
 
     print("\nAll requested Manim matrix animations rendered successfully!")

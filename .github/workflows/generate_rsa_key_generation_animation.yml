@@ -60,6 +60,7 @@ jobs:
             2026-09-12/rsa_key_generation_manim/generate_rsa_animation.py \
             2026-09-12/rsa_key_generation_manim/test_rsa_math.py \
             "$ARTIFACT_DIRECTORY/code/"
+          cp -r 2026-09-12/rsa_key_generation_manim/scenes "$ARTIFACT_DIRECTORY/code/"
 
       - name: Create GitHub Release for RSA Animations
         env:
