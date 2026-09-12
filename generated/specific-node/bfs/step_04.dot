@@ -16,31 +16,36 @@ graph traversal {
   D [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   E [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   F [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
-  G [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
+  G [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   H [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   I [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   J [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   A -- B;
+  A -- C;
+  A -- D;
+  A -- F;
+  A -- G;
+  A -- I;
   A -- J;
   B -- C;
-  B -- D;
   B -- E [color="#7C3AED", penwidth=3.8];
   B -- F;
-  B -- H;
+  B -- I;
+  B -- J;
   C -- D;
   C -- G;
-  C -- H;
-  C -- I;
-  D -- J;
+  D -- G;
+  D -- I;
   E -- F [color="#7C3AED", penwidth=3.8];
+  E -- G [color="#7C3AED", penwidth=3.8];
   F -- I;
   G -- H;
-  G -- I;
   G -- J;
-  I -- J;
+  H -- I;
+  H -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Queue:</B> F</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Queue:</B> F  →  G</TD></TR>
       <TR><TD ALIGN="LEFT"><B>Visited:</B> E</TD></TR>
     </TABLE>
   >];
