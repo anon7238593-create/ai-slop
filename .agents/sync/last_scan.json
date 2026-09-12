@@ -1,15 +1,7 @@
 {
   "branch": "master",
-  "last_commit": "0411f1d feat(rsa): complete kinetic motion overhaul, zero overlap, and anti-aliased scenes for RSA Manim animations (anon7238593-create, 7 minutes ago)",
+  "last_commit": "318d696 fix(matrix): correct linear transformation maths, add multi-shape deformation, eliminate z-axis rotation (anon7238593-create, 5 seconds ago)",
   "modified": [
-    ".agents/sync/CURRENT_STATE.md",
-    ".agents/sync/activity_log.jsonl",
-    "2026-09-12/matrix_multiplication_manim/README.md",
-    "2026-09-12/matrix_multiplication_manim/rendered_animations/animation_manifest.json",
-    "2026-09-12/matrix_multiplication_manim/rendered_animations/eigenvectors_invariant_directions.mp4",
-    "2026-09-12/matrix_multiplication_manim/rendered_animations/master_matrix_multiplication_story.mp4",
-    "2026-09-12/matrix_multiplication_manim/rendered_animations/matrix_multiplication_composition.mp4",
-    "2026-09-12/matrix_multiplication_manim/rendered_animations/space_transformations.mp4",
     "2026-09-12/rsa_key_generation_manim/generate_rsa_animation.py",
     "2026-09-12/rsa_key_generation_manim/rendered_animations/FermatsLittleTheoremScene.mp4",
     "2026-09-12/rsa_key_generation_manim/rendered_animations/rsa_manifest.json",

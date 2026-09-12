@@ -1,8 +1,8 @@
 {
   "topic": "RSA Key Generation and Foundational Number Theory",
-  "timestamp": "2026-09-12T03:33:02Z",
+  "timestamp": "2026-09-12T03:43:35Z",
   "total_scenes": 5,
-  "total_render_time_sec": 22.32,
+  "total_render_time_sec": 221.01,
   "quality": "m",
   "scenes": [
     {
@@ -10,9 +10,9 @@
       "description": "Fermat's Little Theorem (Residue Permutation & Cyclic Powers)",
       "file_name": "FermatsLittleTheoremScene.mp4",
       "file_path": "/home/aman/dev/ai-slop/2026-09-12/rsa_key_generation_manim/rendered_animations/FermatsLittleTheoremScene.mp4",
-      "size_bytes": 1441584,
-      "size_mb": 1.37,
-      "render_time_sec": 4.35
+      "size_bytes": 838550,
+      "size_mb": 0.8,
+      "render_time_sec": 29.23
     },
     {
       "scene_name": "BezoutsIdentityScene",
@@ -21,34 +21,34 @@
       "file_path": "/home/aman/dev/ai-slop/2026-09-12/rsa_key_generation_manim/rendered_animations/BezoutsIdentityScene.mp4",
       "size_bytes": 927972,
       "size_mb": 0.88,
-      "render_time_sec": 3.36
+      "render_time_sec": 71.6
     },
     {
       "scene_name": "EulersTheoremScene",
       "description": "Euler's Totient Theorem & Multiplicativity Grid",
       "file_name": "EulersTheoremScene.mp4",
       "file_path": "/home/aman/dev/ai-slop/2026-09-12/rsa_key_generation_manim/rendered_animations/EulersTheoremScene.mp4",
-      "size_bytes": 844958,
-      "size_mb": 0.81,
-      "render_time_sec": 5.53
+      "size_bytes": 715348,
+      "size_mb": 0.68,
+      "render_time_sec": 43.7
     },
     {
       "scene_name": "ModularInverseScene",
       "description": "Modular Multiplicative Inverse & Coprimality Condition",
       "file_name": "ModularInverseScene.mp4",
       "file_path": "/home/aman/dev/ai-slop/2026-09-12/rsa_key_generation_manim/rendered_animations/ModularInverseScene.mp4",
-      "size_bytes": 1372260,
-      "size_mb": 1.31,
-      "render_time_sec": 4.83
+      "size_bytes": 767837,
+      "size_mb": 0.73,
+      "render_time_sec": 29.99
     },
     {
       "scene_name": "RSAKeyGenerationScene",
       "description": "RSA Key Generation, Encryption, Decryption & Correctness Proof",
       "file_name": "RSAKeyGenerationScene.mp4",
       "file_path": "/home/aman/dev/ai-slop/2026-09-12/rsa_key_generation_manim/rendered_animations/RSAKeyGenerationScene.mp4",
-      "size_bytes": 1388186,
-      "size_mb": 1.32,
-      "render_time_sec": 4.2
+      "size_bytes": 996385,
+      "size_mb": 0.95,
+      "render_time_sec": 46.47
     }
   ]
 }

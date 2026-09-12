@@ -26,6 +26,16 @@ from scene3_euler import EulersTheoremScene
 from scene4_inverse import ModularInverseScene
 from scene5_rsa import RSAKeyGenerationScene
 
+# Ensure Manim CLI discovers classes when running against rsa_scenes.py
+for cls in (
+    FermatsLittleTheoremScene,
+    BezoutsIdentityScene,
+    EulersTheoremScene,
+    ModularInverseScene,
+    RSAKeyGenerationScene,
+):
+    cls.__module__ = __name__
+
 __all__ = [
     "FermatsLittleTheoremScene",
     "BezoutsIdentityScene",
@@ -33,3 +43,4 @@ __all__ = [
     "ModularInverseScene",
     "RSAKeyGenerationScene",
 ]
+
