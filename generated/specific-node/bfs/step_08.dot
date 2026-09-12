@@ -11,40 +11,37 @@ graph traversal {
     { rank=same; key_unseen; key_frontier; key_current; key_done; }
   }
   A [fillcolor="#FFEDD5", color="#EA580C", fontcolor="#9A3412"];
-  B [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  B [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   C [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
-  D [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
+  D [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   E [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  F [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
-  G [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  F [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
+  G [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   H [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
-  I [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
+  I [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   J [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
-  A -- B;
-  A -- C;
-  A -- D [color="#7C3AED", penwidth=3.8];
-  A -- F;
-  A -- G;
+  A -- B [color="#7C3AED", penwidth=3.8];
   A -- J;
+  B -- C [color="#7C3AED", penwidth=3.8];
+  B -- D [color="#7C3AED", penwidth=3.8];
+  B -- E [color="#7C3AED", penwidth=3.8];
   B -- F;
-  B -- H;
-  B -- I [color="#7C3AED", penwidth=3.8];
-  B -- J;
-  C -- D [color="#7C3AED", penwidth=3.8];
+  B -- H [color="#7C3AED", penwidth=3.8];
+  C -- D;
   C -- G;
-  D -- E [color="#7C3AED", penwidth=3.8];
-  D -- F [color="#7C3AED", penwidth=3.8];
-  D -- G [color="#7C3AED", penwidth=3.8];
-  E -- I [color="#7C3AED", penwidth=3.8];
-  F -- G;
-  F -- J;
+  C -- H;
+  C -- I;
+  D -- J;
+  E -- F [color="#7C3AED", penwidth=3.8];
+  F -- I [color="#7C3AED", penwidth=3.8];
+  G -- H;
+  G -- I;
   G -- J;
-  H -- I [color="#7C3AED", penwidth=3.8];
-  H -- J;
+  I -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Queue:</B> C  →  F  →  G  →  B  →  H</TD></TR>
-      <TR><TD ALIGN="LEFT"><B>Visited:</B> D, E, I</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Queue:</B> C  →  D  →  H  →  I</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Visited:</B> B, E, F</TD></TR>
     </TABLE>
   >];
 }
