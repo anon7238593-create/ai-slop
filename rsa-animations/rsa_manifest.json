@@ -1,8 +1,8 @@
 {
   "topic": "RSA Key Generation and Foundational Number Theory",
-  "timestamp": "2026-09-12T03:09:22Z",
+  "timestamp": "2026-09-12T03:47:54Z",
   "total_scenes": 5,
-  "total_render_time_sec": 81.75,
+  "total_render_time_sec": 101.95,
   "quality": "m",
   "scenes": [
     {
@@ -10,45 +10,45 @@
       "description": "Fermat's Little Theorem (Residue Permutation & Cyclic Powers)",
       "file_name": "FermatsLittleTheoremScene.mp4",
       "file_path": "/home/runner/work/_temp/rsa-animations/FermatsLittleTheoremScene.mp4",
-      "size_bytes": 673046,
-      "size_mb": 0.64,
-      "render_time_sec": 13.29
+      "size_bytes": 859993,
+      "size_mb": 0.82,
+      "render_time_sec": 19.32
     },
     {
       "scene_name": "BezoutsIdentityScene",
       "description": "B\u00e9zout's Identity & Extended Euclidean Algorithm",
       "file_name": "BezoutsIdentityScene.mp4",
       "file_path": "/home/runner/work/_temp/rsa-animations/BezoutsIdentityScene.mp4",
-      "size_bytes": 562290,
-      "size_mb": 0.54,
-      "render_time_sec": 14.11
+      "size_bytes": 972454,
+      "size_mb": 0.93,
+      "render_time_sec": 23.28
     },
     {
       "scene_name": "EulersTheoremScene",
       "description": "Euler's Totient Theorem & Multiplicativity Grid",
       "file_name": "EulersTheoremScene.mp4",
       "file_path": "/home/runner/work/_temp/rsa-animations/EulersTheoremScene.mp4",
-      "size_bytes": 508535,
-      "size_mb": 0.48,
-      "render_time_sec": 12.84
+      "size_bytes": 739021,
+      "size_mb": 0.7,
+      "render_time_sec": 16.5
     },
     {
       "scene_name": "ModularInverseScene",
       "description": "Modular Multiplicative Inverse & Coprimality Condition",
       "file_name": "ModularInverseScene.mp4",
       "file_path": "/home/runner/work/_temp/rsa-animations/ModularInverseScene.mp4",
-      "size_bytes": 520702,
-      "size_mb": 0.5,
-      "render_time_sec": 12.49
+      "size_bytes": 775893,
+      "size_mb": 0.74,
+      "render_time_sec": 16.31
     },
     {
       "scene_name": "RSAKeyGenerationScene",
       "description": "RSA Key Generation, Encryption, Decryption & Correctness Proof",
       "file_name": "RSAKeyGenerationScene.mp4",
       "file_path": "/home/runner/work/_temp/rsa-animations/RSAKeyGenerationScene.mp4",
-      "size_bytes": 1193441,
-      "size_mb": 1.14,
-      "render_time_sec": 29.01
+      "size_bytes": 1015236,
+      "size_mb": 0.97,
+      "render_time_sec": 26.53
     }
   ]
 }

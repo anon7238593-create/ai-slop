@@ -32,11 +32,31 @@ import time
 current_dir = Path(__file__).resolve().parent
 
 SCENE_MAPPING = {
-    "flt": ("FermatsLittleTheoremScene", "Fermat's Little Theorem (Residue Permutation & Cyclic Powers)"),
-    "bezout": ("BezoutsIdentityScene", "Bézout's Identity & Extended Euclidean Algorithm"),
-    "euler": ("EulersTheoremScene", "Euler's Totient Theorem & Multiplicativity Grid"),
-    "inverse": ("ModularInverseScene", "Modular Multiplicative Inverse & Coprimality Condition"),
-    "rsa": ("RSAKeyGenerationScene", "RSA Key Generation, Encryption, Decryption & Correctness Proof"),
+    "flt": (
+        current_dir / "scenes" / "scene1_fermat.py",
+        "FermatsLittleTheoremScene",
+        "Fermat's Little Theorem (Residue Permutation & Cyclic Powers)",
+    ),
+    "bezout": (
+        current_dir / "scenes" / "scene2_bezout.py",
+        "BezoutsIdentityScene",
+        "Bézout's Identity & Extended Euclidean Algorithm",
+    ),
+    "euler": (
+        current_dir / "scenes" / "scene3_euler.py",
+        "EulersTheoremScene",
+        "Euler's Totient Theorem & Multiplicativity Grid",
+    ),
+    "inverse": (
+        current_dir / "scenes" / "scene4_inverse.py",
+        "ModularInverseScene",
+        "Modular Multiplicative Inverse & Coprimality Condition",
+    ),
+    "rsa": (
+        current_dir / "scenes" / "scene5_rsa.py",
+        "RSAKeyGenerationScene",
+        "RSA Key Generation, Encryption, Decryption & Correctness Proof",
+    ),
 }
 
 
@@ -58,6 +78,7 @@ def find_manim_bin(custom_path: str | None = None) -> str:
 
 
 def render_scene(
+    scene_file: Path,
     scene_name: str,
     scene_description: str,
     manim_bin: str,
@@ -65,12 +86,19 @@ def render_scene(
     output_dir: Path,
 ) -> dict:
     """Render a single Manim scene and move the resulting video to output_dir."""
-    scenes_file = current_dir / "rsa_scenes.py"
+    media_dir = current_dir / "media"
+    media_dir.mkdir(parents=True, exist_ok=True)
+    target_filename = f"{scene_name}.mp4"
+
     cmd = [
         manim_bin,
         f"-q{quality_flag}",
-        str(scenes_file),
+        str(scene_file),
         scene_name,
+        "-o",
+        target_filename,
+        "--media_dir",
+        str(media_dir),
     ]
 
     print(f"\n=======================================================")
@@ -82,26 +110,30 @@ def render_scene(
     res = subprocess.run(cmd, cwd=str(current_dir), capture_output=True, text=True)
     duration_render = time.time() - t0
 
-    if res.returncode != 0:
-        print(f"STDERR:\n{res.stderr[-800:]}")
-        print(f"STDOUT:\n{res.stdout[-800:]}")
+    if res.returncode != 0 or "no scenes inside that module" in res.stdout.lower() or "no scenes inside that module" in res.stderr.lower():
+        print(f"STDERR:\n{res.stderr}")
+        print(f"STDOUT:\n{res.stdout}")
         raise RuntimeError(f"Failed to render scene {scene_name} (exit code {res.returncode})")
 
-    # Manim saves videos under current_dir / media / videos / rsa_scenes / <res> / <scene_name>.mp4
-    found_videos = list(current_dir.glob(f"media/videos/rsa_scenes/**/{scene_name}.mp4"))
+    # Manim saves videos under media_dir/**/<target_filename>
+    found_videos = list(media_dir.glob(f"**/{target_filename}"))
     if not found_videos:
-        # Check parent media directory
-        found_videos = list(Path("media").glob(f"videos/rsa_scenes/**/{scene_name}.mp4"))
+        found_videos = list(current_dir.glob(f"**/{target_filename}"))
+    if not found_videos:
+        repo_root = current_dir.parent.parent
+        found_videos = list((repo_root / "media").glob(f"**/{target_filename}"))
 
     if not found_videos:
-        raise FileNotFoundError(f"Could not locate output video file for scene {scene_name}")
+        print(f"STDOUT:\n{res.stdout}")
+        print(f"STDERR:\n{res.stderr}")
+        raise FileNotFoundError(f"Could not locate output video file {target_filename} for scene {scene_name}")
 
     # Pick the most recently modified video
     found_videos.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     source_video = found_videos[0]
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    dest_video = output_dir / f"{scene_name}.mp4"
+    dest_video = output_dir / target_filename
     shutil.copy2(source_video, dest_video)
 
     size_bytes = dest_video.stat().st_size
@@ -160,8 +192,9 @@ def main() -> None:
     manifest_entries = []
     total_start = time.time()
 
-    for scene_cls, scene_desc in scenes_to_render:
+    for scene_file, scene_cls, scene_desc in scenes_to_render:
         info = render_scene(
+            scene_file=scene_file,
             scene_name=scene_cls,
             scene_description=scene_desc,
             manim_bin=manim_bin,
