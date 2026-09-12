@@ -106,19 +106,25 @@ The animation records ghost outlines of all shapes after $A$ and $B$, resets to 
 
 ## Quickstart & CLI Usage
 
-### Render Animations
-```bash
-# Render all scenes in medium quality (720p30):
-python3 generate_matrix_animation.py --scene all --quality m
+### Render High-Definition Animations (Full HD 1080p60 + Anti-Aliasing)
+The generator automatically enables Cairo's `ANTIALIAS_BEST` subpixel vector filter and defaults to Full HD 1080p at 60 FPS:
 
-# Render with reproducible seed in low quality (fast preview):
-python3 generate_matrix_animation.py --seed 42 --quality l --scene all
+```bash
+# Render all scenes in 1080p60 Full HD with anti-aliasing (Default):
+python3 generate_matrix_animation.py --scene all --quality h
+
+# Render with reproducible seed in 1080p60:
+python3 generate_matrix_animation.py --seed 42 --quality h --scene all
 
 # Render individual scenes:
-python3 generate_matrix_animation.py --scene transformations --quality l --seed 42
-python3 generate_matrix_animation.py --scene eigenvectors --quality l --seed 42
-python3 generate_matrix_animation.py --scene multiplication --quality l --seed 42
-python3 generate_matrix_animation.py --scene master --quality l --seed 42
+python3 generate_matrix_animation.py --scene transformations --quality h --seed 42
+python3 generate_matrix_animation.py --scene eigenvectors --quality h --seed 42
+python3 generate_matrix_animation.py --scene multiplication --quality h --seed 42
+python3 generate_matrix_animation.py --scene master --quality h --seed 42
+
+# Ultra HD 4K (2160p60) or 2K (1440p60):
+python3 generate_matrix_animation.py --scene all --quality k
+python3 generate_matrix_animation.py --scene all --quality p
 ```
 
 ### Run Mathematical Test Suite

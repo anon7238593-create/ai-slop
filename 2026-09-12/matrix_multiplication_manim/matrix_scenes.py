@@ -1,14 +1,57 @@
 import json
 import os
 import math
+from pathlib import Path
+import sys
 import numpy as np
+import cairo
+
+# Add current dir to sys.path for robust imports
+current_dir = Path(__file__).resolve().parent
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
+
 from manim import *
+from manim.camera.camera import Camera
 from random_matrix_generator import (
     generate_matrix_pack, 
     MatrixPack, 
     matrix_to_latex, 
     format_latex_num
 )
+
+# ---------------------------------------------------------------------
+# Anti-Aliasing Enhancement: Force Cairo to use ANTIALIAS_BEST
+# ---------------------------------------------------------------------
+_orig_get_cairo_context = Camera.get_cairo_context
+
+def _antialias_best_get_cairo_context(self, pixel_array):
+    ctx = _orig_get_cairo_context(self, pixel_array)
+    ctx.set_antialias(cairo.ANTIALIAS_BEST)
+    return ctx
+
+Camera.get_cairo_context = _antialias_best_get_cairo_context
+
+
+def get_current_matrix_pack() -> MatrixPack:
+    """Retrieve or generate the matrix configuration for the current scene run."""
+    env_seed = os.environ.get("MATRIX_ANIM_SEED")
+    if env_seed is not None:
+        try:
+            return generate_matrix_pack(int(env_seed))
+        except ValueError:
+            pass
+
+    config_file = Path(__file__).resolve().parent / "matrix_config.json"
+    if config_file.exists():
+        try:
+            with open(config_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return MatrixPack(**data)
+        except Exception:
+            pass
+
+    return generate_matrix_pack(42)
 
 # Configuration for glassmorphic HUD cards
 HUD_BG_COLOR = "#0B0F19"
@@ -49,7 +92,7 @@ def mat_vec_mul(mat, vec):
 
 class SpaceTransformationsScene(Scene):
     def construct(self):
-        pack = generate_matrix_pack(42)
+        pack = get_current_matrix_pack()
         
         # Elements
         title = Text("Linear Transformations: How Space Transforms", font_size=24, weight=BOLD)
@@ -172,7 +215,7 @@ class SpaceTransformationsScene(Scene):
 
 class EigenvectorsScene(Scene):
     def construct(self):
-        pack = generate_matrix_pack(42)
+        pack = get_current_matrix_pack()
         
         title = Text("Eigenvectors: Directions That Never Tilt", font_size=24, weight=BOLD)
         title_bg = BackgroundRectangle(title, color=HUD_BG_COLOR, fill_opacity=0.92, buff=0.15, stroke_width=1.0, stroke_color=HUD_BORDER_COLOR)
@@ -242,7 +285,7 @@ class EigenvectorsScene(Scene):
 
 class MatrixMultiplicationScene(Scene):
     def construct(self):
-        pack = generate_matrix_pack(42)
+        pack = get_current_matrix_pack()
         
         title = Text("Matrix Multiplication: Composition of Transformations", font_size=24, weight=BOLD)
         title_bg = BackgroundRectangle(title, color=HUD_BG_COLOR, fill_opacity=0.92, buff=0.15, stroke_width=1.0, stroke_color=HUD_BORDER_COLOR)
@@ -358,7 +401,10 @@ class MatrixMultiplicationScene(Scene):
 class MasterMatrixMultiplicationStory(Scene):
     def construct(self):
         SpaceTransformationsScene.construct(self)
-        self.clear()
+        self.play(*[FadeOut(m) for m in self.mobjects], run_time=0.8)
+        self.wait(0.3)
         EigenvectorsScene.construct(self)
-        self.clear()
+        self.play(*[FadeOut(m) for m in self.mobjects], run_time=0.8)
+        self.wait(0.3)
         MatrixMultiplicationScene.construct(self)
+        self.play(*[FadeOut(m) for m in self.mobjects], run_time=0.8)

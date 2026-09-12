@@ -1447,32 +1447,34 @@
       "det_c": "\\det(C) = 1.102"
     }
   },
-  "generated_at": "2026-09-12 04:16:44 UTC",
-  "quality": "l",
+  "generated_at": "2026-09-12 14:31:14 UTC",
+  "quality": "h",
+  "resolution": "1920x1080 @ 60fps (Full HD)",
+  "anti_aliasing": "Cairo ANTIALIAS_BEST (Subpixel Filter)",
   "videos": [
     {
       "scene": "SpaceTransformationsScene",
       "filename": "space_transformations.mp4",
-      "size_mb": 0.53,
-      "render_duration_s": 5.7
+      "size_mb": 1.8,
+      "render_duration_s": 71.8
     },
     {
       "scene": "EigenvectorsScene",
       "filename": "eigenvectors_invariant_directions.mp4",
-      "size_mb": 0.24,
-      "render_duration_s": 3.4
+      "size_mb": 0.83,
+      "render_duration_s": 4.1
     },
     {
       "scene": "MatrixMultiplicationScene",
       "filename": "matrix_multiplication_composition.mp4",
-      "size_mb": 0.73,
-      "render_duration_s": 8.7
+      "size_mb": 2.5,
+      "render_duration_s": 53.6
     },
     {
       "scene": "MasterMatrixMultiplicationStory",
       "filename": "master_matrix_multiplication_story.mp4",
-      "size_mb": 1.5,
-      "render_duration_s": 25.3
+      "size_mb": 5.43,
+      "render_duration_s": 125.1
     }
   ]
 }
