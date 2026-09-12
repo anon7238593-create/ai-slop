@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1393" viewBox="0 0 1400 1393" style="max-width: 100%; height: auto;">
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+  <text x="700.0" y="43" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#172033">Euclidean algorithm: gcd(100, 225) = 25</text>
+  <text x="700.0" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" fill="#475569">Take the biggest squares first; each remaining strip creates a smaller square size. Seed 2821617855.</text>
+  <g>
+    <rect x="490.56" y="716.11" width="488.89" height="488.89" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="735.00" y="976.56" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">100×100</text>
+    <rect x="490.56" y="227.22" width="488.89" height="488.89" fill="#ff6b6b" stroke="#172033" stroke-width="2.5"/>
+    <text x="735.00" y="487.67" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#172033">100×100</text>
+    <rect x="490.56" y="105.00" width="122.22" height="122.22" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="551.67" y="172.78" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#172033">25×25</text>
+    <rect x="612.78" y="105.00" width="122.22" height="122.22" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="673.89" y="172.78" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#172033">25×25</text>
+    <rect x="735.00" y="105.00" width="122.22" height="122.22" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="796.11" y="172.78" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#172033">25×25</text>
+    <rect x="857.22" y="105.00" width="122.22" height="122.22" fill="#4dabf7" stroke="#172033" stroke-width="2.5"/>
+    <text x="918.33" y="172.78" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#172033">25×25</text>
+  </g>
+  <rect x="150.0" y="1293.0" width="21" height="21" fill="#ff6b6b" stroke="#172033" stroke-width="1.5"/>
+  <text x="181.0" y="1310.0" font-family="Arial, sans-serif" font-size="17" fill="#172033">Step 1: 2 square(s) of 100×100</text>
+  <rect x="540.0" y="1293.0" width="21" height="21" fill="#4dabf7" stroke="#172033" stroke-width="1.5"/>
+  <text x="571.0" y="1310.0" font-family="Arial, sans-serif" font-size="17" fill="#172033">Step 2: 4 square(s) of 25×25</text>
+  <text x="735.0" y="1255.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="bold" fill="#172033">Width = 100</text>
+  <text x="445.6" y="655.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="bold" fill="#172033" transform="rotate(-90 445.6 655.0)">Height = 225</text>
+</svg>
