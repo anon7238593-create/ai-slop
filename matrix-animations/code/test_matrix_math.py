@@ -20,6 +20,7 @@ from random_matrix_generator import (
     get_canonical_shapes,
     get_ellipse_parameters,
     matrix_to_latex,
+    sample_unit_circle,
     transform_point,
     transform_shape,
 )
@@ -200,6 +201,80 @@ class TestMatrixMath(unittest.TestCase):
         self.assertIn("eigenvalues", manifest)
         self.assertIn("product_formula", manifest)
 
+    def test_shape_composition_multiplication_equivalence(self):
+        """Verify that B @ (A @ v) == (B @ A) @ v for all vertices of all shapes."""
+        for seed in (42, 108, 999):
+            pack = generate_matrix_pack(seed=seed)
+            A = pack.matrix_a
+            B = pack.matrix_b
+            C = pack.matrix_c
+
+            test_points = (
+                UNIT_SQUARE_VERTICES
+                + ASYMMETRIC_TRIANGLE_VERTICES
+                + [BASIS_VECTORS["i_hat"], BASIS_VECTORS["j_hat"]]
+                + sample_unit_circle(16)
+            )
+
+            for pt in test_points:
+                # Step 1: v' = A @ v
+                v_prime = transform_point(A, pt)
+                # Step 2: v'' = B @ v' = B @ (A @ v)
+                v_double_prime = transform_point(B, v_prime)
+                # Direct single step: v_direct = C @ v = (B @ A) @ v
+                v_direct = transform_point(C, pt)
+
+                self.assertAlmostEqual(v_double_prime[0], v_direct[0], delta=0.03)
+                self.assertAlmostEqual(v_double_prime[1], v_direct[1], delta=0.03)
+
+    def test_collinearity_preservation(self):
+        """Linear transformations must preserve collinearity: points on a line remain on a line."""
+        pack = generate_matrix_pack(seed=42)
+        for M in (pack.scale_matrix, pack.shear_matrix, pack.matrix_a, pack.matrix_b, pack.matrix_c):
+            # 3 points on line y = 2x + 1
+            p1 = [0.0, 1.0]
+            p2 = [1.0, 3.0]
+            p3 = [2.0, 5.0]
+
+            tp1 = transform_point(M, p1)
+            tp2 = transform_point(M, p2)
+            tp3 = transform_point(M, p3)
+
+            # Cross product (area of triangle formed by 3 points) should be 0
+            cross = (tp2[0] - tp1[0]) * (tp3[1] - tp1[1]) - (tp2[1] - tp1[1]) * (tp3[0] - tp1[0])
+            self.assertAlmostEqual(cross, 0.0, delta=1e-5)
+
+    def test_area_scaling_law(self):
+        """Area of unit square under transformation M must equal |det(M)|."""
+        def polygon_area_2d(pts):
+            n = len(pts)
+            area = 0.0
+            for i in range(n):
+                j = (i + 1) % n
+                area += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1]
+            return abs(area) / 2.0
+
+        for seed in (11, 22, 33, 44):
+            pack = generate_matrix_pack(seed=seed)
+            orig_area = polygon_area_2d(UNIT_SQUARE_VERTICES)
+            self.assertAlmostEqual(orig_area, 1.0, places=5)
+
+            # Transformed under A
+            sq_a = transform_shape(pack.matrix_a, UNIT_SQUARE_VERTICES)
+            area_a = polygon_area_2d(sq_a)
+            self.assertAlmostEqual(area_a, abs(pack.det_a), delta=0.05)
+
+            # Transformed under Shear H
+            sq_h = transform_shape(pack.shear_matrix, UNIT_SQUARE_VERTICES)
+            area_h = polygon_area_2d(sq_h)
+            self.assertAlmostEqual(area_h, 1.0, delta=0.02)
+
+            # Transformed under C = B @ A
+            sq_c = transform_shape(pack.matrix_c, UNIT_SQUARE_VERTICES)
+            area_c = polygon_area_2d(sq_c)
+            self.assertAlmostEqual(area_c, abs(pack.det_c), delta=0.08)
+
 
 if __name__ == "__main__":
     unittest.main()
+

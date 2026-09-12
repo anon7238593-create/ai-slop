@@ -2,16 +2,21 @@
 """Manim animation scenes visualizing linear transformations and matrix multiplication.
 
 Demonstrates:
-1. Space Transformations: Scale, Shear, and General Stretching
-2. Eigenvectors & Eigenvalues: Invariant directions that scale without rotating
-3. Matrix Multiplication: Composition of transformations (A then B vs C = B @ A)
+1. Space Transformations: Pure 2D Scaling, Shearing, and General Stretching
+   - Multi-shape deformation: Unit Square, Unit Circle (ellipse), Asymmetric Triangle, Basis Vectors
+2. Eigenvectors & Eigenvalues: Invariant directions that scale without rotating (A*v = lambda*v)
+   - Unit circle transforming into an ellipse whose principal axes align with eigenvectors
+3. Matrix Multiplication: Composition of transformations (A then B vs single product C = B @ A)
+   - Multi-shape composition, ghost outlines preserved, exact coincidence on direct product map
 4. Master Story: Combined cinematic educational presentation
 
-All parameters and matrices are randomly generated per execution, or seed-controlled.
+All parameters and matrices are mathematically consistent, 1.0 unit = 1 grid spacing,
+with pure 2D planar maps and zero unneeded z-axis rotations.
 """
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import math
 import os
@@ -26,7 +31,13 @@ current_dir = Path(__file__).resolve().parent
 if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
-from random_matrix_generator import MatrixPack, generate_matrix_pack
+from random_matrix_generator import (
+    MatrixPack,
+    format_latex_num,
+    generate_matrix_pack,
+    matrix_to_latex,
+    vector_to_latex,
+)
 
 
 def get_current_matrix_pack() -> MatrixPack:
@@ -44,198 +55,341 @@ def get_current_matrix_pack() -> MatrixPack:
         try:
             with open(config_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                return MatrixPack(**data)
+                field_names = {f.name for f in dataclasses.fields(MatrixPack)}
+                filtered_data = {k: v for k, v in data.items() if k in field_names}
+                return MatrixPack(**filtered_data)
         except Exception:
             pass
 
-    # Default: fresh random configuration
     return generate_matrix_pack(None)
 
 
 # Visual Styling Constants
-COLOR_I_HAT = "#10B981"      # Emerald Green for basis vector i-hat
-COLOR_J_HAT = "#EF4444"      # Crimson Red for basis vector j-hat
-COLOR_V1 = "#F59E0B"         # Radiant Gold for Eigenvector 1
-COLOR_V2 = "#06B6D4"         # Electric Cyan for Eigenvector 2
-COLOR_TEST_VEC = "#EC4899"   # Magenta for non-eigenvector test vector
-COLOR_GRID_BASE = "#1E293B"  # Slate Blue for background coordinate grid
-COLOR_PANEL_BG = "#0B0F19"   # Dark slate HUD banner background
+COLOR_I_HAT = "#10B981"         # Emerald Green for basis vector i-hat
+COLOR_J_HAT = "#EF4444"         # Crimson Red for basis vector j-hat
+COLOR_SQUARE = YELLOW           # Yellow for Unit Square
+COLOR_CIRCLE = "#06B6D4"        # Electric Cyan for Unit Circle
+COLOR_TRIANGLE = "#A855F7"      # Vivid Purple for Asymmetric Triangle
+COLOR_V1 = "#F59E0B"            # Radiant Gold for Eigenvector 1
+COLOR_V2 = "#06B6D4"            # Electric Cyan for Eigenvector 2
+COLOR_TEST_VEC = "#EC4899"      # Hot Pink for non-eigenvector test vector
+COLOR_PANEL_BG = "#0B0F19"      # Dark slate HUD banner background
+COLOR_PANEL_BORDER = "#334155"  # Slate border for HUD panels
 
+
+# =====================================================================
+# Geometry and HUD Helpers
+# =====================================================================
+
+def create_coordinate_plane() -> NumberPlane:
+    """Create coordinate plane with exact 1.0 unit spacing matching basis vectors."""
+    return NumberPlane(
+        x_range=[-8, 8, 1],
+        y_range=[-5, 5, 1],
+        background_line_style={"stroke_color": TEAL_E, "stroke_width": 1.2, "stroke_opacity": 0.40},
+        faded_line_style={"stroke_color": TEAL_E, "stroke_width": 0.6, "stroke_opacity": 0.18},
+    )
+
+
+def create_basis_vectors() -> tuple[Arrow, Arrow, MathTex, MathTex]:
+    """Create canonical basis vectors i-hat and j-hat of exact length 1.0."""
+    i_hat = Arrow(
+        ORIGIN, RIGHT, buff=0, color=COLOR_I_HAT,
+        stroke_width=4.5, max_tip_length_to_length_ratio=0.22
+    )
+    j_hat = Arrow(
+        ORIGIN, UP, buff=0, color=COLOR_J_HAT,
+        stroke_width=4.5, max_tip_length_to_length_ratio=0.22
+    )
+    i_label = MathTex(r"\hat{i}", color=COLOR_I_HAT, font_size=24).next_to(RIGHT, DOWN, buff=0.12)
+    j_label = MathTex(r"\hat{j}", color=COLOR_J_HAT, font_size=24).next_to(UP, LEFT, buff=0.12)
+    return i_hat, j_hat, i_label, j_label
+
+
+def create_shape_ensemble() -> tuple[Polygon, Circle, Polygon]:
+    """Create canonical unit scale geometric probes:
+
+    1. Unit Square [0,1]x[0,1]
+    2. Unit Circle radius=1.0 centered at origin
+    3. Asymmetric Triangle [(0,0), (1.2, 0.2), (0.4, 1.0)]
+    """
+    unit_square = Polygon(
+        ORIGIN, RIGHT, RIGHT + UP, UP,
+        color=COLOR_SQUARE, fill_color=COLOR_SQUARE, fill_opacity=0.25,
+        stroke_color=YELLOW_D, stroke_width=2.5
+    )
+    unit_circle = Circle(
+        radius=1.0, color=COLOR_CIRCLE, fill_color=COLOR_CIRCLE, fill_opacity=0.20,
+        stroke_color="#38BDF8", stroke_width=2.5
+    )
+    triangle = Polygon(
+        ORIGIN, np.array([1.2, 0.2, 0.0]), np.array([0.4, 1.0, 0.0]),
+        color=COLOR_TRIANGLE, fill_color=COLOR_TRIANGLE, fill_opacity=0.25,
+        stroke_color="#C084FC", stroke_width=2.5
+    )
+    return unit_square, unit_circle, triangle
+
+
+def mat_vec_mul(matrix: list[list[float]] | np.ndarray, vec: list[float] | np.ndarray) -> np.ndarray:
+    """Multiply 2D vector by 2x2 matrix and return 3D vector with z=0."""
+    x = float(matrix[0][0] * vec[0] + matrix[0][1] * vec[1])
+    y = float(matrix[1][0] * vec[0] + matrix[1][1] * vec[1])
+    return np.array([x, y, 0.0])
+
+
+def get_label_pos(v_end: np.ndarray, label_type: str = "i") -> np.ndarray:
+    """Dynamically determine non-overlapping label position for a transformed vector."""
+    if label_type == "i":
+        offset = np.array([0.16, -0.18, 0.0]) if v_end[1] >= -0.05 else np.array([0.16, 0.18, 0.0])
+    elif label_type == "j":
+        offset = np.array([-0.20, 0.16, 0.0]) if v_end[0] >= -0.05 else np.array([0.20, 0.16, 0.0])
+    elif label_type == "v1":
+        offset = np.array([0.18, 0.18, 0.0])
+    elif label_type == "v2":
+        offset = np.array([-0.18, 0.18, 0.0])
+    else:  # "w"
+        offset = np.array([0.22, 0.02, 0.0])
+    return v_end + offset
+
+
+def create_hud_card(
+    title: str,
+    subtitle: str | None = None,
+    formula: Mobject | None = None,
+    extra_text: str | None = None,
+    title_color: str = BLUE_C,
+    font_scale: float = 0.88,
+) -> VGroup:
+    """Create a high-contrast HUD card enclosed with BackgroundRectangle."""
+    elements: list[Mobject] = [
+        Text(title, font_size=int(16 * font_scale), weight=BOLD, color=title_color)
+    ]
+    if subtitle:
+        elements.append(Text(subtitle, font_size=int(13 * font_scale), color=LIGHT_GRAY))
+    if formula:
+        elements.append(formula)
+    if extra_text:
+        if any(tok in extra_text for tok in ["\\", "\\det", "\\lambda", "\\text", "\\quad", "_", "^"]):
+            elements.append(MathTex(extra_text, font_size=int(16 * font_scale), color=YELLOW_B))
+        else:
+            elements.append(Text(extra_text, font_size=int(12 * font_scale), color=YELLOW_B))
+
+    content = VGroup(*elements).arrange(DOWN, aligned_edge=LEFT, buff=0.10 * font_scale)
+    bg = BackgroundRectangle(
+        content,
+        color=COLOR_PANEL_BG,
+        fill_opacity=0.92,
+        buff=0.18,
+        stroke_width=1.0,
+        stroke_color=COLOR_PANEL_BORDER,
+    )
+    return VGroup(bg, content)
+
+
+# =====================================================================
+# Scene 1: Space Transformations
+# =====================================================================
 
 class SpaceTransformationsScene(Scene):
-    """Act 1: How Space Transforms under Scaling, Shearing, and Stretching."""
+    """Act 1: Pure 2D Planar Scaling, Shearing, and General Transformation."""
 
     def construct(self):
         pack = get_current_matrix_pack()
 
         # Title Card
-        title = Text("Linear Transformations: How Space Transforms", font_size=32, weight=BOLD, color=WHITE).to_edge(UP, buff=0.4)
-        subtitle = Text(f"Random Seed: {pack.seed}  •  Grid, Basis Vectors & Deformation", font_size=18, color=GRAY).next_to(title, DOWN, buff=0.15)
-        self.play(FadeIn(title), FadeIn(subtitle), run_time=1)
-        self.wait(0.5)
+        title = Text("Linear Transformations: How Space Transforms", font_size=24, weight=BOLD, color=WHITE).to_edge(UP, buff=0.20)
+        subtitle = Text(f"Random Seed: {pack.seed}  •  Multi-Shape Deformation & Basis Vectors", font_size=14, color=GRAY).next_to(title, DOWN, buff=0.08)
+        title_group = VGroup(title, subtitle)
+        self.play(FadeIn(title_group), run_time=1.0)
+        self.wait(0.4)
 
         # Coordinate Plane
-        plane = NumberPlane(
-            x_range=[-7, 7, 1],
-            y_range=[-4, 4, 1],
-            background_line_style={"stroke_color": TEAL_E, "stroke_width": 1.2, "stroke_opacity": 0.5},
-            faded_line_style={"stroke_color": TEAL_E, "stroke_width": 0.6, "stroke_opacity": 0.25},
-        )
-        self.play(Create(plane), run_time=1.5)
+        plane = create_coordinate_plane()
+        self.play(Create(plane), run_time=1.2)
 
-        # Basis Vectors: i-hat = [1, 0], j-hat = [0, 1]
-        i_hat = Arrow(ORIGIN, RIGHT * 2.0, buff=0, color=COLOR_I_HAT, stroke_width=4, max_tip_length_to_length_ratio=0.25)
-        j_hat = Arrow(ORIGIN, UP * 2.0, buff=0, color=COLOR_J_HAT, stroke_width=4, max_tip_length_to_length_ratio=0.25)
-        i_label = MathTex(r"\hat{i}", color=COLOR_I_HAT, font_size=24).next_to(i_hat.get_end(), DOWN, buff=0.1)
-        j_label = MathTex(r"\hat{j}", color=COLOR_J_HAT, font_size=24).next_to(j_hat.get_end(), LEFT, buff=0.1)
+        # Canonical Multi-Shapes and Basis Vectors
+        unit_square, unit_circle, triangle = create_shape_ensemble()
+        i_hat, j_hat, i_label, j_label = create_basis_vectors()
 
-        # Unit Square
-        unit_square = Polygon(
-            ORIGIN, RIGHT * 2.0, RIGHT * 2.0 + UP * 2.0, UP * 2.0,
-            fill_color=YELLOW, fill_opacity=0.2, stroke_color=YELLOW_D, stroke_width=2
-        )
+        # Shape Legend
+        legend_content = VGroup(
+            Text("Geometric Probes:", font_size=14, weight=BOLD, color=WHITE),
+            Text("• Unit Square (Yellow): Area & Parallelogram Shear", font_size=11, color=YELLOW),
+            Text("• Unit Circle (Cyan): Curvature & Ellipse Axes", font_size=11, color=COLOR_CIRCLE),
+            Text("• Triangle (Purple): Collinearity & Asymmetry", font_size=11, color=COLOR_TRIANGLE),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.07)
+        legend_bg = BackgroundRectangle(legend_content, color=COLOR_PANEL_BG, fill_opacity=0.88, buff=0.16, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
+        legend_card = VGroup(legend_bg, legend_content).next_to(title_group, DOWN, buff=0.15).to_edge(RIGHT, buff=0.35)
 
         self.play(
+            FadeIn(unit_square),
+            FadeIn(unit_circle),
+            FadeIn(triangle),
             GrowArrow(i_hat), FadeIn(i_label),
             GrowArrow(j_hat), FadeIn(j_label),
-            FadeIn(unit_square),
-            run_time=1.2
+            FadeIn(legend_card),
+            run_time=1.4
         )
-        self.wait(0.8)
+        self.wait(1.0)
+        self.play(FadeOut(legend_card), run_time=0.5)
 
         # -------------------------------------------------------------
         # Part A: Scaling Transformation
         # -------------------------------------------------------------
-        scale_card = VGroup(
-            Text("1. Scaling Transformation", font_size=20, weight=BOLD, color=BLUE_C),
-            Text(f"Stretch x by {pack.scale_x}x, y by {pack.scale_y}x", font_size=16, color=LIGHT_GRAY),
-            MathTex(
-                r"S = \begin{bmatrix} " + f"{pack.scale_x} & 0.0 \\\\ 0.0 & {pack.scale_y}" + r" \end{bmatrix}",
-                font_size=24, color=YELLOW
-            )
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UL, buff=0.8)
-
-        scale_bg = BackgroundRectangle(scale_card, color=COLOR_PANEL_BG, fill_opacity=0.85, buff=0.2)
-        scale_group = VGroup(scale_bg, scale_card)
-        self.play(FadeIn(scale_group), run_time=0.8)
-
-        # Apply scaling
         scale_mat = pack.scale_matrix
-        new_i_end = np.array([scale_mat[0][0] * 2.0, scale_mat[1][0] * 2.0, 0])
-        new_j_end = np.array([scale_mat[0][1] * 2.0, scale_mat[1][1] * 2.0, 0])
-        new_sq_points = [
-            ORIGIN,
-            new_i_end,
-            new_i_end + new_j_end,
-            new_j_end
-        ]
+        det_s = pack.scale_x * pack.scale_y
+        scale_card = create_hud_card(
+            title="1. Scaling Transformation (Matrix S)",
+            subtitle=f"Stretch x by {pack.scale_x:.2f}x, y by {pack.scale_y:.2f}x",
+            formula=MathTex(r"S = " + pack.latex_scale_matrix, font_size=21, color=YELLOW),
+            extra_text=f"det(S) = {det_s:.2f} (Area Scaling Multiplier)",
+            title_color=BLUE_C,
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
+
+        self.play(FadeIn(scale_card), run_time=0.8)
+
+        new_i_scale = mat_vec_mul(scale_mat, [1.0, 0.0])
+        new_j_scale = mat_vec_mul(scale_mat, [0.0, 1.0])
+
+        obs_a_text = Text(f"Circle stretches into an axis-aligned ellipse! Area multiplied by {det_s:.2f}x.", font_size=15, color=YELLOW_A)
+        obs_a_bg = BackgroundRectangle(obs_a_text, color=COLOR_PANEL_BG, fill_opacity=0.9, buff=0.15)
+        obs_a = VGroup(obs_a_bg, obs_a_text).to_edge(DOWN, buff=0.35)
 
         self.play(
             plane.animate.apply_matrix(scale_mat),
-            i_hat.animate.put_start_and_end_on(ORIGIN, new_i_end),
-            j_hat.animate.put_start_and_end_on(ORIGIN, new_j_end),
-            unit_square.animate.set_points_as_corners(new_sq_points + [ORIGIN]),
-            i_label.animate.next_to(new_i_end, DOWN, buff=0.1),
-            j_label.animate.next_to(new_j_end, LEFT, buff=0.1),
-            run_time=2
-        )
-        self.wait(1)
-
-        # Revert back to identity
-        inv_scale = [[1.0 / scale_mat[0][0], 0.0], [0.0, 1.0 / scale_mat[1][1]]]
-        self.play(
-            plane.animate.apply_matrix(inv_scale),
-            i_hat.animate.put_start_and_end_on(ORIGIN, RIGHT * 2.0),
-            j_hat.animate.put_start_and_end_on(ORIGIN, UP * 2.0),
-            unit_square.animate.set_points_as_corners([ORIGIN, RIGHT * 2.0, RIGHT * 2.0 + UP * 2.0, UP * 2.0, ORIGIN]),
-            i_label.animate.next_to(RIGHT * 2.0, DOWN, buff=0.1),
-            j_label.animate.next_to(UP * 2.0, LEFT, buff=0.1),
-            FadeOut(scale_group),
-            run_time=1.5
-        )
-
-        # -------------------------------------------------------------
-        # Part B: Shearing Transformation
-        # -------------------------------------------------------------
-        shear_card = VGroup(
-            Text("2. Shearing Transformation", font_size=20, weight=BOLD, color=PURPLE_B),
-            Text(f"Shear factor k = {pack.shear_k} (Area preserved: det = 1)", font_size=16, color=LIGHT_GRAY),
-            MathTex(
-                r"H = \begin{bmatrix} " + f"{pack.shear_matrix[0][0]} & {pack.shear_matrix[0][1]} \\\\ {pack.shear_matrix[1][0]} & {pack.shear_matrix[1][1]}" + r" \end{bmatrix}",
-                font_size=24, color=PURPLE_A
-            )
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UL, buff=0.8)
-
-        shear_bg = BackgroundRectangle(shear_card, color=COLOR_PANEL_BG, fill_opacity=0.85, buff=0.2)
-        shear_group = VGroup(shear_bg, shear_card)
-        self.play(FadeIn(shear_group), run_time=0.8)
-
-        shear_mat = pack.shear_matrix
-        new_i_end = np.array([shear_mat[0][0] * 2.0, shear_mat[1][0] * 2.0, 0])
-        new_j_end = np.array([shear_mat[0][1] * 2.0, shear_mat[1][1] * 2.0, 0])
-        new_sq_points = [ORIGIN, new_i_end, new_i_end + new_j_end, new_j_end]
-
-        self.play(
-            plane.animate.apply_matrix(shear_mat),
-            i_hat.animate.put_start_and_end_on(ORIGIN, new_i_end),
-            j_hat.animate.put_start_and_end_on(ORIGIN, new_j_end),
-            unit_square.animate.set_points_as_corners(new_sq_points + [ORIGIN]),
-            i_label.animate.next_to(new_i_end, DOWN, buff=0.1),
-            j_label.animate.next_to(new_j_end, LEFT, buff=0.1),
-            run_time=2
-        )
-        self.wait(1)
-
-        # -------------------------------------------------------------
-        # Part C: General Stretching & Rotation (Matrix A)
-        # -------------------------------------------------------------
-        mat_a = pack.matrix_a
-        # Invert shear to go from shear to matrix A: inv(shear) then A
-        inv_shear = [[shear_mat[1][1], -shear_mat[0][1]], [-shear_mat[1][0], shear_mat[0][0]]]
-        transition_mat = [
-            [mat_a[0][0] * inv_shear[0][0] + mat_a[0][1] * inv_shear[1][0], mat_a[0][0] * inv_shear[0][1] + mat_a[0][1] * inv_shear[1][1]],
-            [mat_a[1][0] * inv_shear[0][0] + mat_a[1][1] * inv_shear[1][0], mat_a[1][0] * inv_shear[0][1] + mat_a[1][1] * inv_shear[1][1]],
-        ]
-
-        general_card = VGroup(
-            Text("3. General Linear Transformation (Matrix A)", font_size=20, weight=BOLD, color=GOLD_B),
-            Text(f"Columns dictate where basis vectors land!", font_size=16, color=LIGHT_GRAY),
-            MathTex(
-                r"A = \begin{bmatrix} " + f"{mat_a[0][0]} & {mat_a[0][1]} \\\\ {mat_a[1][0]} & {mat_a[1][1]}" + r" \end{bmatrix}",
-                font_size=24, color=GOLD_A
-            )
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UL, buff=0.8)
-        general_bg = BackgroundRectangle(general_card, color=COLOR_PANEL_BG, fill_opacity=0.85, buff=0.2)
-        general_group = VGroup(general_bg, general_card)
-
-        self.play(ReplacementTransform(shear_group, general_group), run_time=0.8)
-
-        final_i_end = np.array([mat_a[0][0] * 2.0, mat_a[1][0] * 2.0, 0])
-        final_j_end = np.array([mat_a[0][1] * 2.0, mat_a[1][1] * 2.0, 0])
-        final_sq = [ORIGIN, final_i_end, final_i_end + final_j_end, final_j_end]
-
-        self.play(
-            plane.animate.apply_matrix(transition_mat),
-            i_hat.animate.put_start_and_end_on(ORIGIN, final_i_end),
-            j_hat.animate.put_start_and_end_on(ORIGIN, final_j_end),
-            unit_square.animate.set_points_as_corners(final_sq + [ORIGIN]),
-            i_label.animate.next_to(final_i_end, RIGHT, buff=0.1),
-            j_label.animate.next_to(final_j_end, UP, buff=0.1),
+            unit_square.animate.apply_matrix(scale_mat),
+            unit_circle.animate.apply_matrix(scale_mat),
+            triangle.animate.apply_matrix(scale_mat),
+            i_hat.animate.put_start_and_end_on(ORIGIN, new_i_scale),
+            j_hat.animate.put_start_and_end_on(ORIGIN, new_j_scale),
+            i_label.animate.move_to(get_label_pos(new_i_scale, "i")),
+            j_label.animate.move_to(get_label_pos(new_j_scale, "j")),
+            FadeIn(obs_a),
             run_time=2.2
         )
         self.wait(1.5)
 
+        # Reset smoothly back to identity with S^(-1)
+        inv_scale = np.linalg.inv(np.array(scale_mat)).tolist()
+        self.play(
+            plane.animate.apply_matrix(inv_scale),
+            unit_square.animate.apply_matrix(inv_scale),
+            unit_circle.animate.apply_matrix(inv_scale),
+            triangle.animate.apply_matrix(inv_scale),
+            i_hat.animate.put_start_and_end_on(ORIGIN, RIGHT),
+            j_hat.animate.put_start_and_end_on(ORIGIN, UP),
+            i_label.animate.move_to(get_label_pos(RIGHT, "i")),
+            j_label.animate.move_to(get_label_pos(UP, "j")),
+            FadeOut(scale_card), FadeOut(obs_a),
+            run_time=1.5
+        )
+        self.wait(0.4)
+
+        # -------------------------------------------------------------
+        # Part B: Shearing Transformation
+        # -------------------------------------------------------------
+        shear_mat = pack.shear_matrix
+        shear_card = create_hud_card(
+            title="2. Shearing Transformation (Matrix H)",
+            subtitle=f"Shear along {pack.shear_axis}-axis by factor k = {pack.shear_k:.2f}",
+            formula=MathTex(r"H = " + pack.latex_shear_matrix, font_size=21, color=PURPLE_A),
+            extra_text=r"\det(H) = 1.00 \text{ (Area Strictly Preserved!)}",
+            title_color=PURPLE_B,
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
+
+        self.play(FadeIn(shear_card), run_time=0.8)
+
+        new_i_shear = mat_vec_mul(shear_mat, [1.0, 0.0])
+        new_j_shear = mat_vec_mul(shear_mat, [0.0, 1.0])
+
+        obs_b_text = Text("Square tilts to parallelogram, circle to tilted ellipse — Area is 100% PRESERVED!", font_size=14, color=PURPLE_A)
+        obs_b_bg = BackgroundRectangle(obs_b_text, color=COLOR_PANEL_BG, fill_opacity=0.9, buff=0.15)
+        obs_b = VGroup(obs_b_bg, obs_b_text).to_edge(DOWN, buff=0.35)
+
+        self.play(
+            plane.animate.apply_matrix(shear_mat),
+            unit_square.animate.apply_matrix(shear_mat),
+            unit_circle.animate.apply_matrix(shear_mat),
+            triangle.animate.apply_matrix(shear_mat),
+            i_hat.animate.put_start_and_end_on(ORIGIN, new_i_shear),
+            j_hat.animate.put_start_and_end_on(ORIGIN, new_j_shear),
+            i_label.animate.move_to(get_label_pos(new_i_shear, "i")),
+            j_label.animate.move_to(get_label_pos(new_j_shear, "j")),
+            FadeIn(obs_b),
+            run_time=2.2
+        )
+        self.wait(1.5)
+
+        # Reset smoothly back to identity with H^(-1)
+        inv_shear = np.linalg.inv(np.array(shear_mat)).tolist()
+        self.play(
+            plane.animate.apply_matrix(inv_shear),
+            unit_square.animate.apply_matrix(inv_shear),
+            unit_circle.animate.apply_matrix(inv_shear),
+            triangle.animate.apply_matrix(inv_shear),
+            i_hat.animate.put_start_and_end_on(ORIGIN, RIGHT),
+            j_hat.animate.put_start_and_end_on(ORIGIN, UP),
+            i_label.animate.move_to(get_label_pos(RIGHT, "i")),
+            j_label.animate.move_to(get_label_pos(UP, "j")),
+            FadeOut(shear_card), FadeOut(obs_b),
+            run_time=1.5
+        )
+        self.wait(0.4)
+
+        # -------------------------------------------------------------
+        # Part C: General Linear Transformation (Matrix A)
+        # -------------------------------------------------------------
+        mat_a = pack.matrix_a
+        general_card = create_hud_card(
+            title="3. General Linear Transformation (Matrix A)",
+            subtitle="Matrix columns dictate where basis vectors land!",
+            formula=MathTex(r"A = " + pack.latex_matrix_a, font_size=21, color=GOLD_A),
+            extra_text=rf"\det(A) = {pack.det_a:.2f}, \quad \text{{Trace}} = {pack.trace_a:.2f}",
+            title_color=GOLD_B,
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
+
+        self.play(FadeIn(general_card), run_time=0.8)
+
+        new_i_a = mat_vec_mul(mat_a, [1.0, 0.0])
+        new_j_a = mat_vec_mul(mat_a, [0.0, 1.0])
+
+        obs_c_formula = MathTex(
+            r"\text{Transformed } \hat{i} = \text{Col } 1\ " + vector_to_latex(new_i_a[:2]) +
+            r",\quad \text{Transformed } \hat{j} = \text{Col } 2\ " + vector_to_latex(new_j_a[:2]),
+            font_size=18, color=GOLD_B
+        )
+        obs_c_bg = BackgroundRectangle(obs_c_formula, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.18)
+        obs_c = VGroup(obs_c_bg, obs_c_formula).to_edge(DOWN, buff=0.35)
+
+        self.play(
+            plane.animate.apply_matrix(mat_a),
+            unit_square.animate.apply_matrix(mat_a),
+            unit_circle.animate.apply_matrix(mat_a),
+            triangle.animate.apply_matrix(mat_a),
+            i_hat.animate.put_start_and_end_on(ORIGIN, new_i_a),
+            j_hat.animate.put_start_and_end_on(ORIGIN, new_j_a),
+            i_label.animate.move_to(get_label_pos(new_i_a, "i")),
+            j_label.animate.move_to(get_label_pos(new_j_a, "j")),
+            FadeIn(obs_c),
+            run_time=2.4
+        )
+        self.wait(2.0)
+
         # Fade out
         self.play(
-            FadeOut(plane), FadeOut(i_hat), FadeOut(j_hat),
-            FadeOut(i_label), FadeOut(j_label), FadeOut(unit_square),
-            FadeOut(general_group), FadeOut(title), FadeOut(subtitle),
-            run_time=1
+            FadeOut(plane), FadeOut(unit_square), FadeOut(unit_circle), FadeOut(triangle),
+            FadeOut(i_hat), FadeOut(j_hat), FadeOut(i_label), FadeOut(j_label),
+            FadeOut(general_card), FadeOut(obs_c), FadeOut(title), FadeOut(subtitle),
+            run_time=1.2
         )
 
 
+# =====================================================================
+# Scene 2: Eigenvectors & Eigenvalues
+# =====================================================================
+
 class EigenvectorsScene(Scene):
-    """Act 2: Eigenvectors and Invariant Directions: A*v = lambda*v."""
+    """Act 2: Eigenvalues, Invariant Directions, and Unit Circle to Ellipse Alignment."""
 
     def construct(self):
         pack = get_current_matrix_pack()
@@ -243,56 +397,56 @@ class EigenvectorsScene(Scene):
         l1, l2 = pack.lambda_1, pack.lambda_2
         v1, v2 = pack.v1, pack.v2
 
-        # Header
-        title = Text("Eigenvectors: Invariant Directions in Space", font_size=30, weight=BOLD, color=WHITE).to_edge(UP, buff=0.35)
-        subtitle = MathTex(r"A\vec{v} = \lambda \vec{v} \quad \text{Vectors that ONLY scale, never rotate!}", font_size=20, color=GOLD_B).next_to(title, DOWN, buff=0.15)
-        self.play(FadeIn(title), FadeIn(subtitle), run_time=1)
+        # Title Card
+        title = Text("Eigenvectors: Invariant Directions in Space", font_size=24, weight=BOLD, color=WHITE).to_edge(UP, buff=0.20)
+        subtitle = MathTex(
+            r"A\vec{v} = \lambda \vec{v} \quad \text{Vectors that ONLY scale along their line, never rotate!}",
+            font_size=17, color=GOLD_B
+        ).next_to(title, DOWN, buff=0.08)
+        title_group = VGroup(title, subtitle)
+        self.play(FadeIn(title_group), run_time=1.0)
 
         # Coordinate Plane
-        plane = NumberPlane(
-            x_range=[-7, 7, 1],
-            y_range=[-4, 4, 1],
-            background_line_style={"stroke_color": BLUE_E, "stroke_width": 1.2, "stroke_opacity": 0.5}
-        )
+        plane = create_coordinate_plane()
         self.play(Create(plane), run_time=1.2)
 
-        # Info Box: Matrix A and Eigenvalues
-        info_card = VGroup(
-            Text(f"Matrix A (det = {pack.det_a:.2f})", font_size=18, weight=BOLD, color=WHITE),
-            MathTex(
-                r"A = \begin{bmatrix} " + f"{mat_a[0][0]} & {mat_a[0][1]} \\\\ {mat_a[1][0]} & {mat_a[1][1]}" + r" \end{bmatrix}",
-                font_size=22, color=LIGHT_GRAY
-            ),
-            MathTex(r"\lambda_1 = " + f"{l1:.2f}" + r",\ \vec{v}_1 \text{ (Gold)}", font_size=19, color=COLOR_V1),
-            MathTex(r"\lambda_2 = " + f"{l2:.2f}" + r",\ \vec{v}_2 \text{ (Cyan)}", font_size=19, color=COLOR_V2),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.12).to_corner(UL, buff=0.6)
-        info_bg = BackgroundRectangle(info_card, color=COLOR_PANEL_BG, fill_opacity=0.88, buff=0.2)
-        info_group = VGroup(info_bg, info_card)
-        self.play(FadeIn(info_group), run_time=0.8)
+        # Canonical Multi-Shapes and Basis Vectors
+        unit_square, unit_circle, triangle = create_shape_ensemble()
+        i_hat, j_hat, i_label, j_label = create_basis_vectors()
 
-        # Draw the two Eigen-Lines (infinite dashed lines along eigenvector directions)
-        v1_dir = np.array([v1[0], v1[1], 0])
-        v2_dir = np.array([v2[0], v2[1], 0])
+        # HUD Info Card: Matrix A and Eigenvalues
+        info_card = create_hud_card(
+            title=f"Matrix A (det = {pack.det_a:.2f})",
+            formula=MathTex(r"A = " + pack.latex_matrix_a, font_size=20, color=LIGHT_GRAY),
+            extra_text=rf"\lambda_1 = {l1:.2f} \text{{ (Gold)}}, \quad \lambda_2 = {l2:.2f} \text{{ (Cyan)}}",
+            title_color=WHITE,
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
+        self.play(FadeIn(info_card), run_time=0.8)
 
-        eigen_line1 = DashedLine(start=-v1_dir * 8.0, end=v1_dir * 8.0, color=COLOR_V1, stroke_width=2.5, dash_length=0.15)
-        eigen_line2 = DashedLine(start=-v2_dir * 8.0, end=v2_dir * 8.0, color=COLOR_V2, stroke_width=2.5, dash_length=0.15)
-        self.play(Create(eigen_line1), Create(eigen_line2), run_time=1.5)
+        # Draw the two Eigen-Lines (infinite dashed lines through origin)
+        v1_dir = np.array([v1[0], v1[1], 0.0])
+        v2_dir = np.array([v2[0], v2[1], 0.0])
 
-        # Place Eigenvectors on their respective lines
-        vec_scale = 1.8
-        v1_vec = Arrow(ORIGIN, v1_dir * vec_scale, buff=0, color=COLOR_V1, stroke_width=5)
-        v2_vec = Arrow(ORIGIN, v2_dir * vec_scale, buff=0, color=COLOR_V2, stroke_width=5)
-        v1_label = MathTex(r"\vec{v}_1", color=COLOR_V1, font_size=24).next_to(v1_vec.get_end(), UR, buff=0.1)
-        v2_label = MathTex(r"\vec{v}_2", color=COLOR_V2, font_size=24).next_to(v2_vec.get_end(), UL, buff=0.1)
+        eigen_line1 = DashedLine(start=-v1_dir * 7.5, end=v1_dir * 7.5, color=COLOR_V1, stroke_width=2.5, dash_length=0.15)
+        eigen_line2 = DashedLine(start=-v2_dir * 7.5, end=v2_dir * 7.5, color=COLOR_V2, stroke_width=2.5, dash_length=0.15)
+        self.play(Create(eigen_line1), Create(eigen_line2), run_time=1.2)
 
-        # Add a non-eigenvector test vector w (oriented in between)
-        w = pack.test_vector_w
-        w_dir = np.array([w[0], w[1], 0])
-        w_vec = Arrow(ORIGIN, w_dir, buff=0, color=COLOR_TEST_VEC, stroke_width=4)
-        w_line = DashedLine(start=-w_dir * 3.0, end=w_dir * 3.0, color=COLOR_TEST_VEC, stroke_width=1.5, stroke_opacity=0.5)
-        w_label = MathTex(r"\vec{w}\text{ (Generic)}", color=COLOR_TEST_VEC, font_size=20).next_to(w_vec.get_end(), RIGHT, buff=0.1)
+        # Place Eigenvectors (length 1.0, touching unit circle perimeter!)
+        v1_vec = Arrow(ORIGIN, v1_dir, buff=0, color=COLOR_V1, stroke_width=5.0, max_tip_length_to_length_ratio=0.22)
+        v2_vec = Arrow(ORIGIN, v2_dir, buff=0, color=COLOR_V2, stroke_width=5.0, max_tip_length_to_length_ratio=0.22)
+        v1_label = MathTex(r"\vec{v}_1", color=COLOR_V1, font_size=22).move_to(get_label_pos(v1_dir, "v1"))
+        v2_label = MathTex(r"\vec{v}_2", color=COLOR_V2, font_size=22).move_to(get_label_pos(v2_dir, "v2"))
 
+        # Add generic non-eigenvector test vector w
+        w = np.array([pack.test_vector_w[0], pack.test_vector_w[1], 0.0])
+        w_line = DashedLine(start=-w * 3.5, end=w * 3.5, color=COLOR_TEST_VEC, stroke_width=1.5, stroke_opacity=0.45, dash_length=0.12)
+        w_vec = Arrow(ORIGIN, w, buff=0, color=COLOR_TEST_VEC, stroke_width=4.2, max_tip_length_to_length_ratio=0.2)
+        w_label = MathTex(r"\vec{w}\text{ (Generic)}", color=COLOR_TEST_VEC, font_size=18).move_to(get_label_pos(w, "w"))
+
+        # Introduce shapes and vectors together
         self.play(
+            FadeIn(unit_square), FadeIn(unit_circle), FadeIn(triangle),
+            GrowArrow(i_hat), FadeIn(i_label), GrowArrow(j_hat), FadeIn(j_label),
             GrowArrow(v1_vec), FadeIn(v1_label),
             GrowArrow(v2_vec), FadeIn(v2_label),
             Create(w_line), GrowArrow(w_vec), FadeIn(w_label),
@@ -300,55 +454,78 @@ class EigenvectorsScene(Scene):
         )
         self.wait(1.0)
 
-        # Transforming space: Observe how vectors behave!
-        # Compute transformed vector positions:
-        # A @ v1 = l1 * v1
-        # A @ v2 = l2 * v2
-        # A @ w = [a11*w1 + a12*w2, a21*w1 + a22*w2]
-        new_v1_end = v1_dir * (vec_scale * l1)
-        new_v2_end = v2_dir * (vec_scale * l2)
-        trans_w = np.array([mat_a[0][0] * w[0] + mat_a[0][1] * w[1], mat_a[1][0] * w[0] + mat_a[1][1] * w[1], 0])
+        # Observation prompt
+        obs_text = Text(
+            "Notice: v1 and v2 lie ON the unit circle. Watch how they and the circle transform!",
+            font_size=15, color=YELLOW
+        )
+        obs_bg = BackgroundRectangle(obs_text, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.15)
+        obs_banner = VGroup(obs_bg, obs_text).to_edge(DOWN, buff=0.35)
+        self.play(FadeIn(obs_banner), run_time=0.8)
+        self.wait(0.8)
 
-        observation_banner = Text("Watch: v1 and v2 STAY on their lines; w rotates away!", font_size=18, color=YELLOW).to_edge(DOWN, buff=0.4)
-        self.play(Write(observation_banner), run_time=0.8)
+        # Transformed positions:
+        # A @ v1 = lambda1 * v1
+        # A @ v2 = lambda2 * v2
+        # A @ w rotates off span
+        new_v1 = v1_dir * l1
+        new_v2 = v2_dir * l2
+        new_w = mat_vec_mul(mat_a, w)
+        new_i = mat_vec_mul(mat_a, [1.0, 0.0])
+        new_j = mat_vec_mul(mat_a, [0.0, 1.0])
 
         self.play(
             plane.animate.apply_matrix(mat_a),
-            v1_vec.animate.put_start_and_end_on(ORIGIN, new_v1_end),
-            v2_vec.animate.put_start_and_end_on(ORIGIN, new_v2_end),
-            w_vec.animate.put_start_and_end_on(ORIGIN, trans_w),
-            v1_label.animate.next_to(new_v1_end, UR, buff=0.1),
-            v2_label.animate.next_to(new_v2_end, UL, buff=0.1),
-            w_label.animate.next_to(trans_w, UR, buff=0.1),
+            unit_square.animate.apply_matrix(mat_a),
+            unit_circle.animate.apply_matrix(mat_a),
+            triangle.animate.apply_matrix(mat_a),
+            i_hat.animate.put_start_and_end_on(ORIGIN, new_i),
+            j_hat.animate.put_start_and_end_on(ORIGIN, new_j),
+            v1_vec.animate.put_start_and_end_on(ORIGIN, new_v1),
+            v2_vec.animate.put_start_and_end_on(ORIGIN, new_v2),
+            w_vec.animate.put_start_and_end_on(ORIGIN, new_w),
+            i_label.animate.move_to(get_label_pos(new_i, "i")),
+            j_label.animate.move_to(get_label_pos(new_j, "j")),
+            v1_label.animate.move_to(get_label_pos(new_v1, "v1")),
+            v2_label.animate.move_to(get_label_pos(new_v2, "v2")),
+            w_label.animate.move_to(get_label_pos(new_w, "w")),
             run_time=2.8
         )
-        self.wait(1.2)
+        self.wait(1.0)
 
-        # Highlight formula
-        callout = VGroup(
-            MathTex(r"A\vec{v}_1 = " + f"{l1:.2f}" + r"\vec{v}_1 \quad (\text{Scaled by }" + f"{l1:.2f}" + r"\times)", color=COLOR_V1, font_size=20),
-            MathTex(r"A\vec{v}_2 = " + f"{l2:.2f}" + r"\vec{v}_2 \quad (\text{Scaled by }" + f"{l2:.2f}" + r"\times)", color=COLOR_V2, font_size=20),
-            MathTex(r"A\vec{w} \ne \lambda \vec{w} \quad (\text{Rotated off original span!})", color=COLOR_TEST_VEC, font_size=20),
-        ).arrange(DOWN, buff=0.15).to_corner(UR, buff=0.6)
-        callout_bg = BackgroundRectangle(callout, color=COLOR_PANEL_BG, fill_opacity=0.9, buff=0.2)
-        callout_group = VGroup(callout_bg, callout)
+        # Highlight formula callout and geometric alignment
+        callout_lines = VGroup(
+            MathTex(rf"A\vec{{v}}_1 = {format_latex_num(l1)}\vec{{v}}_1 \quad (\text{{Stays on Gold line, scaled by }}{format_latex_num(l1)}\times)", color=COLOR_V1, font_size=18),
+            MathTex(rf"A\vec{{v}}_2 = {format_latex_num(l2)}\vec{{v}}_2 \quad (\text{{Stays on Cyan line, scaled by }}{format_latex_num(l2)}\times)", color=COLOR_V2, font_size=18),
+            MathTex(r"A\vec{w} \ne \lambda \vec{w} \quad (\text{Rotated away from pink line!})", color=COLOR_TEST_VEC, font_size=18),
+            Text(f"Ellipse principal axes align EXACTLY with eigenvectors v1 and v2!", font_size=14, color=WHITE),
+            Text(f"Semi-major axis = {l1:.2f} along v1  •  Semi-minor axis = {l2:.2f} along v2", font_size=13, color=YELLOW_A),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.12)
+        callout_bg = BackgroundRectangle(callout_lines, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.20, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
+        callout_card = VGroup(callout_bg, callout_lines).next_to(title_group, DOWN, buff=0.15).to_edge(RIGHT, buff=0.35)
 
-        self.play(FadeIn(callout_group), run_time=1)
-        self.wait(2.0)
+        self.play(FadeIn(callout_card), run_time=1.0)
+        self.wait(2.5)
 
         # Fade out
         self.play(
-            FadeOut(plane), FadeOut(eigen_line1), FadeOut(eigen_line2),
+            FadeOut(plane), FadeOut(unit_square), FadeOut(unit_circle), FadeOut(triangle),
+            FadeOut(eigen_line1), FadeOut(eigen_line2),
             FadeOut(v1_vec), FadeOut(v2_vec), FadeOut(w_vec), FadeOut(w_line),
+            FadeOut(i_hat), FadeOut(j_hat), FadeOut(i_label), FadeOut(j_label),
             FadeOut(v1_label), FadeOut(v2_label), FadeOut(w_label),
-            FadeOut(info_group), FadeOut(callout_group), FadeOut(observation_banner),
-            FadeOut(title), FadeOut(subtitle),
-            run_time=1
+            FadeOut(info_card), FadeOut(callout_card), FadeOut(obs_banner),
+            FadeOut(title_group),
+            run_time=1.2
         )
 
 
+# =====================================================================
+# Scene 3: Matrix Multiplication
+# =====================================================================
+
 class MatrixMultiplicationScene(Scene):
-    """Act 3: Matrix Multiplication as Composition of Transformations: A then B vs C = B @ A."""
+    """Act 3: Matrix Multiplication as Composition of Transformations (A then B vs C = B @ A)."""
 
     def construct(self):
         pack = get_current_matrix_pack()
@@ -357,161 +534,192 @@ class MatrixMultiplicationScene(Scene):
         mat_c = pack.matrix_c
 
         # Title
-        title = Text("Matrix Multiplication: Composition of Transformations", font_size=28, weight=BOLD, color=WHITE).to_edge(UP, buff=0.35)
-        subtitle = MathTex(r"\text{Applying } A \text{ then } B \text{ is IDENTICAL to applying } C = B \cdot A", font_size=20, color=BLUE_C).next_to(title, DOWN, buff=0.15)
-        self.play(FadeIn(title), FadeIn(subtitle), run_time=1)
+        title = Text("Matrix Multiplication: Composition of Transformations", font_size=24, weight=BOLD, color=WHITE).to_edge(UP, buff=0.20)
+        subtitle = MathTex(
+            r"\text{Applying } A \text{ then } B \text{ is IDENTICAL to applying } C = B \cdot A \text{ directly in one step!}",
+            font_size=17, color=BLUE_C
+        ).next_to(title, DOWN, buff=0.08)
+        title_group = VGroup(title, subtitle)
+        self.play(FadeIn(title_group), run_time=1.0)
 
         # Coordinate Plane
-        plane = NumberPlane(
-            x_range=[-7, 7, 1],
-            y_range=[-4, 4, 1],
-            background_line_style={"stroke_color": TEAL_E, "stroke_width": 1.2, "stroke_opacity": 0.5}
-        )
+        plane = create_coordinate_plane()
         self.play(Create(plane), run_time=1.2)
 
-        # Basis vectors
-        i_hat = Arrow(ORIGIN, RIGHT * 2.0, buff=0, color=COLOR_I_HAT, stroke_width=4)
-        j_hat = Arrow(ORIGIN, UP * 2.0, buff=0, color=COLOR_J_HAT, stroke_width=4)
-        i_label = MathTex(r"\hat{i}", color=COLOR_I_HAT, font_size=22).next_to(i_hat.get_end(), DOWN, buff=0.1)
-        j_label = MathTex(r"\hat{j}", color=COLOR_J_HAT, font_size=22).next_to(j_hat.get_end(), LEFT, buff=0.1)
-        self.play(GrowArrow(i_hat), FadeIn(i_label), GrowArrow(j_hat), FadeIn(j_label), run_time=1)
+        # Canonical Multi-Shapes and Basis Vectors
+        unit_square, unit_circle, triangle = create_shape_ensemble()
+        i_hat, j_hat, i_label, j_label = create_basis_vectors()
+
+        self.play(
+            FadeIn(unit_square), FadeIn(unit_circle), FadeIn(triangle),
+            GrowArrow(i_hat), FadeIn(i_label), GrowArrow(j_hat), FadeIn(j_label),
+            run_time=1.2
+        )
+        self.wait(0.6)
 
         # -------------------------------------------------------------
-        # Step 1: Apply Transformation A
+        # Step 1: Apply Transformation Matrix A
         # -------------------------------------------------------------
-        step1_card = VGroup(
-            Text("Step 1: Apply Matrix A", font_size=18, weight=BOLD, color=YELLOW),
-            MathTex(
-                r"A = \begin{bmatrix} " + f"{mat_a[0][0]} & {mat_a[0][1]} \\\\ {mat_a[1][0]} & {mat_a[1][1]}" + r" \end{bmatrix}",
-                font_size=22, color=YELLOW_B
-            ),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.1).to_corner(UL, buff=0.6)
-        step1_bg = BackgroundRectangle(step1_card, color=COLOR_PANEL_BG, fill_opacity=0.88, buff=0.2)
-        step1_group = VGroup(step1_bg, step1_card)
-        self.play(FadeIn(step1_group), run_time=0.6)
+        step1_card = create_hud_card(
+            title="Step 1: Apply Matrix A",
+            formula=MathTex(r"A = " + pack.latex_matrix_a, font_size=21, color=YELLOW_B),
+            extra_text=rf"\det(A) = {pack.det_a:.2f}",
+            title_color=YELLOW,
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
+        self.play(FadeIn(step1_card), run_time=0.8)
 
-        a_i_end = np.array([mat_a[0][0] * 2.0, mat_a[1][0] * 2.0, 0])
-        a_j_end = np.array([mat_a[0][1] * 2.0, mat_a[1][1] * 2.0, 0])
+        a_i = mat_vec_mul(mat_a, [1.0, 0.0])
+        a_j = mat_vec_mul(mat_a, [0.0, 1.0])
 
         self.play(
             plane.animate.apply_matrix(mat_a),
-            i_hat.animate.put_start_and_end_on(ORIGIN, a_i_end),
-            j_hat.animate.put_start_and_end_on(ORIGIN, a_j_end),
-            i_label.animate.next_to(a_i_end, RIGHT, buff=0.1),
-            j_label.animate.next_to(a_j_end, UP, buff=0.1),
-            run_time=2
+            unit_square.animate.apply_matrix(mat_a),
+            unit_circle.animate.apply_matrix(mat_a),
+            triangle.animate.apply_matrix(mat_a),
+            i_hat.animate.put_start_and_end_on(ORIGIN, a_i),
+            j_hat.animate.put_start_and_end_on(ORIGIN, a_j),
+            i_label.animate.move_to(get_label_pos(a_i, "i")),
+            j_label.animate.move_to(get_label_pos(a_j, "j")),
+            run_time=2.2
         )
         self.wait(0.8)
 
         # -------------------------------------------------------------
-        # Step 2: Apply Transformation B to the already transformed space
+        # Step 2: Apply Transformation Matrix B to Transformed Space
         # -------------------------------------------------------------
-        step2_card = VGroup(
-            Text("Step 2: Apply Matrix B", font_size=18, weight=BOLD, color=RED_B),
-            MathTex(
-                r"B = \begin{bmatrix} " + f"{mat_b[0][0]} & {mat_b[0][1]} \\\\ {mat_b[1][0]} & {mat_b[1][1]}" + r" \end{bmatrix}",
-                font_size=22, color=RED_A
-            ),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.1).next_to(step1_group, DOWN, buff=0.2)
-        step2_bg = BackgroundRectangle(step2_card, color=COLOR_PANEL_BG, fill_opacity=0.88, buff=0.2)
-        step2_group = VGroup(step2_bg, step2_card)
-        self.play(FadeIn(step2_group), run_time=0.6)
+        b_desc = pack.b_description if pack.b_description else "Pure 2D planar map (no z-rotation)"
+        step2_card = create_hud_card(
+            title="Step 2: Apply Matrix B",
+            subtitle=b_desc,
+            formula=MathTex(r"B = " + pack.latex_matrix_b, font_size=21, color=RED_A),
+            extra_text=rf"\det(B) = {pack.det_b:.2f}",
+            title_color=RED_B,
+        ).next_to(step1_card, DOWN, buff=0.2, aligned_edge=LEFT)
+        self.play(FadeIn(step2_card), run_time=0.8)
 
-        c_i_end = np.array([mat_c[0][0] * 2.0, mat_c[1][0] * 2.0, 0])
-        c_j_end = np.array([mat_c[0][1] * 2.0, mat_c[1][1] * 2.0, 0])
+        c_i = mat_vec_mul(mat_c, [1.0, 0.0])
+        c_j = mat_vec_mul(mat_c, [0.0, 1.0])
 
         self.play(
             plane.animate.apply_matrix(mat_b),
-            i_hat.animate.put_start_and_end_on(ORIGIN, c_i_end),
-            j_hat.animate.put_start_and_end_on(ORIGIN, c_j_end),
-            i_label.animate.next_to(c_i_end, RIGHT, buff=0.1),
-            j_label.animate.next_to(c_j_end, UP, buff=0.1),
-            run_time=2
+            unit_square.animate.apply_matrix(mat_b),
+            unit_circle.animate.apply_matrix(mat_b),
+            triangle.animate.apply_matrix(mat_b),
+            i_hat.animate.put_start_and_end_on(ORIGIN, c_i),
+            j_hat.animate.put_start_and_end_on(ORIGIN, c_j),
+            i_label.animate.move_to(get_label_pos(c_i, "i")),
+            j_label.animate.move_to(get_label_pos(c_j, "j")),
+            run_time=2.2
         )
         self.wait(1.0)
 
-        # Snapshot ghost markers of the final basis vectors
-        ghost_i = Arrow(ORIGIN, c_i_end, buff=0, color=COLOR_I_HAT, stroke_width=2, stroke_opacity=0.4)
-        ghost_j = Arrow(ORIGIN, c_j_end, buff=0, color=COLOR_J_HAT, stroke_width=2, stroke_opacity=0.4)
-        self.add(ghost_i, ghost_j)
+        # -------------------------------------------------------------
+        # Preserve Ghost Outlines of Composite State (B @ A)
+        # -------------------------------------------------------------
+        ghost_square = unit_square.copy().set_stroke(YELLOW_A, width=2.5, opacity=0.55).set_fill(YELLOW, opacity=0.08)
+        ghost_circle = unit_circle.copy().set_stroke("#38BDF8", width=2.5, opacity=0.55).set_fill(COLOR_CIRCLE, opacity=0.08)
+        ghost_triangle = triangle.copy().set_stroke("#C084FC", width=2.5, opacity=0.55).set_fill(COLOR_TRIANGLE, opacity=0.08)
+        ghost_i = Arrow(ORIGIN, c_i, buff=0, color=COLOR_I_HAT, stroke_width=2.5, stroke_opacity=0.45, max_tip_length_to_length_ratio=0.22)
+        ghost_j = Arrow(ORIGIN, c_j, buff=0, color=COLOR_J_HAT, stroke_width=2.5, stroke_opacity=0.45, max_tip_length_to_length_ratio=0.22)
+        ghost_group = VGroup(ghost_square, ghost_circle, ghost_triangle, ghost_i, ghost_j)
+        self.add(ghost_group)
+
+        ghost_msg = Text("Ghost outlines recorded for composite state B(A(x)). Resetting space...", font_size=15, color=YELLOW_A)
+        ghost_bg = BackgroundRectangle(ghost_msg, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.15)
+        ghost_banner = VGroup(ghost_bg, ghost_msg).to_edge(DOWN, buff=0.35)
+        self.play(FadeIn(ghost_banner), run_time=0.6)
+        self.wait(1.0)
 
         # -------------------------------------------------------------
-        # Step 3: Matrix Multiplication Formula & Reset
+        # Step 3: Matrix Multiplication Formula HUD & Reset to Identity
         # -------------------------------------------------------------
-        formula_box = VGroup(
-            Text("Algebraic Matrix Multiplication C = B × A", font_size=20, weight=BOLD, color=WHITE),
+        formula_lines = VGroup(
+            Text("Matrix Composition: C = B · A", font_size=18, weight=BOLD, color=WHITE),
             MathTex(
-                r"\begin{bmatrix} " + f"{mat_b[0][0]} & {mat_b[0][1]} \\\\ {mat_b[1][0]} & {mat_b[1][1]}" + r"\end{bmatrix}"
-                r"\begin{bmatrix} " + f"{mat_a[0][0]} & {mat_a[0][1]} \\\\ {mat_a[1][0]} & {mat_a[1][1]}" + r"\end{bmatrix}"
-                r"= \begin{bmatrix} " + f"{mat_c[0][0]} & {mat_c[0][1]} \\\\ {mat_c[1][0]} & {mat_c[1][1]}" + r"\end{bmatrix}",
-                font_size=22, color=GREEN_B
+                matrix_to_latex(mat_b) + r"\cdot" + matrix_to_latex(mat_a) + r"=" + matrix_to_latex(mat_c),
+                font_size=20, color=GREEN_B
             ),
-            Text("Now resetting space to demonstrate ONE-STEP product transformation C...", font_size=16, color=YELLOW)
-        ).arrange(DOWN, buff=0.15).to_corner(UR, buff=0.5)
-        formula_bg = BackgroundRectangle(formula_box, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.25)
-        formula_group = VGroup(formula_bg, formula_box)
+            MathTex(
+                rf"\det(C) = \det(B)\det(A) = {pack.det_b:.2f} \times {pack.det_a:.2f} = {pack.det_c:.2f}",
+                font_size=17, color=LIGHT_GRAY
+            ),
+            Text("Now demonstrating ONE-STEP direct product transformation C...", font_size=14, color=YELLOW)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.12)
+        formula_bg = BackgroundRectangle(formula_lines, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.20, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
+        formula_card = VGroup(formula_bg, formula_lines).next_to(title_group, DOWN, buff=0.15).to_edge(RIGHT, buff=0.35)
 
-        self.play(FadeIn(formula_group), run_time=1)
+        self.play(FadeIn(formula_card), run_time=1.0)
         self.wait(1.5)
 
-        # Reset grid back to identity: apply inv(C)
-        det_c = mat_c[0][0] * mat_c[1][1] - mat_c[0][1] * mat_c[1][0]
-        inv_c = [
-            [mat_c[1][1] / det_c, -mat_c[0][1] / det_c],
-            [-mat_c[1][0] / det_c, mat_c[0][0] / det_c]
-        ]
-
+        # Reset space back to identity using inv(C)
+        inv_c = np.linalg.inv(np.array(mat_c)).tolist()
         self.play(
             plane.animate.apply_matrix(inv_c),
-            i_hat.animate.put_start_and_end_on(ORIGIN, RIGHT * 2.0),
-            j_hat.animate.put_start_and_end_on(ORIGIN, UP * 2.0),
-            i_label.animate.next_to(RIGHT * 2.0, DOWN, buff=0.1),
-            j_label.animate.next_to(UP * 2.0, LEFT, buff=0.1),
-            FadeOut(step1_group), FadeOut(step2_group),
+            unit_square.animate.apply_matrix(inv_c),
+            unit_circle.animate.apply_matrix(inv_c),
+            triangle.animate.apply_matrix(inv_c),
+            i_hat.animate.put_start_and_end_on(ORIGIN, RIGHT),
+            j_hat.animate.put_start_and_end_on(ORIGIN, UP),
+            i_label.animate.move_to(get_label_pos(RIGHT, "i")),
+            j_label.animate.move_to(get_label_pos(UP, "j")),
+            FadeOut(step1_card), FadeOut(step2_card), FadeOut(ghost_banner),
             run_time=1.8
         )
         self.wait(0.8)
 
         # -------------------------------------------------------------
-        # Step 4: Apply Product Matrix C directly in ONE step!
+        # Step 4: Single-Step Transformation by Product Matrix C Directly
         # -------------------------------------------------------------
-        direct_banner = VGroup(
-            Text("Single-Step Transformation by Product Matrix C", font_size=19, weight=BOLD, color=GREEN_C),
-            MathTex(r"C = \begin{bmatrix} " + f"{mat_c[0][0]} & {mat_c[0][1]} \\\\ {mat_c[1][0]} & {mat_c[1][1]}" + r" \end{bmatrix}", font_size=22, color=GREEN_A)
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.1).to_corner(UL, buff=0.6)
-        direct_bg = BackgroundRectangle(direct_banner, color=COLOR_PANEL_BG, fill_opacity=0.88, buff=0.2)
-        direct_group = VGroup(direct_bg, direct_banner)
+        direct_card = create_hud_card(
+            title="Single-Step: Apply Product Matrix C",
+            subtitle="Watch shapes directly snap into the ghost outlines!",
+            formula=MathTex(r"C = " + pack.latex_matrix_c, font_size=21, color=GREEN_A),
+            extra_text=rf"\det(C) = {pack.det_c:.2f}",
+            title_color=GREEN_C,
+        ).next_to(title_group, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
 
-        self.play(FadeIn(direct_group), run_time=0.8)
+        self.play(FadeIn(direct_card), run_time=0.8)
 
-        # Animate C directly
         self.play(
             plane.animate.apply_matrix(mat_c),
-            i_hat.animate.put_start_and_end_on(ORIGIN, c_i_end),
-            j_hat.animate.put_start_and_end_on(ORIGIN, c_j_end),
-            i_label.animate.next_to(c_i_end, RIGHT, buff=0.1),
-            j_label.animate.next_to(c_j_end, UP, buff=0.1),
-            run_time=2.2
+            unit_square.animate.apply_matrix(mat_c),
+            unit_circle.animate.apply_matrix(mat_c),
+            triangle.animate.apply_matrix(mat_c),
+            i_hat.animate.put_start_and_end_on(ORIGIN, c_i),
+            j_hat.animate.put_start_and_end_on(ORIGIN, c_j),
+            i_label.animate.move_to(get_label_pos(c_i, "i")),
+            j_label.animate.move_to(get_label_pos(c_j, "j")),
+            run_time=2.4
         )
         self.wait(1.0)
 
-        # Verification Callout
-        verification = Text("Match! Single transformation C achieves the exact resultant of A followed by B.", font_size=17, color=YELLOW_A).to_edge(DOWN, buff=0.4)
-        self.play(Write(verification), run_time=1)
-        self.wait(2.0)
+        # Match Verification Callout
+        verification_text = Text(
+            "MATCH! Single transformation C lands exactly onto the composite ghost outlines!",
+            font_size=16, color=GREEN_B
+        )
+        verification_bg = BackgroundRectangle(verification_text, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.18)
+        verification = VGroup(verification_bg, verification_text).to_edge(DOWN, buff=0.35)
 
-        # Clean exit
+        self.play(FadeIn(verification), run_time=0.8)
+        self.wait(2.2)
+
+        # Clean Exit
         self.play(
-            FadeOut(plane), FadeOut(i_hat), FadeOut(j_hat),
-            FadeOut(i_label), FadeOut(j_label), FadeOut(ghost_i), FadeOut(ghost_j),
-            FadeOut(formula_group), FadeOut(direct_group), FadeOut(verification),
-            FadeOut(title), FadeOut(subtitle),
-            run_time=1
+            FadeOut(plane), FadeOut(unit_square), FadeOut(unit_circle), FadeOut(triangle),
+            FadeOut(i_hat), FadeOut(j_hat), FadeOut(i_label), FadeOut(j_label),
+            FadeOut(ghost_group), FadeOut(formula_card), FadeOut(direct_card),
+            FadeOut(verification), FadeOut(title_group),
+            run_time=1.2
         )
 
 
+# =====================================================================
+# Scene 4: Master Matrix Multiplication Story
+# =====================================================================
+
 class MasterMatrixMultiplicationStory(Scene):
-    """Epic unified master scene: Space Transforms + Eigenvectors + Matrix Multiplication."""
+    """Grand cinematic educational presentation combining all three acts."""
 
     def construct(self):
         pack = get_current_matrix_pack()
@@ -522,192 +730,261 @@ class MasterMatrixMultiplicationStory(Scene):
         v1, v2 = pack.v1, pack.v2
 
         # -------------------------------------------------------------
-        # Prologue: Title Card
+        # Prologue: Grand Title Card
         # -------------------------------------------------------------
-        main_title = Text("The Geometry of Matrix Multiplication", font_size=36, weight=BOLD, color=WHITE)
-        sub_title = Text("Space Transformations • Eigenvectors • Compositional Multiplication", font_size=20, color=BLUE_C).next_to(main_title, DOWN, buff=0.25)
-        seed_label = Text(f"Randomized Run Seed: {pack.seed}", font_size=15, color=GRAY).next_to(sub_title, DOWN, buff=0.2)
+        main_title = Text("The Geometry of Matrix Multiplication", font_size=34, weight=BOLD, color=WHITE)
+        sub_title = Text("Space Transformations • Eigenvectors • Compositional Multiplication", font_size=18, color=BLUE_C).next_to(main_title, DOWN, buff=0.22)
+        seed_label = Text(f"Randomized Run Seed: {pack.seed}  •  Pure 2D Planar Maps", font_size=14, color=GRAY).next_to(sub_title, DOWN, buff=0.18)
 
-        self.play(FadeIn(main_title, shift=UP * 0.3), FadeIn(sub_title), FadeIn(seed_label), run_time=1.5)
+        self.play(FadeIn(main_title, shift=UP * 0.25), FadeIn(sub_title), FadeIn(seed_label), run_time=1.4)
         self.wait(1.5)
         self.play(FadeOut(main_title), FadeOut(sub_title), FadeOut(seed_label), run_time=0.8)
 
         # -------------------------------------------------------------
-        # Chapter 1: Basis Vectors and Space Deformation
+        # Act 1: Basis Vectors & Multi-Shape Deformation
         # -------------------------------------------------------------
-        chap1_text = Text("Part 1: Basis Vectors & Space Deformation", font_size=26, weight=BOLD, color=GOLD).to_edge(UP, buff=0.4)
-        self.play(FadeIn(chap1_text), run_time=0.8)
+        act1_title = Text("Part 1: Basis Vectors & Space Deformation", font_size=24, weight=BOLD, color=GOLD_B).to_edge(UP, buff=0.20)
+        self.play(FadeIn(act1_title), run_time=0.8)
 
-        plane = NumberPlane(
-            x_range=[-7, 7, 1],
-            y_range=[-4, 4, 1],
-            background_line_style={"stroke_color": TEAL_E, "stroke_width": 1.2, "stroke_opacity": 0.5}
-        )
+        plane = create_coordinate_plane()
         self.play(Create(plane), run_time=1.2)
 
-        i_hat = Arrow(ORIGIN, RIGHT * 2.0, buff=0, color=COLOR_I_HAT, stroke_width=4)
-        j_hat = Arrow(ORIGIN, UP * 2.0, buff=0, color=COLOR_J_HAT, stroke_width=4)
-        i_label = MathTex(r"\hat{i} = \begin{bmatrix}1\\0\end{bmatrix}", color=COLOR_I_HAT, font_size=20).next_to(i_hat.get_end(), DOWN, buff=0.1)
-        j_label = MathTex(r"\hat{j} = \begin{bmatrix}0\\1\end{bmatrix}", color=COLOR_J_HAT, font_size=20).next_to(j_hat.get_end(), LEFT, buff=0.1)
+        unit_square, unit_circle, triangle = create_shape_ensemble()
+        i_hat, j_hat, i_label, j_label = create_basis_vectors()
 
-        unit_square = Polygon(
-            ORIGIN, RIGHT * 2.0, RIGHT * 2.0 + UP * 2.0, UP * 2.0,
-            fill_color=YELLOW, fill_opacity=0.18, stroke_color=YELLOW_D, stroke_width=2
+        self.play(
+            FadeIn(unit_square), FadeIn(unit_circle), FadeIn(triangle),
+            GrowArrow(i_hat), FadeIn(i_label), GrowArrow(j_hat), FadeIn(j_label),
+            run_time=1.2
         )
+        self.wait(0.6)
 
-        self.play(GrowArrow(i_hat), FadeIn(i_label), GrowArrow(j_hat), FadeIn(j_label), FadeIn(unit_square), run_time=1)
-        self.wait(0.8)
+        # Transformation under Matrix A
+        a_card = create_hud_card(
+            title="Applying Linear Transformation A",
+            subtitle="Col 1 = transformed i-hat, Col 2 = transformed j-hat",
+            formula=MathTex(r"A = " + pack.latex_matrix_a, font_size=21, color=GOLD_A),
+            extra_text=rf"\det(A) = {pack.det_a:.2f}",
+            title_color=GOLD_B,
+        ).next_to(act1_title, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
+        self.play(FadeIn(a_card), run_time=0.8)
 
-        # Demonstrate general stretching under matrix A
-        a_card = VGroup(
-            Text("Applying Linear Transformation Matrix A", font_size=18, weight=BOLD, color=GOLD_B),
-            MathTex(r"A = \begin{bmatrix} " + f"{mat_a[0][0]} & {mat_a[0][1]} \\\\ {mat_a[1][0]} & {mat_a[1][1]}" + r" \end{bmatrix}", font_size=22, color=GOLD_A),
-            Text(f"Col 1 = transformed i-hat, Col 2 = transformed j-hat", font_size=14, color=LIGHT_GRAY)
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.12).to_corner(UL, buff=0.6)
-        a_bg = BackgroundRectangle(a_card, color=COLOR_PANEL_BG, fill_opacity=0.88, buff=0.2)
-        a_group = VGroup(a_bg, a_card)
-
-        self.play(FadeIn(a_group), run_time=0.8)
-
-        a_i = np.array([mat_a[0][0] * 2.0, mat_a[1][0] * 2.0, 0])
-        a_j = np.array([mat_a[0][1] * 2.0, mat_a[1][1] * 2.0, 0])
-        sq_a = [ORIGIN, a_i, a_i + a_j, a_j]
+        a_i = mat_vec_mul(mat_a, [1.0, 0.0])
+        a_j = mat_vec_mul(mat_a, [0.0, 1.0])
 
         self.play(
             plane.animate.apply_matrix(mat_a),
+            unit_square.animate.apply_matrix(mat_a),
+            unit_circle.animate.apply_matrix(mat_a),
+            triangle.animate.apply_matrix(mat_a),
             i_hat.animate.put_start_and_end_on(ORIGIN, a_i),
             j_hat.animate.put_start_and_end_on(ORIGIN, a_j),
-            unit_square.animate.set_points_as_corners(sq_a + [ORIGIN]),
-            i_label.animate.next_to(a_i, RIGHT, buff=0.1),
-            j_label.animate.next_to(a_j, UP, buff=0.1),
-            run_time=2.2
+            i_label.animate.move_to(get_label_pos(a_i, "i")),
+            j_label.animate.move_to(get_label_pos(a_j, "j")),
+            run_time=2.4
         )
-        self.wait(1.0)
+        self.wait(1.2)
 
         # -------------------------------------------------------------
-        # Chapter 2: The Magic of Eigenvectors
+        # Act 2: Eigenvalues & Invariant Directions
         # -------------------------------------------------------------
-        self.play(FadeOut(a_group), FadeOut(chap1_text), FadeOut(unit_square), run_time=0.6)
+        self.play(FadeOut(a_card), FadeOut(act1_title), run_time=0.6)
 
-        chap2_text = Text("Part 2: Eigenvectors & Invariant Directions", font_size=26, weight=BOLD, color=COLOR_V1).to_edge(UP, buff=0.4)
-        self.play(FadeIn(chap2_text), run_time=0.6)
+        act2_title = Text("Part 2: Eigenvectors & Invariant Directions", font_size=24, weight=BOLD, color=COLOR_V1).to_edge(UP, buff=0.20)
+        self.play(FadeIn(act2_title), run_time=0.6)
 
-        # Reset plane back to identity to illustrate eigenvectors clearly
-        det_a = mat_a[0][0] * mat_a[1][1] - mat_a[0][1] * mat_a[1][0]
-        inv_a = [
-            [mat_a[1][1] / det_a, -mat_a[0][1] / det_a],
-            [-mat_a[1][0] / det_a, mat_a[0][0] / det_a]
-        ]
+        # Reset back to identity to show eigenvectors clearly
+        inv_a = np.linalg.inv(np.array(mat_a)).tolist()
         self.play(
             plane.animate.apply_matrix(inv_a),
-            i_hat.animate.put_start_and_end_on(ORIGIN, RIGHT * 2.0),
-            j_hat.animate.put_start_and_end_on(ORIGIN, UP * 2.0),
-            i_label.animate.next_to(RIGHT * 2.0, DOWN, buff=0.1),
-            j_label.animate.next_to(UP * 2.0, LEFT, buff=0.1),
+            unit_square.animate.apply_matrix(inv_a),
+            unit_circle.animate.apply_matrix(inv_a),
+            triangle.animate.apply_matrix(inv_a),
+            i_hat.animate.put_start_and_end_on(ORIGIN, RIGHT),
+            j_hat.animate.put_start_and_end_on(ORIGIN, UP),
+            i_label.animate.move_to(get_label_pos(RIGHT, "i")),
+            j_label.animate.move_to(get_label_pos(UP, "j")),
             run_time=1.5
         )
 
-        # Draw Eigen-Lines
-        v1_dir = np.array([v1[0], v1[1], 0])
-        v2_dir = np.array([v2[0], v2[1], 0])
-        eigen_line1 = DashedLine(start=-v1_dir * 8.0, end=v1_dir * 8.0, color=COLOR_V1, stroke_width=2.5, dash_length=0.15)
-        eigen_line2 = DashedLine(start=-v2_dir * 8.0, end=v2_dir * 8.0, color=COLOR_V2, stroke_width=2.5, dash_length=0.15)
+        v1_dir = np.array([v1[0], v1[1], 0.0])
+        v2_dir = np.array([v2[0], v2[1], 0.0])
+        eigen_line1 = DashedLine(start=-v1_dir * 7.5, end=v1_dir * 7.5, color=COLOR_V1, stroke_width=2.5, dash_length=0.15)
+        eigen_line2 = DashedLine(start=-v2_dir * 7.5, end=v2_dir * 7.5, color=COLOR_V2, stroke_width=2.5, dash_length=0.15)
 
-        v1_vec = Arrow(ORIGIN, v1_dir * 1.8, buff=0, color=COLOR_V1, stroke_width=4.5)
-        v2_vec = Arrow(ORIGIN, v2_dir * 1.8, buff=0, color=COLOR_V2, stroke_width=4.5)
+        v1_vec = Arrow(ORIGIN, v1_dir, buff=0, color=COLOR_V1, stroke_width=5.0, max_tip_length_to_length_ratio=0.22)
+        v2_vec = Arrow(ORIGIN, v2_dir, buff=0, color=COLOR_V2, stroke_width=5.0, max_tip_length_to_length_ratio=0.22)
+        v1_label = MathTex(r"\vec{v}_1", color=COLOR_V1, font_size=22).move_to(get_label_pos(v1_dir, "v1"))
+        v2_label = MathTex(r"\vec{v}_2", color=COLOR_V2, font_size=22).move_to(get_label_pos(v2_dir, "v2"))
 
-        w = pack.test_vector_w
-        w_dir = np.array([w[0], w[1], 0])
-        w_vec = Arrow(ORIGIN, w_dir, buff=0, color=COLOR_TEST_VEC, stroke_width=4)
-        w_label = MathTex(r"\vec{w}\text{ (tilts)}", color=COLOR_TEST_VEC, font_size=18).next_to(w_vec.get_end(), RIGHT, buff=0.1)
+        w = np.array([pack.test_vector_w[0], pack.test_vector_w[1], 0.0])
+        w_line = DashedLine(start=-w * 3.5, end=w * 3.5, color=COLOR_TEST_VEC, stroke_width=1.5, stroke_opacity=0.45, dash_length=0.12)
+        w_vec = Arrow(ORIGIN, w, buff=0, color=COLOR_TEST_VEC, stroke_width=4.2, max_tip_length_to_length_ratio=0.2)
+        w_label = MathTex(r"\vec{w}\text{ (tilts)}", color=COLOR_TEST_VEC, font_size=18).move_to(get_label_pos(w, "w"))
 
-        eigen_hud = VGroup(
-            Text("Eigenvalues & Directions:", font_size=17, weight=BOLD, color=WHITE),
-            MathTex(r"\lambda_1 = " + f"{l1:.2f}" + r"\quad (\vec{v}_1 \text{ Gold})", color=COLOR_V1, font_size=19),
-            MathTex(r"\lambda_2 = " + f"{l2:.2f}" + r"\quad (\vec{v}_2 \text{ Cyan})", color=COLOR_V2, font_size=19),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.1).to_corner(UL, buff=0.6)
-        eigen_hud_bg = BackgroundRectangle(eigen_hud, color=COLOR_PANEL_BG, fill_opacity=0.88, buff=0.2)
-        eigen_hud_group = VGroup(eigen_hud_bg, eigen_hud)
+        eigen_hud = create_hud_card(
+            title="Eigenvalues & Invariant Directions",
+            formula=MathTex(
+                rf"\lambda_1 = {l1:.2f}\ (\vec{{v}}_1\text{{ Gold}}), \quad \lambda_2 = {l2:.2f}\ (\vec{{v}}_2\text{{ Cyan}})",
+                font_size=18, color=LIGHT_GRAY
+            ),
+            extra_text="Circle transforms to ellipse whose axes align with v1 & v2!",
+            title_color=COLOR_V1,
+        ).next_to(act2_title, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
 
         self.play(
             Create(eigen_line1), Create(eigen_line2),
-            GrowArrow(v1_vec), GrowArrow(v2_vec),
-            GrowArrow(w_vec), FadeIn(w_label),
-            FadeIn(eigen_hud_group),
+            GrowArrow(v1_vec), FadeIn(v1_label),
+            GrowArrow(v2_vec), FadeIn(v2_label),
+            Create(w_line), GrowArrow(w_vec), FadeIn(w_label),
+            FadeIn(eigen_hud),
             run_time=1.5
         )
         self.wait(0.8)
 
-        # Animate transformation under A: notice v1 and v2 stay on their lines!
-        new_v1 = v1_dir * (1.8 * l1)
-        new_v2 = v2_dir * (1.8 * l2)
-        new_w = np.array([mat_a[0][0] * w[0] + mat_a[0][1] * w[1], mat_a[1][0] * w[0] + mat_a[1][1] * w[1], 0])
+        new_v1 = v1_dir * l1
+        new_v2 = v2_dir * l2
+        new_w = mat_vec_mul(mat_a, w)
 
         self.play(
             plane.animate.apply_matrix(mat_a),
+            unit_square.animate.apply_matrix(mat_a),
+            unit_circle.animate.apply_matrix(mat_a),
+            triangle.animate.apply_matrix(mat_a),
             i_hat.animate.put_start_and_end_on(ORIGIN, a_i),
             j_hat.animate.put_start_and_end_on(ORIGIN, a_j),
             v1_vec.animate.put_start_and_end_on(ORIGIN, new_v1),
             v2_vec.animate.put_start_and_end_on(ORIGIN, new_v2),
             w_vec.animate.put_start_and_end_on(ORIGIN, new_w),
-            w_label.animate.next_to(new_w, RIGHT, buff=0.1),
-            run_time=2.5
+            i_label.animate.move_to(get_label_pos(a_i, "i")),
+            j_label.animate.move_to(get_label_pos(a_j, "j")),
+            v1_label.animate.move_to(get_label_pos(new_v1, "v1")),
+            v2_label.animate.move_to(get_label_pos(new_v2, "v2")),
+            w_label.animate.move_to(get_label_pos(new_w, "w")),
+            run_time=2.8
         )
-        self.wait(1.2)
+        self.wait(1.5)
 
         # -------------------------------------------------------------
-        # Chapter 3: Matrix Multiplication Composition (A then B vs C)
+        # Act 3: Matrix Multiplication Composition (A then B vs C)
         # -------------------------------------------------------------
         self.play(
-            FadeOut(eigen_hud_group), FadeOut(chap2_text),
+            FadeOut(eigen_hud), FadeOut(act2_title),
             FadeOut(eigen_line1), FadeOut(eigen_line2),
-            FadeOut(v1_vec), FadeOut(v2_vec), FadeOut(w_vec), FadeOut(w_label),
+            FadeOut(v1_vec), FadeOut(v2_vec), FadeOut(w_vec), FadeOut(w_line),
+            FadeOut(v1_label), FadeOut(v2_label), FadeOut(w_label),
             run_time=0.6
         )
 
-        chap3_text = Text("Part 3: Matrix Multiplication is Transformation Composition", font_size=24, weight=BOLD, color=BLUE_B).to_edge(UP, buff=0.4)
-        self.play(FadeIn(chap3_text), run_time=0.6)
+        act3_title = Text("Part 3: Matrix Multiplication is Transformation Composition", font_size=22, weight=BOLD, color=BLUE_B).to_edge(UP, buff=0.20)
+        self.play(FadeIn(act3_title), run_time=0.6)
 
-        # Apply second matrix B
-        b_hud = VGroup(
-            Text("Applying Second Matrix B to Transformed Space", font_size=18, weight=BOLD, color=RED_B),
-            MathTex(r"B = \begin{bmatrix} " + f"{mat_b[0][0]} & {mat_b[0][1]} \\\\ {mat_b[1][0]} & {mat_b[1][1]}" + r" \end{bmatrix}", font_size=22, color=RED_A),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.1).to_corner(UL, buff=0.6)
-        b_bg = BackgroundRectangle(b_hud, color=COLOR_PANEL_BG, fill_opacity=0.88, buff=0.2)
-        b_group = VGroup(b_bg, b_hud)
-        self.play(FadeIn(b_group), run_time=0.6)
+        # Apply second matrix B from state A
+        b_desc = pack.b_description if pack.b_description else "Pure 2D planar map"
+        b_hud = create_hud_card(
+            title="Applying Matrix B to Transformed Space",
+            subtitle=b_desc,
+            formula=MathTex(r"B = " + pack.latex_matrix_b, font_size=21, color=RED_A),
+            extra_text=rf"\det(B) = {pack.det_b:.2f}",
+            title_color=RED_B,
+        ).next_to(act3_title, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
+        self.play(FadeIn(b_hud), run_time=0.8)
 
-        c_i = np.array([mat_c[0][0] * 2.0, mat_c[1][0] * 2.0, 0])
-        c_j = np.array([mat_c[0][1] * 2.0, mat_c[1][1] * 2.0, 0])
+        c_i = mat_vec_mul(mat_c, [1.0, 0.0])
+        c_j = mat_vec_mul(mat_c, [0.0, 1.0])
 
         self.play(
             plane.animate.apply_matrix(mat_b),
+            unit_square.animate.apply_matrix(mat_b),
+            unit_circle.animate.apply_matrix(mat_b),
+            triangle.animate.apply_matrix(mat_b),
             i_hat.animate.put_start_and_end_on(ORIGIN, c_i),
             j_hat.animate.put_start_and_end_on(ORIGIN, c_j),
+            i_label.animate.move_to(get_label_pos(c_i, "i")),
+            j_label.animate.move_to(get_label_pos(c_j, "j")),
             run_time=2.2
         )
         self.wait(1.0)
 
-        # Show product matrix equivalence
-        product_hud = VGroup(
-            Text("Product Matrix C = B × A", font_size=18, weight=BOLD, color=GREEN_C),
-            MathTex(r"C = \begin{bmatrix} " + f"{mat_c[0][0]} & {mat_c[0][1]} \\\\ {mat_c[1][0]} & {mat_c[1][1]}" + r" \end{bmatrix}", font_size=22, color=GREEN_A),
-            Text("Applying C directly from Identity reaches this EXACT state!", font_size=15, color=YELLOW)
-        ).arrange(DOWN, buff=0.12).to_corner(UR, buff=0.6)
-        prod_bg = BackgroundRectangle(product_hud, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.2)
-        prod_group = VGroup(prod_bg, product_hud)
+        # Ghost markers
+        ghost_square = unit_square.copy().set_stroke(YELLOW_A, width=2.5, opacity=0.55).set_fill(YELLOW, opacity=0.08)
+        ghost_circle = unit_circle.copy().set_stroke("#38BDF8", width=2.5, opacity=0.55).set_fill(COLOR_CIRCLE, opacity=0.08)
+        ghost_triangle = triangle.copy().set_stroke("#C084FC", width=2.5, opacity=0.55).set_fill(COLOR_TRIANGLE, opacity=0.08)
+        ghost_i = Arrow(ORIGIN, c_i, buff=0, color=COLOR_I_HAT, stroke_width=2.5, stroke_opacity=0.45, max_tip_length_to_length_ratio=0.22)
+        ghost_j = Arrow(ORIGIN, c_j, buff=0, color=COLOR_J_HAT, stroke_width=2.5, stroke_opacity=0.45, max_tip_length_to_length_ratio=0.22)
+        ghost_group = VGroup(ghost_square, ghost_circle, ghost_triangle, ghost_i, ghost_j)
+        self.add(ghost_group)
 
-        self.play(FadeIn(prod_group), run_time=0.8)
-        self.wait(2.0)
+        prod_formula = VGroup(
+            Text("Matrix Composition: C = B · A", font_size=18, weight=BOLD, color=WHITE),
+            MathTex(
+                matrix_to_latex(mat_b) + r"\cdot" + matrix_to_latex(mat_a) + r"=" + matrix_to_latex(mat_c),
+                font_size=20, color=GREEN_B
+            ),
+            Text("Single-step transformation C exactly matches composite B · A!", font_size=14, color=YELLOW)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.12)
+        prod_bg = BackgroundRectangle(prod_formula, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.20, stroke_width=1, stroke_color=COLOR_PANEL_BORDER)
+        prod_card = VGroup(prod_bg, prod_formula).next_to(act3_title, DOWN, buff=0.15).to_edge(RIGHT, buff=0.35)
 
-        # Epilogue
-        summary = Text("Matrix Multiplication: Not just numbers, but composition of space!", font_size=20, color=WHITE).to_edge(DOWN, buff=0.4)
-        self.play(Write(summary), run_time=1)
+        self.play(FadeIn(prod_card), run_time=1.0)
+        self.wait(1.5)
+
+        # Reset to identity
+        inv_c = np.linalg.inv(np.array(mat_c)).tolist()
+        self.play(
+            plane.animate.apply_matrix(inv_c),
+            unit_square.animate.apply_matrix(inv_c),
+            unit_circle.animate.apply_matrix(inv_c),
+            triangle.animate.apply_matrix(inv_c),
+            i_hat.animate.put_start_and_end_on(ORIGIN, RIGHT),
+            j_hat.animate.put_start_and_end_on(ORIGIN, UP),
+            i_label.animate.move_to(get_label_pos(RIGHT, "i")),
+            j_label.animate.move_to(get_label_pos(UP, "j")),
+            FadeOut(b_hud),
+            run_time=1.8
+        )
+        self.wait(0.6)
+
+        # Direct product transformation
+        direct_banner = create_hud_card(
+            title="Direct Transformation: Apply Matrix C",
+            formula=MathTex(r"C = " + pack.latex_matrix_c, font_size=21, color=GREEN_A),
+            extra_text="Shapes and basis vectors snap directly into ghost outlines!",
+            title_color=GREEN_C,
+        ).next_to(act3_title, DOWN, buff=0.15).to_edge(LEFT, buff=0.35)
+
+        self.play(FadeIn(direct_banner), run_time=0.8)
+
+        self.play(
+            plane.animate.apply_matrix(mat_c),
+            unit_square.animate.apply_matrix(mat_c),
+            unit_circle.animate.apply_matrix(mat_c),
+            triangle.animate.apply_matrix(mat_c),
+            i_hat.animate.put_start_and_end_on(ORIGIN, c_i),
+            j_hat.animate.put_start_and_end_on(ORIGIN, c_j),
+            i_label.animate.move_to(get_label_pos(c_i, "i")),
+            j_label.animate.move_to(get_label_pos(c_j, "j")),
+            run_time=2.4
+        )
+        self.wait(1.2)
+
+        # -------------------------------------------------------------
+        # Epilogue: Grand Summary Card
+        # -------------------------------------------------------------
+        summary_text = Text(
+            "Matrix Multiplication: Not just arithmetic, but the composition of spatial transformations!",
+            font_size=16, color=WHITE
+        )
+        summary_bg = BackgroundRectangle(summary_text, color=COLOR_PANEL_BG, fill_opacity=0.92, buff=0.18)
+        summary = VGroup(summary_bg, summary_text).to_edge(DOWN, buff=0.35)
+
+        self.play(FadeIn(summary), run_time=0.8)
         self.wait(2.5)
 
         self.play(
-            FadeOut(plane), FadeOut(i_hat), FadeOut(j_hat),
-            FadeOut(i_label), FadeOut(j_label), FadeOut(b_group),
-            FadeOut(prod_group), FadeOut(chap3_text), FadeOut(summary),
+            FadeOut(plane), FadeOut(unit_square), FadeOut(unit_circle), FadeOut(triangle),
+            FadeOut(i_hat), FadeOut(j_hat), FadeOut(i_label), FadeOut(j_label),
+            FadeOut(ghost_group), FadeOut(prod_card), FadeOut(direct_banner),
+            FadeOut(act3_title), FadeOut(summary),
             run_time=1.5
         )
