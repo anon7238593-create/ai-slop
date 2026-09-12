@@ -419,17 +419,10 @@ def build_traversal_steps(
 
 # Cairo Drawing Utilities & Anti-Aliasing Configuration
 def configure_cairo_context(ctx: cairo.Context) -> None:
-    """Configure pristine anti-aliasing and subpixel font hinting on a Cairo context."""
-    ctx.set_antialias(cairo.ANTIALIAS_BEST)
+    """Configure smooth anti-aliasing and cap/join styles on a Cairo context."""
+    ctx.set_antialias(cairo.ANTIALIAS_DEFAULT)
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
-
-    font_opts = cairo.FontOptions()
-    font_opts.set_antialias(cairo.ANTIALIAS_BEST)
-    font_opts.set_hint_style(cairo.HINT_STYLE_FULL)
-    font_opts.set_hint_metrics(cairo.HINT_METRICS_ON)
-    font_opts.set_subpixel_order(cairo.SUBPIXEL_ORDER_RGB)
-    ctx.set_font_options(font_opts)
 
 
 def draw_rounded_rect(
@@ -716,6 +709,7 @@ class TraversalVideoRenderer:
             fill_c, border_c, text_c = NODE_COLORS[state]
 
             # Drop Shadow
+            ctx.new_sub_path()
             ctx.arc(nx + 2.0 * self.scale, ny + 3.0 * self.scale, r, 0.0, 2.0 * math.pi)
             ctx.set_source_rgba(0.0, 0.0, 0.0, 0.35)
             ctx.fill()
@@ -725,12 +719,14 @@ class TraversalVideoRenderer:
                 pulse_phase = (global_frame % 30) / 30.0
                 pulse_r = r + (7.0 + 9.0 * math.sin(pulse_phase * math.pi)) * self.scale
                 pulse_alpha = 0.5 * (1.0 - pulse_phase)
+                ctx.new_sub_path()
                 ctx.arc(nx, ny, pulse_r, 0.0, 2.0 * math.pi)
                 ctx.set_source_rgba(border_c[0], border_c[1], border_c[2], pulse_alpha)
                 ctx.set_line_width(max(1.5, 3.5 * self.scale))
                 ctx.stroke()
 
             # Base Node Circle
+            ctx.new_sub_path()
             ctx.arc(nx, ny, r, 0.0, 2.0 * math.pi)
             ctx.set_source_rgb(*fill_c)
             ctx.fill_preserve()
@@ -751,6 +747,7 @@ class TraversalVideoRenderer:
                 bx = nx + r * 0.72
                 by = ny - r * 0.72
 
+                ctx.new_sub_path()
                 ctx.arc(bx, by, badge_r, 0.0, 2.0 * math.pi)
                 ctx.set_source_rgb(0.06, 0.73, 0.51)
                 ctx.fill_preserve()
@@ -1427,6 +1424,7 @@ class ComparativeTraversalRenderer:
         cx = self.width / 2.0
         cy = panel_y + (panel_h - 200.0 * self.scale) / 2.0
         r_vs = max(16.0, 26.0 * self.scale)
+        ctx.new_sub_path()
         ctx.arc(cx, cy, r_vs, 0.0, 2.0 * math.pi)
         ctx.set_source_rgb(0.08, 0.12, 0.20)
         ctx.fill_preserve()

@@ -68,7 +68,7 @@ class TestTraversalAnimator(unittest.TestCase):
         surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, 200, 200)
         ctx = cairo.Context(surf)
         configure_cairo_context(ctx)
-        self.assertEqual(ctx.get_antialias(), cairo.ANTIALIAS_BEST)
+        self.assertEqual(ctx.get_antialias(), cairo.ANTIALIAS_DEFAULT)
         self.assertEqual(ctx.get_line_cap(), cairo.LINE_CAP_ROUND)
         self.assertEqual(ctx.get_line_join(), cairo.LINE_JOIN_ROUND)
 
