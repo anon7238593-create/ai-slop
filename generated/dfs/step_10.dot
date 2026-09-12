@@ -13,43 +13,42 @@ graph traversal {
   A [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   B [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   C [fillcolor="#FFEDD5", color="#EA580C", fontcolor="#9A3412"];
-  D [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  E [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
-  F [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  D [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  E [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
+  F [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   G [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   H [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
-  I [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  I [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   J [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   A -- B [color="#7C3AED", penwidth=3.8];
   A -- C [color="#7C3AED", penwidth=3.8];
-  A -- F [color="#7C3AED", penwidth=3.8];
+  A -- D [color="#7C3AED", penwidth=3.8];
   A -- G [color="#7C3AED", penwidth=3.8];
   A -- H [color="#7C3AED", penwidth=3.8];
-  A -- I [color="#7C3AED", penwidth=3.8];
   A -- J [color="#7C3AED", penwidth=3.8];
-  B -- D [color="#7C3AED", penwidth=3.8];
-  B -- E [color="#7C3AED", penwidth=3.8];
-  B -- F;
-  C -- D;
+  B -- C;
+  B -- F [color="#7C3AED", penwidth=3.8];
+  B -- H;
+  B -- J;
   C -- E;
-  C -- G;
-  C -- H;
-  D -- E;
+  C -- F;
+  C -- J;
   D -- F;
-  D -- G;
-  D -- I;
-  E -- F;
+  D -- J;
+  E -- G;
   E -- H;
   E -- J;
-  F -- I;
+  F -- I [color="#7C3AED", penwidth=3.8];
   F -- J;
   G -- I;
   G -- J;
   H -- I;
+  H -- J;
+  I -- J;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> J  |  I  |  H  |  G  |  F</TD></TR>
-      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, D, E</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> J  |  H  |  G  |  D</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, F, I</TD></TR>
     </TABLE>
   >];
 }
