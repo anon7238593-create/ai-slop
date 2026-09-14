@@ -2,88 +2,94 @@
   "graph": {
     "A": [
       "B",
-      "N",
-      "O"
+      "E",
+      "G",
+      "I",
+      "N"
     ],
     "B": [
       "A",
       "C",
-      "F",
-      "K",
-      "M"
+      "D",
+      "H",
+      "J"
     ],
     "C": [
       "B",
       "D",
-      "E",
-      "M"
+      "K"
     ],
     "D": [
+      "B",
       "C",
       "E",
-      "G",
-      "I",
       "J",
-      "K",
       "L"
     ],
     "E": [
-      "C",
+      "A",
       "D",
+      "F",
       "J",
+      "M",
       "N"
     ],
     "F": [
-      "B",
-      "G",
-      "I",
-      "O"
+      "E"
     ],
     "G": [
-      "D",
-      "F",
-      "H"
+      "A",
+      "I",
+      "L"
     ],
     "H": [
-      "G",
-      "K"
+      "B",
+      "I",
+      "J",
+      "L",
+      "N"
     ],
     "I": [
-      "D",
-      "F",
+      "A",
+      "G",
+      "H",
       "J",
       "K",
-      "M"
+      "L",
+      "M",
+      "O"
     ],
     "J": [
+      "B",
       "D",
       "E",
+      "H",
       "I"
     ],
     "K": [
-      "B",
-      "D",
-      "H",
+      "C",
       "I",
-      "O"
+      "M"
     ],
     "L": [
-      "D"
+      "D",
+      "G",
+      "H",
+      "I"
     ],
     "M": [
-      "B",
-      "C",
-      "I"
+      "E",
+      "I",
+      "K"
     ],
     "N": [
       "A",
       "E",
+      "H",
       "O"
     ],
     "O": [
-      "A",
-      "F",
-      "K",
+      "I",
       "N"
     ]
   },
@@ -92,10 +98,10 @@
   "target_hop_distance": 2,
   "min_distance": 2,
   "short_circuit": true,
-  "random_seed": 1789420472,
+  "random_seed": 1789424098,
   "edge_probability": null,
   "nodes": 15,
-  "edges": 28,
+  "edges": 31,
   "step_duration_seconds": 1.8,
   "scope": "short_circuit_target_K"
 }
