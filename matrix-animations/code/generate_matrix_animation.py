@@ -58,9 +58,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--quality",
-        choices=("l", "m", "h", "k"),
-        default="m",
-        help="rendering quality: l (480p15), m (720p30), h (1080p60), k (4k60) - default: m",
+        choices=("l", "m", "h", "p", "k"),
+        default="h",
+        help="rendering quality: l (480p15), m (720p30), h (1080p60), p (1440p60), k (4k60) - default: h",
     )
     parser.add_argument(
         "--output-dir",
@@ -72,6 +72,15 @@ def main() -> None:
 
     args = parser.parse_args()
     manim_bin = find_manim_bin(args.manim_bin)
+
+    quality_names = {
+        "l": "854x480 @ 15fps",
+        "m": "1280x720 @ 30fps",
+        "h": "1920x1080 @ 60fps (Full HD)",
+        "p": "2560x1440 @ 60fps (2K QHD)",
+        "k": "3840x2160 @ 60fps (4K UHD)",
+    }
+    resolution_label = quality_names.get(args.quality, f"-q{args.quality}")
 
     # Generate or reuse matrix pack
     current_dir = Path(__file__).resolve().parent
@@ -86,7 +95,9 @@ def main() -> None:
     print(f"Matrix A: {pack.matrix_a} (Eigenvalues: {pack.lambda_1}, {pack.lambda_2})")
     print(f"Matrix B: {pack.matrix_b}")
     print(f"Product C = B @ A: {pack.matrix_c}")
-    print(f"Quality: -q{args.quality}  |  Scene Target: {args.scene}")
+    print(f"Quality: -q{args.quality} ({resolution_label})")
+    print(f"Anti-Aliasing: ENABLED (Cairo ANTIALIAS_BEST Subpixel Filter)")
+    print(f"Scene Target: {args.scene}")
     print(f"================================================================")
 
     # Scenes map
@@ -135,6 +146,7 @@ def main() -> None:
             found_files = list((current_dir / "media").glob(f"**/{target_filename}"))
 
         if found_files:
+            found_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
             source_file = found_files[0]
             shutil.copy2(source_file, target_path)
             duration_s = round(time.time() - t0, 1)
@@ -169,6 +181,8 @@ def main() -> None:
         "configuration": pack.to_dict(),
         "generated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
         "quality": args.quality,
+        "resolution": resolution_label,
+        "anti_aliasing": "Cairo ANTIALIAS_BEST (Subpixel Filter)",
         "videos": list(existing_videos.values()),
     }
     with open(manifest_path, "w", encoding="utf-8") as f:
