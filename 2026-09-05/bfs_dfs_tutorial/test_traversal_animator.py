@@ -3,8 +3,11 @@
 
 import os
 from pathlib import Path
+import sys
 import tempfile
 import unittest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import cairo
 
@@ -146,15 +149,25 @@ class TestTraversalAnimator(unittest.TestCase):
         self.assertEqual(len(dfs_steps[-1].visited_order), 15)
 
     def test_target_node_stopping_and_path(self):
-        steps = build_traversal_steps(DEFAULT_GRAPH, "A", "bfs", target_node="E")
-        self.assertEqual(steps[-1].action_type, "FINISHED")
-        self.assertIn("E", steps[-1].visited_order)
-        # Should stop before exploring all 15 nodes
-        self.assertLess(len(steps[-1].visited_order), 15)
-        target_steps = [s for s in steps if s.action_type == "TARGET_REACHED"]
-        self.assertEqual(len(target_steps), 1)
-        self.assertIn("TARGET NODE E REACHED", target_steps[0].title)
-        self.assertIn("Path from A to E", steps[-1].description)
+        # BFS search originating from Node A to target ending Node K
+        bfs_steps = build_traversal_steps(DEFAULT_GRAPH, "A", "bfs", target_node="K")
+        self.assertEqual(bfs_steps[-1].action_type, "FINISHED")
+        self.assertIn("K", bfs_steps[-1].visited_order)
+        self.assertLess(len(bfs_steps[-1].visited_order), 15)
+        bfs_target_steps = [s for s in bfs_steps if s.action_type == "TARGET_REACHED"]
+        self.assertEqual(len(bfs_target_steps), 1)
+        self.assertIn("TARGET NODE K REACHED", bfs_target_steps[0].title)
+        self.assertIn("Path from A to K", bfs_steps[-1].description)
+        # Verify solved active path edges are marked
+        self.assertTrue(len(bfs_target_steps[0].active_edges) > 0)
+
+        # DFS search originating from Node A to target ending Node K
+        dfs_steps = build_traversal_steps(DEFAULT_GRAPH, "A", "dfs", target_node="K")
+        self.assertEqual(dfs_steps[-1].action_type, "FINISHED")
+        self.assertIn("K", dfs_steps[-1].visited_order)
+        dfs_target_steps = [s for s in dfs_steps if s.action_type == "TARGET_REACHED"]
+        self.assertEqual(len(dfs_target_steps), 1)
+        self.assertIn("TARGET NODE K REACHED", dfs_target_steps[0].title)
 
     def test_specific_node_traversal_integration(self):
         from specific_node_traversal import generate_specific_node_traversal
@@ -162,8 +175,8 @@ class TestTraversalAnimator(unittest.TestCase):
             out_dir = Path(tmpdir)
             manifest = generate_specific_node_traversal(
                 graph=DEFAULT_GRAPH,
-                start_node="E",
-                target_node=None,
+                start_node="A",
+                target_node="K",
                 output_dir=out_dir,
                 algorithm="bfs",
                 fps=10,
@@ -176,9 +189,13 @@ class TestTraversalAnimator(unittest.TestCase):
             self.assertTrue((out_dir / "bfs_traversal.mp4").exists())
             self.assertTrue((out_dir / "video_manifest.json").exists())
             self.assertTrue((out_dir / "specific_node_graph.json").exists())
-            self.assertEqual(manifest["start_node"], "E")
+            self.assertEqual(manifest["start_node"], "A")
+            self.assertEqual(manifest["target_node"], "K")
             self.assertEqual(len(manifest["generated_videos"]), 1)
-            self.assertEqual(manifest["generated_videos"][0]["algorithm"], "bfs")
+            vid = manifest["generated_videos"][0]
+            self.assertEqual(vid["algorithm"], "bfs")
+            self.assertEqual(vid["scope"], "target_K")
+            self.assertEqual(vid["target_node"], "K")
 
 
 if __name__ == "__main__":

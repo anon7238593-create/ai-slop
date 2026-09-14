@@ -673,8 +673,8 @@
         <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-heading);">Animation Videos</h3>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
           <select id="traversal-scope-filter" class="select" style="min-width: 180px;">
-            <option value="all">All Scopes (Full & Particular)</option>
-            <option value="particular">🎯 Particular Node Focus</option>
+            <option value="all">All Scopes (Full & Target Search)</option>
+            <option value="particular">🎯 Target Ending Node Search</option>
             <option value="full">🌐 Full Graph (All Nodes)</option>
           </select>
           <select id="traversal-algo-filter" class="select" style="min-width: 160px;">
@@ -1113,28 +1113,31 @@
           size_mb: 0.56
         },
         {
-          title: "Particular Node (E): Comparative Traversal",
+          title: "Target Search (Finding Node K): Comparative Traversal",
           filename: "generated/specific-node/bfs_dfs_comparison.mp4",
-          description: "Synchronized comparison originating specifically from Node E demonstrating differential discovery branches and traversal order.",
-          scope: "node_E",
-          start_node: "E",
-          size_mb: 0.75
+          description: "Synchronized search from Node A seeking destination Node K. Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
+          scope: "target_K",
+          start_node: "A",
+          target_node: "K",
+          size_mb: 0.85
         },
         {
-          title: "Particular Node (E): BFS Animation",
+          title: "Target Search (Finding Node K): BFS Animation",
           filename: "generated/specific-node/bfs_traversal.mp4",
-          description: "Focused wavefront search originating strictly from Node E with queue state tracking and path discovery.",
-          scope: "node_E",
-          start_node: "E",
-          size_mb: 0.83
+          description: "Breadth-first search originating from Node A seeking destination Node K, stopping upon discovery to reveal the optimal shortest path.",
+          scope: "target_K",
+          start_node: "A",
+          target_node: "K",
+          size_mb: 0.90
         },
         {
-          title: "Particular Node (E): DFS Animation",
+          title: "Target Search (Finding Node K): DFS Animation",
           filename: "generated/specific-node/dfs_traversal.mp4",
-          description: "Targeted depth-first search originating from Node E tracking stack state and deep backtracking.",
-          scope: "node_E",
-          start_node: "E",
-          size_mb: 0.83
+          description: "Depth-first search originating from Node A seeking destination Node K, demonstrating deep exploration and backtracking until target reached.",
+          scope: "target_K",
+          start_node: "A",
+          target_node: "K",
+          size_mb: 0.90
         }
       ];
 
@@ -1145,7 +1148,7 @@
         const selectedAlgo = algoFilter ? algoFilter.value : 'all';
 
         const filtered = allVideos.filter(v => {
-          const isParticular = (v.scope && v.scope.startsWith('node_')) || (v.filename && v.filename.includes('specific-node'));
+          const isParticular = (v.scope && (v.scope.startsWith('target_') || v.scope.startsWith('node_') || v.scope === 'particular_node')) || (v.filename && v.filename.includes('specific-node'));
           if (selectedScope === 'particular' && !isParticular) return false;
           if (selectedScope === 'full' && isParticular) return false;
 
@@ -1163,15 +1166,16 @@
         }
 
         filtered.forEach((v) => {
-          const isParticular = (v.scope && v.scope.startsWith('node_')) || (v.filename && v.filename.includes('specific-node'));
-          const startNode = v.start_node || (isParticular ? 'E' : 'A');
+          const isParticular = (v.scope && (v.scope.startsWith('target_') || v.scope.startsWith('node_') || v.scope === 'particular_node')) || (v.filename && v.filename.includes('specific-node'));
+          const targetNode = v.target_node || (isParticular ? 'K' : null);
+          const startNode = v.start_node || 'A';
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
             <div class="card-body">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
                 <span class="count-tag" style="background:${isParticular ? 'rgba(56, 189, 248, 0.15)' : 'rgba(168, 85, 247, 0.15)'}; color:${isParticular ? '#38bdf8' : '#c084fc'}; font-size:0.72rem; font-weight:600; padding:2px 8px; border-radius:9999px;">
-                  ${isParticular ? `🎯 Particular Node (${startNode})` : '🌐 Full Graph (All Nodes)'}
+                  ${isParticular ? `🎯 Finding Ending Node (${targetNode})` : '🌐 Full Graph (All Nodes)'}
                 </span>
                 <span style="font-size:0.75rem; color:var(--text-muted); font-weight:500;">${v.size_mb || 1.0} MB</span>
               </div>

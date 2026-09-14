@@ -55,7 +55,8 @@ jobs:
             --output "$ARTIFACT_DIRECTORY"
           python3 2026-09-05/bfs_dfs_tutorial/specific_node_traversal.py \
             --algorithm all \
-            --node E \
+            --start-node A \
+            --target-node K \
             --graph-json "$ARTIFACT_DIRECTORY/graph.json" \
             --fps 30 \
             --step-duration 1.8 \

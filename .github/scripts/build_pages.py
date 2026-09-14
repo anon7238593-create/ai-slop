@@ -203,10 +203,11 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                     "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
                 })
 
-        # Particular-node videos in generated/specific-node/
+        # Particular target ending node videos in generated/specific-node/
         spec_dir = os.path.join(gen_dir, "specific-node")
         if os.path.exists(spec_dir):
-            spec_start_node = "E"
+            spec_start_node = "A"
+            spec_target_node = "K"
             spec_manifest = os.path.join(spec_dir, "video_manifest.json")
             spec_meta_graph = os.path.join(spec_dir, "specific_node_graph.json")
 
@@ -215,6 +216,7 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                     with open(spec_manifest, "r", encoding="utf-8") as f:
                         s_meta = json.load(f)
                         spec_start_node = s_meta.get("start_node", spec_start_node)
+                        spec_target_node = s_meta.get("target_node", spec_target_node)
                 except Exception:
                     pass
             elif os.path.exists(spec_meta_graph):
@@ -222,27 +224,31 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                     with open(spec_meta_graph, "r", encoding="utf-8") as f:
                         s_meta = json.load(f)
                         spec_start_node = s_meta.get("start_node", spec_start_node)
+                        spec_target_node = s_meta.get("target_node", spec_target_node)
                 except Exception:
                     pass
+
+            target_label = f"Node {spec_target_node}" if spec_target_node else f"Node {spec_start_node}"
+            spec_scope = f"target_{spec_target_node}" if spec_target_node else f"node_{spec_start_node}"
 
             spec_vids = [
                 (
                     "bfs_dfs_comparison.mp4",
-                    f"Particular Node ({spec_start_node}): Comparative Traversal",
-                    f"Synchronized comparison from start Node {spec_start_node} demonstrating differential discovery branches and traversal order.",
-                    f"node_{spec_start_node}",
+                    f"Target Search (Finding {target_label}): Comparative Traversal",
+                    f"Synchronized search from Node {spec_start_node} seeking destination {target_label}. Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
+                    spec_scope,
                 ),
                 (
                     "bfs_traversal.mp4",
-                    f"Particular Node ({spec_start_node}): BFS Animation",
-                    f"Focused wavefront search originating strictly from Node {spec_start_node} with queue state tracking and path discovery.",
-                    f"node_{spec_start_node}",
+                    f"Target Search (Finding {target_label}): BFS Animation",
+                    f"Breadth-first search originating from Node {spec_start_node} seeking destination {target_label}, stopping upon discovery to reveal the optimal shortest path.",
+                    spec_scope,
                 ),
                 (
                     "dfs_traversal.mp4",
-                    f"Particular Node ({spec_start_node}): DFS Animation",
-                    f"Targeted depth-first search originating from Node {spec_start_node} tracking stack state and deep backtracking.",
-                    f"node_{spec_start_node}",
+                    f"Target Search (Finding {target_label}): DFS Animation",
+                    f"Depth-first search originating from Node {spec_start_node} seeking destination {target_label}, demonstrating deep exploration and backtracking until target reached.",
+                    spec_scope,
                 ),
             ]
             for fname, v_title, v_desc, v_scope in spec_vids:
@@ -254,6 +260,7 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                         "description": v_desc,
                         "scope": v_scope,
                         "start_node": spec_start_node,
+                        "target_node": spec_target_node,
                         "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
                     })
 
