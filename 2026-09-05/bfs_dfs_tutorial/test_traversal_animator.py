@@ -228,6 +228,80 @@ class TestTraversalAnimator(unittest.TestCase):
         self.assertIn("K", dist)
         self.assertGreaterEqual(dist["K"], 2)
 
+    def test_short_circuit_bfs_early_termination(self):
+        # In standard mode, K is only detected when dequeued from frontier
+        standard_steps = build_traversal_steps(DEFAULT_GRAPH, "A", "bfs", target_node="K", short_circuit=False)
+        # In short-circuit mode, K is detected eagerly the instant an edge touches K
+        sc_steps = build_traversal_steps(DEFAULT_GRAPH, "A", "bfs", target_node="K", short_circuit=True)
+
+        self.assertLess(len(sc_steps), len(standard_steps))
+        self.assertEqual(sc_steps[-1].action_type, "FINISHED")
+        self.assertIn("SHORT-CIRCUIT SEARCH COMPLETE", sc_steps[-1].title)
+        self.assertIn("K", sc_steps[-1].visited_order)
+
+        target_reached = [s for s in sc_steps if s.action_type == "TARGET_REACHED"]
+        self.assertEqual(len(target_reached), 1)
+        self.assertIn("SHORT-CIRCUITED", target_reached[0].title)
+        self.assertGreater(len(target_reached[0].active_edges), 0)
+
+    def test_short_circuit_dfs_early_termination(self):
+        standard_steps = build_traversal_steps(DEFAULT_GRAPH, "A", "dfs", target_node="K", short_circuit=False)
+        sc_steps = build_traversal_steps(DEFAULT_GRAPH, "A", "dfs", target_node="K", short_circuit=True)
+
+        self.assertLess(len(sc_steps), len(standard_steps))
+        self.assertEqual(sc_steps[-1].action_type, "FINISHED")
+        self.assertIn("SHORT-CIRCUIT SEARCH COMPLETE", sc_steps[-1].title)
+        self.assertIn("K", sc_steps[-1].visited_order)
+
+        target_reached = [s for s in sc_steps if s.action_type == "TARGET_REACHED"]
+        self.assertEqual(len(target_reached), 1)
+        self.assertIn("SHORT-CIRCUITED", target_reached[0].title)
+
+    def test_bfs_dfs_visualizer_short_circuit(self):
+        import bfs_dfs_visualizer as visualizer
+        visualizer.GRAPH = DEFAULT_GRAPH
+        visualizer.START_NODE = "A"
+        visualizer.TARGET_NODE = "K"
+        steps = visualizer.traversal_steps("bfs", short_circuit=True)
+        self.assertGreater(len(steps), 2)
+        # Last step should indicate short-circuit target found
+        last_action = steps[-1][0]
+        self.assertIn("SHORT-CIRCUITED", last_action)
+        self.assertIn("K", last_action)
+
+    def test_short_circuit_traversal_generator_integration(self):
+        from short_circuit_traversal import generate_short_circuit_traversal
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_dir = Path(tmpdir)
+            manifest = generate_short_circuit_traversal(
+                graph=DEFAULT_GRAPH,
+                start_node="A",
+                target_node="K",
+                output_dir=out_dir,
+                algorithm="bfs",
+                fps=10,
+                width=320,
+                height=240,
+                step_duration=0.1,
+                preset="720p",
+                save_frames=True,
+            )
+            self.assertTrue((out_dir / "bfs_traversal.mp4").exists())
+            self.assertTrue((out_dir / "bfs_short_circuit.mp4").exists())
+            self.assertTrue((out_dir / "video_manifest.json").exists())
+            self.assertTrue((out_dir / "short_circuit_graph.json").exists())
+            self.assertEqual(manifest["start_node"], "A")
+            self.assertEqual(manifest["target_node"], "K")
+            self.assertTrue(manifest["short_circuit"])
+            self.assertEqual(len(manifest["generated_videos"]), 1)
+            vid = manifest["generated_videos"][0]
+            self.assertEqual(vid["algorithm"], "bfs")
+            self.assertEqual(vid["scope"], "short_circuit_target_K")
+            self.assertEqual(vid["target_node"], "K")
+            self.assertTrue(vid["short_circuit"])
+            self.assertGreaterEqual(manifest["target_hop_distance"], 2)
+
 
 if __name__ == "__main__":
     unittest.main()
+

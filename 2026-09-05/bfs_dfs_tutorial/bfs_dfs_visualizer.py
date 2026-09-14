@@ -38,6 +38,7 @@ GRAPH: dict[str, list[str]] = {
 }
 START_NODE = "A"
 TARGET_NODE: str | None = None
+SHORT_CIRCUIT: bool = False
 
 COLORS = {
     "unseen": ("#F8FAFC", "#94A3B8", "#334155"),
@@ -157,8 +158,10 @@ def make_dot(
     return "\n".join(lines) + "\n"
 
 
-def traversal_steps(algorithm: str) -> list[tuple[str, str | None, list[str], set[str], set[frozenset[str]]]]:
+def traversal_steps(algorithm: str, short_circuit: bool | None = None) -> list[tuple[str, str | None, list[str], set[str], set[frozenset[str]]]]:
     """Capture visual states immediately before and after each processing action."""
+    if short_circuit is None:
+        short_circuit = SHORT_CIRCUIT
     start_node = START_NODE
     target_node = TARGET_NODE
     frontier: deque[str] | list[str] = deque([start_node]) if algorithm == "bfs" else [start_node]
@@ -168,7 +171,8 @@ def traversal_steps(algorithm: str) -> list[tuple[str, str | None, list[str], se
     parent: dict[str, str] = {}
     init_desc = f"Start at {start_node}"
     if target_node:
-        init_desc += f" (Seeking target node {target_node})"
+        mode_str = " (Eager Short-Circuit)" if short_circuit else ""
+        init_desc += f" (Seeking target node {target_node}{mode_str})"
     steps = [(init_desc, None, list(frontier), set(done), set(discovery_edges))]
 
     while frontier:
@@ -193,20 +197,34 @@ def traversal_steps(algorithm: str) -> list[tuple[str, str | None, list[str], se
             if neighbor not in discovered:
                 discovered.add(neighbor)
                 parent[neighbor] = current
+                discovery_edges.add(frozenset((current, neighbor)))
+
+                if short_circuit and target_node and neighbor == target_node:
+                    done.add(current)
+                    done.add(neighbor)
+                    path = [neighbor]
+                    curr = neighbor
+                    while curr in parent:
+                        curr = parent[curr]
+                        path.append(curr)
+                    path.reverse()
+                    path_str = " → ".join(path)
+                    steps.append((f"TARGET NODE {target_node} FOUND (SHORT-CIRCUITED)! Path ({len(path)-1} hops): {path_str}", neighbor, list(frontier), set(done), set(discovery_edges)))
+                    return steps
+
                 frontier.append(neighbor)
                 new_nodes.append(neighbor)
-                discovery_edges.add(frozenset((current, neighbor)))
         done.add(current)
         detail = f"Discover {', '.join(new_nodes)} from {current}" if new_nodes else f"No new neighbors from {current}"
         steps.append((detail, None, list(frontier), set(done), set(discovery_edges)))
     return steps
 
 
-def render(algorithm: str, output_root: Path) -> None:
+def render(algorithm: str, output_root: Path, short_circuit: bool | None = None) -> None:
     """Write numbered .dot files and matching PDFs for an algorithm."""
     target = output_root / algorithm
     target.mkdir(parents=True, exist_ok=True)
-    steps = traversal_steps(algorithm)
+    steps = traversal_steps(algorithm, short_circuit=short_circuit)
     for index, (action, current, frontier, done, edges) in enumerate(steps, start=1):
         dot_path = target / f"step_{index:02d}.dot"
         pdf_path = dot_path.with_suffix(".pdf")
@@ -216,7 +234,7 @@ def render(algorithm: str, output_root: Path) -> None:
 
 
 def main() -> None:
-    global GRAPH, START_NODE, TARGET_NODE
+    global GRAPH, START_NODE, TARGET_NODE, SHORT_CIRCUIT
     parser = argparse.ArgumentParser(description="Create BFS/DFS Graphviz walkthrough PDFs.")
     parser.add_argument("--algorithm", choices=("bfs", "dfs", "both"), default="both")
     parser.add_argument("--output", type=Path, default=Path("output"), help="directory for generated files")
@@ -226,6 +244,11 @@ def main() -> None:
     parser.add_argument("--seed", type=int, help="seed for reproducible random graph generation")
     parser.add_argument("--start-node", help="node from which to start the traversal")
     parser.add_argument("--target-node", help="optional destination ending node to search for and stop upon reaching")
+    parser.add_argument(
+        "--short-circuit",
+        action="store_true",
+        help="halt traversal eagerly on edge discovery of target node without waiting for queue/stack pop",
+    )
     args = parser.parse_args()
     if not shutil.which("dot"):
         raise SystemExit("Graphviz is required. Install it, then ensure the 'dot' command is on PATH.")
@@ -244,12 +267,14 @@ def main() -> None:
         if args.target_node not in GRAPH:
             raise SystemExit(f"Unknown target node {args.target_node!r}. Choose one of: {', '.join(GRAPH)}")
         TARGET_NODE = args.target_node
+    SHORT_CIRCUIT = args.short_circuit
 
     args.output.mkdir(parents=True, exist_ok=True)
     metadata = {
         "graph": GRAPH,
         "start_node": START_NODE,
         "target_node": TARGET_NODE,
+        "short_circuit": SHORT_CIRCUIT,
         "random_seed": args.seed,
         "edge_probability": args.edge_probability if args.random_graph else None,
         "nodes": len(GRAPH),
@@ -257,7 +282,7 @@ def main() -> None:
     }
     (args.output / "graph.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
     for algorithm in (("bfs", "dfs") if args.algorithm == "both" else (args.algorithm,)):
-        render(algorithm, args.output)
+        render(algorithm, args.output, short_circuit=SHORT_CIRCUIT)
 
 
 if __name__ == "__main__":

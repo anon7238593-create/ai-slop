@@ -289,6 +289,7 @@ def build_traversal_steps(
     algorithm: str,
     target_node: Optional[str] = None,
     frames_per_step: int = 54,
+    short_circuit: bool = False,
 ) -> list[TraversalStep]:
     """Generate fine-grained traversal events with animated transitions at clear pedagogical pacing."""
     steps: list[TraversalStep] = []
@@ -307,7 +308,8 @@ def build_traversal_steps(
     # Step 0: Initialization
     init_desc = f"Push start node {start_node} to {ds_name}. Node marked Frontier."
     if target_node:
-        init_desc += f" Search target: Node {target_node}."
+        mode_label = " (Eager Short-Circuit)" if short_circuit else ""
+        init_desc += f" Search target: Node {target_node}{mode_label}."
     steps.append(
         TraversalStep(
             step_number=step_counter,
@@ -419,25 +421,97 @@ def build_traversal_steps(
             if is_unvisited:
                 discovered.add(neighbor)
                 parent[neighbor] = current
-                frontier.append(neighbor)
                 tree_edges.add(edge)
 
-                steps.append(
-                    TraversalStep(
-                        step_number=step_counter,
-                        action_type="DISCOVER",
-                        title="DISCOVER NEIGHBOR",
-                        description=f"Explore edge ({current} -> {neighbor}). New node discovered! Added to {ds_name}.",
-                        active_node=current,
-                        target_neighbor=neighbor,
-                        frontier=frontier,
-                        visited_nodes=visited_nodes,
-                        visited_order=visited_order,
-                        tree_edges=tree_edges,
-                        active_edges={edge},
-                        frame_duration=frames_per_step,
+                if short_circuit and target_node and neighbor == target_node:
+                    steps.append(
+                        TraversalStep(
+                            step_number=step_counter,
+                            action_type="DISCOVER",
+                            title="TARGET NODE DISCOVERED!",
+                            description=f"Explore edge ({current} -> {neighbor}). Target Node {target_node} reached immediately on discovery edge!",
+                            active_node=current,
+                            target_neighbor=neighbor,
+                            frontier=frontier,
+                            visited_nodes=visited_nodes,
+                            visited_order=visited_order,
+                            tree_edges=tree_edges,
+                            active_edges={edge},
+                            frame_duration=frames_per_step,
+                        )
                     )
-                )
+
+                    step_counter += 1
+                    visited_nodes.add(current)
+                    if current not in visited_order:
+                        visited_order.append(current)
+                    visited_nodes.add(neighbor)
+                    if neighbor not in visited_order:
+                        visited_order.append(neighbor)
+
+                    # Reconstruct path from start_node to target_node
+                    path = [neighbor]
+                    curr = neighbor
+                    while curr in parent:
+                        curr = parent[curr]
+                        path.append(curr)
+                    path.reverse()
+                    path_edges = {frozenset((path[i], path[i + 1])) for i in range(len(path) - 1)}
+
+                    path_str = " -> ".join(path)
+                    steps.append(
+                        TraversalStep(
+                            step_number=step_counter,
+                            action_type="TARGET_REACHED",
+                            title=f"TARGET NODE {target_node} FOUND (SHORT-CIRCUITED)!",
+                            description=f"Destination {target_node} discovered! Short-circuiting traversal immediately without waiting in {ds_name}. {'Shortest path' if is_bfs else 'Traversal path'} ({len(path)-1} hops): {path_str}.",
+                            active_node=neighbor,
+                            target_neighbor=None,
+                            frontier=frontier,
+                            visited_nodes=visited_nodes,
+                            visited_order=visited_order,
+                            tree_edges=tree_edges | path_edges,
+                            active_edges=path_edges,
+                            frame_duration=max(25, int(frames_per_step * 2.2)),
+                        )
+                    )
+
+                    step_counter += 1
+                    steps.append(
+                        TraversalStep(
+                            step_number=step_counter,
+                            action_type="FINISHED",
+                            title="SHORT-CIRCUIT SEARCH COMPLETE",
+                            description=f"Path from {start_node} to {target_node} successfully resolved eagerly ({len(path)-1} hops). Search complete!",
+                            active_node=None,
+                            target_neighbor=None,
+                            frontier=frontier,
+                            visited_nodes=visited_nodes,
+                            visited_order=visited_order,
+                            tree_edges=tree_edges | path_edges,
+                            active_edges=path_edges,
+                            frame_duration=max(30, int(frames_per_step * 2.5)),
+                        )
+                    )
+                    return steps
+                else:
+                    frontier.append(neighbor)
+                    steps.append(
+                        TraversalStep(
+                            step_number=step_counter,
+                            action_type="DISCOVER",
+                            title="DISCOVER NEIGHBOR",
+                            description=f"Explore edge ({current} -> {neighbor}). New node discovered! Added to {ds_name}.",
+                            active_node=current,
+                            target_neighbor=neighbor,
+                            frontier=frontier,
+                            visited_nodes=visited_nodes,
+                            visited_order=visited_order,
+                            tree_edges=tree_edges,
+                            active_edges={edge},
+                            frame_duration=frames_per_step,
+                        )
+                    )
             else:
                 steps.append(
                     TraversalStep(
@@ -621,6 +695,7 @@ class TraversalVideoRenderer:
         height: int = 1440,
         start_node: str = "A",
         target_node: Optional[str] = None,
+        short_circuit: bool = False,
     ):
         self.graph = graph
         self.layout = layout
@@ -629,6 +704,7 @@ class TraversalVideoRenderer:
         self.height = height
         self.start_node = start_node
         self.target_node = target_node
+        self.short_circuit = short_circuit
         self.scale = max(0.2, min(width / 1920.0, height / 1080.0))
 
         # Precompute unique edges
@@ -967,7 +1043,10 @@ class TraversalVideoRenderer:
         ctx.set_source_rgb(0.95, 0.98, 1.0)
         ctx.move_to(inner_x, curr_y + 18.0 * self.scale)
         if getattr(self, "target_node", None):
-            header_title = f"{alg_name} [Goal: Find Node {self.target_node}]"
+            if getattr(self, "short_circuit", False):
+                header_title = f"{alg_name} [Goal: Find Node {self.target_node} (Short-Circuit)]"
+            else:
+                header_title = f"{alg_name} [Goal: Find Node {self.target_node}]"
         elif self.start_node != "A":
             header_title = f"{alg_name} [Start: Node {self.start_node}]"
         else:
@@ -977,7 +1056,10 @@ class TraversalVideoRenderer:
         # Complexity & Scope Pills
         curr_y += 32.0 * self.scale
         if getattr(self, "target_node", None):
-            comp_text = f"Origin: Node {self.start_node}  →  Target: Node {self.target_node}  |  O(V + E)"
+            if getattr(self, "short_circuit", False):
+                comp_text = f"Origin: Node {self.start_node}  →  Target: Node {self.target_node}  |  Eager Short-Circuit"
+            else:
+                comp_text = f"Origin: Node {self.start_node}  →  Target: Node {self.target_node}  |  O(V + E)"
         elif self.start_node != "A":
             comp_text = f"Origin: Node {self.start_node}   |   Time: O(V + E)   |   Space: O(V)"
         else:
@@ -1489,6 +1571,7 @@ class ComparativeTraversalRenderer:
         height: int = 1440,
         start_node: str = "A",
         target_node: Optional[str] = None,
+        short_circuit: bool = False,
     ):
         self.graph = graph
         self.layout = layout
@@ -1498,6 +1581,7 @@ class ComparativeTraversalRenderer:
         self.height = height
         self.start_node = start_node
         self.target_node = target_node
+        self.short_circuit = short_circuit
         self.scale = max(0.2, min(width / 1920.0, height / 1080.0))
 
         # Compute dual layouts: one for left half, one for right half
@@ -1516,8 +1600,8 @@ class ComparativeTraversalRenderer:
         self.bfs_layout = layout_graph(graph, box_x=left_x + 20.0 * self.scale, box_y=panel_y + 55.0 * self.scale, box_w=box_w, box_h=box_h, margin=55.0 * self.scale)
         self.dfs_layout = layout_graph(graph, box_x=right_x + 20.0 * self.scale, box_y=panel_y + 55.0 * self.scale, box_w=box_w, box_h=box_h, margin=55.0 * self.scale)
 
-        self.bfs_renderer = TraversalVideoRenderer(graph, self.bfs_layout, "bfs", width=int(panel_w), height=height, start_node=start_node, target_node=target_node)
-        self.dfs_renderer = TraversalVideoRenderer(graph, self.dfs_layout, "dfs", width=int(panel_w), height=height, start_node=start_node, target_node=target_node)
+        self.bfs_renderer = TraversalVideoRenderer(graph, self.bfs_layout, "bfs", width=int(panel_w), height=height, start_node=start_node, target_node=target_node, short_circuit=short_circuit)
+        self.dfs_renderer = TraversalVideoRenderer(graph, self.dfs_layout, "dfs", width=int(panel_w), height=height, start_node=start_node, target_node=target_node, short_circuit=short_circuit)
 
     def render_frame(
         self,
@@ -1553,8 +1637,12 @@ class ComparativeTraversalRenderer:
         ctx.stroke()
 
         if getattr(self, "target_node", None):
-            top_title = f"TARGET NODE SEARCH (FINDING NODE {self.target_node}): BFS vs DFS"
-            top_subtitle = f"Origin: Node {self.start_node}  →  Destination: Node {self.target_node} | BFS Shortest Path vs DFS Branch Diving"
+            if getattr(self, "short_circuit", False):
+                top_title = f"TARGET SEARCH (SHORT-CIRCUIT FINDING NODE {self.target_node}): BFS vs DFS"
+                top_subtitle = f"Origin: Node {self.start_node}  →  Destination: Node {self.target_node} | Eager Short-Circuit on Edge Discovery"
+            else:
+                top_title = f"TARGET NODE SEARCH (FINDING NODE {self.target_node}): BFS vs DFS"
+                top_subtitle = f"Origin: Node {self.start_node}  →  Destination: Node {self.target_node} | BFS Shortest Path vs DFS Branch Diving"
         elif self.start_node != "A":
             top_title = f"GRAPH TRAVERSAL COMPARISON (START: NODE {self.start_node}): BFS vs DFS"
             top_subtitle = f"Origin: Node {self.start_node} | Wavefront Expansion (Queue) vs Deep Branch Diving (Stack)"
@@ -1711,6 +1799,7 @@ def render_standalone_video(
     output_path: Path,
     start_node: str = "A",
     target_node: Optional[str] = None,
+    short_circuit: bool = False,
     fps: int = 30,
     width: int = 2560,
     height: int = 1440,
@@ -1724,8 +1813,8 @@ def render_standalone_video(
         raise RuntimeError("FFmpeg executable not found. Please install ffmpeg or specify --ffmpeg-bin.")
 
     frames_per_step = max(6, int(fps * step_duration))
-    steps = build_traversal_steps(graph, start_node, algorithm, target_node=target_node, frames_per_step=frames_per_step)
-    renderer = TraversalVideoRenderer(graph, layout, algorithm, width=width, height=height, start_node=start_node, target_node=target_node)
+    steps = build_traversal_steps(graph, start_node, algorithm, target_node=target_node, frames_per_step=frames_per_step, short_circuit=short_circuit)
+    renderer = TraversalVideoRenderer(graph, layout, algorithm, width=width, height=height, start_node=start_node, target_node=target_node, short_circuit=short_circuit)
 
     init_hold_frames = max(15, int(fps * 2.0))
     final_hold_frames = max(20, int(fps * 3.5))
@@ -1824,6 +1913,7 @@ def render_comparative_video(
     output_path: Path,
     start_node: str = "A",
     target_node: Optional[str] = None,
+    short_circuit: bool = False,
     fps: int = 30,
     width: int = 2560,
     height: int = 1440,
@@ -1837,10 +1927,10 @@ def render_comparative_video(
         raise RuntimeError("FFmpeg executable not found. Please install ffmpeg or specify --ffmpeg-bin.")
 
     frames_per_step = max(6, int(fps * step_duration))
-    bfs_steps = build_traversal_steps(graph, start_node, "bfs", target_node=target_node, frames_per_step=frames_per_step)
-    dfs_steps = build_traversal_steps(graph, start_node, "dfs", target_node=target_node, frames_per_step=frames_per_step)
+    bfs_steps = build_traversal_steps(graph, start_node, "bfs", target_node=target_node, frames_per_step=frames_per_step, short_circuit=short_circuit)
+    dfs_steps = build_traversal_steps(graph, start_node, "dfs", target_node=target_node, frames_per_step=frames_per_step, short_circuit=short_circuit)
 
-    renderer = ComparativeTraversalRenderer(graph, layout, bfs_steps, dfs_steps, width=width, height=height, start_node=start_node, target_node=target_node)
+    renderer = ComparativeTraversalRenderer(graph, layout, bfs_steps, dfs_steps, width=width, height=height, start_node=start_node, target_node=target_node, short_circuit=short_circuit)
 
     # Align step sequences by step progress
     max_steps = max(len(bfs_steps), len(dfs_steps))
@@ -1967,6 +2057,11 @@ def main() -> None:
     parser.add_argument("--step-duration", type=float, help="duration in seconds for each traversal action step (overrides --speed)")
     parser.add_argument("--ffmpeg-bin", help="path to ffmpeg binary executable")
     parser.add_argument("--save-frames", action="store_true", help="export sample preview PNG frames")
+    parser.add_argument(
+        "--short-circuit",
+        action="store_true",
+        help="halt traversal eagerly on edge discovery of target node without waiting for queue/stack pop",
+    )
 
     args = parser.parse_args()
 
@@ -2031,15 +2126,24 @@ def main() -> None:
     layout = layout_graph(graph, box_x=box_x, box_y=box_y, box_w=box_w, box_h=box_h, margin=75.0 * scale, seed=seed)
 
     # Descriptive titles based on scope
+    short_circuit = args.short_circuit
     is_particular_node = (start_node != "A") or (target_node is not None)
-    scope_str = "particular_node" if is_particular_node else "all_nodes"
-    scope_prefix = f"Particular Node ({start_node}): " if is_particular_node else ""
+    if short_circuit:
+        scope_str = f"short_circuit_target_{target_node}" if target_node else "short_circuit"
+        scope_prefix = f"Short-Circuit ({target_node}): " if target_node else "Short-Circuit: "
+    elif is_particular_node:
+        scope_str = "particular_node"
+        scope_prefix = f"Particular Node ({start_node}): "
+    else:
+        scope_str = "all_nodes"
+        scope_prefix = ""
 
     # Write manifest / metadata
     manifest = {
         "graph": graph,
         "start_node": start_node,
         "target_node": target_node,
+        "short_circuit": short_circuit,
         "seed": seed,
         "nodes": len(graph),
         "edges": sum(len(neighbors) for neighbors in graph.values()) // 2,
@@ -2064,6 +2168,7 @@ def main() -> None:
             out_bfs,
             start_node=start_node,
             target_node=target_node,
+            short_circuit=short_circuit,
             fps=args.fps,
             width=video_width,
             height=video_height,
@@ -2078,6 +2183,7 @@ def main() -> None:
             "data_structure": "FIFO Queue",
             "start_node": start_node,
             "target_node": target_node,
+            "short_circuit": short_circuit,
             "scope": scope_str,
             "resolution": f"{video_width}x{video_height}",
             "step_duration": step_duration,
@@ -2093,6 +2199,7 @@ def main() -> None:
             out_dfs,
             start_node=start_node,
             target_node=target_node,
+            short_circuit=short_circuit,
             fps=args.fps,
             width=video_width,
             height=video_height,
@@ -2107,6 +2214,7 @@ def main() -> None:
             "data_structure": "LIFO Stack",
             "start_node": start_node,
             "target_node": target_node,
+            "short_circuit": short_circuit,
             "scope": scope_str,
             "resolution": f"{video_width}x{video_height}",
             "step_duration": step_duration,
@@ -2121,6 +2229,7 @@ def main() -> None:
             out_comp,
             start_node=start_node,
             target_node=target_node,
+            short_circuit=short_circuit,
             fps=args.fps,
             width=video_width,
             height=video_height,
@@ -2135,6 +2244,7 @@ def main() -> None:
             "data_structure": "Queue vs Stack",
             "start_node": start_node,
             "target_node": target_node,
+            "short_circuit": short_circuit,
             "scope": scope_str,
             "resolution": f"{video_width}x{video_height}",
             "step_duration": step_duration,

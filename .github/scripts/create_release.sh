@@ -166,6 +166,27 @@ if [ -d "$ARTIFACT_DIRECTORY/specific-node" ]; then
   done < <(find "$ARTIFACT_DIRECTORY/specific-node" -maxdepth 1 -type f | sort)
 fi
 
+if [ -d "$ARTIFACT_DIRECTORY/short-circuit" ]; then
+  STAGE_SUBDIR="${TEMP_ARCHIVE_DIR}/staged_short_circuit"
+  mkdir -p "$STAGE_SUBDIR"
+  while IFS= read -r f; do
+    [ -f "$f" ] || continue
+    bname="$(basename "$f")"
+    case "$bname" in
+      *.pdf|*.mp4|*.json|*.png)
+        if [[ "$bname" == short_circuit_* ]]; then
+          staged_file="$STAGE_SUBDIR/$bname"
+        else
+          staged_file="$STAGE_SUBDIR/short_circuit_$bname"
+        fi
+        cp "$f" "$staged_file"
+        UPLOAD_ASSETS+=("$staged_file")
+        echo "    - $(basename "$staged_file") ($(du -h "$staged_file" | cut -f1))"
+        ;;
+    esac
+  done < <(find "$ARTIFACT_DIRECTORY/short-circuit" -maxdepth 1 -type f | sort)
+fi
+
 echo "==> Total assets prepared for release: ${#UPLOAD_ASSETS[@]}"
 
 # 4. Create the GitHub Release

@@ -672,9 +672,10 @@
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem;">
         <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-heading);">Animation Videos</h3>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <select id="traversal-scope-filter" class="select" style="min-width: 180px;">
-            <option value="all">All Scopes (Full & Target Search)</option>
-            <option value="particular">🎯 Target Ending Node Search</option>
+          <select id="traversal-scope-filter" class="select" style="min-width: 190px;">
+            <option value="all">All Modes & Scopes</option>
+            <option value="short_circuit">⚡ Eager Short-Circuit Search</option>
+            <option value="particular">🎯 Target Ending Node Search (Standard)</option>
             <option value="full">🌐 Full Graph (All Nodes)</option>
           </select>
           <select id="traversal-algo-filter" class="select" style="min-width: 160px;">
@@ -1138,6 +1139,36 @@
           start_node: "A",
           target_node: "K",
           size_mb: 0.90
+        },
+        {
+          title: "Short-Circuit Target Search (Finding Node K): Comparative Traversal",
+          filename: "generated/short-circuit/bfs_dfs_comparison.mp4",
+          description: "Synchronized eager search from Node A seeking destination Node K. Halts immediately upon target discovery on edge inspection.",
+          scope: "short_circuit_target_K",
+          short_circuit: true,
+          start_node: "A",
+          target_node: "K",
+          size_mb: 0.85
+        },
+        {
+          title: "Short-Circuit Target Search (Finding Node K): BFS Animation",
+          filename: "generated/short-circuit/bfs_traversal.mp4",
+          description: "Breadth-first search from Node A seeking destination Node K, halting eagerly upon discovering target along edge without waiting in FIFO Queue.",
+          scope: "short_circuit_target_K",
+          short_circuit: true,
+          start_node: "A",
+          target_node: "K",
+          size_mb: 0.90
+        },
+        {
+          title: "Short-Circuit Target Search (Finding Node K): DFS Animation",
+          filename: "generated/short-circuit/dfs_traversal.mp4",
+          description: "Depth-first search from Node A seeking destination Node K, halting eagerly upon discovering target along edge without waiting in LIFO Stack.",
+          scope: "short_circuit_target_K",
+          short_circuit: true,
+          start_node: "A",
+          target_node: "K",
+          size_mb: 0.90
         }
       ];
 
@@ -1148,9 +1179,12 @@
         const selectedAlgo = algoFilter ? algoFilter.value : 'all';
 
         const filtered = allVideos.filter(v => {
-          const isParticular = (v.scope && (v.scope.startsWith('target_') || v.scope.startsWith('node_') || v.scope === 'particular_node')) || (v.filename && v.filename.includes('specific-node'));
+          const isShortCircuit = (v.short_circuit === true) || (v.scope && v.scope.includes('short_circuit')) || (v.filename && v.filename.includes('short-circuit'));
+          const isParticular = !isShortCircuit && ((v.scope && (v.scope.startsWith('target_') || v.scope.startsWith('node_') || v.scope === 'particular_node')) || (v.filename && v.filename.includes('specific-node')));
+
+          if (selectedScope === 'short_circuit' && !isShortCircuit) return false;
           if (selectedScope === 'particular' && !isParticular) return false;
-          if (selectedScope === 'full' && isParticular) return false;
+          if (selectedScope === 'full' && (isShortCircuit || isParticular)) return false;
 
           const fname = (v.filename || '').toLowerCase();
           if (selectedAlgo === 'comparison' && !fname.includes('comparison')) return false;
@@ -1166,16 +1200,32 @@
         }
 
         filtered.forEach((v) => {
-          const isParticular = (v.scope && (v.scope.startsWith('target_') || v.scope.startsWith('node_') || v.scope === 'particular_node')) || (v.filename && v.filename.includes('specific-node'));
-          const targetNode = v.target_node || (isParticular ? 'K' : null);
+          const isShortCircuit = (v.short_circuit === true) || (v.scope && v.scope.includes('short_circuit')) || (v.filename && v.filename.includes('short-circuit'));
+          const isParticular = !isShortCircuit && ((v.scope && (v.scope.startsWith('target_') || v.scope.startsWith('node_') || v.scope === 'particular_node')) || (v.filename && v.filename.includes('specific-node')));
+          const targetNode = v.target_node || (isShortCircuit || isParticular ? 'K' : null);
           const startNode = v.start_node || 'A';
+
+          let tagLabel = '🌐 Full Graph (All Nodes)';
+          let tagBg = 'rgba(168, 85, 247, 0.15)';
+          let tagColor = '#c084fc';
+
+          if (isShortCircuit) {
+            tagLabel = `⚡ Short-Circuit (${targetNode})`;
+            tagBg = 'rgba(234, 179, 8, 0.15)';
+            tagColor = '#facc15';
+          } else if (isParticular) {
+            tagLabel = `🎯 Target Search (${targetNode})`;
+            tagBg = 'rgba(56, 189, 248, 0.15)';
+            tagColor = '#38bdf8';
+          }
+
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
             <div class="card-body">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
-                <span class="count-tag" style="background:${isParticular ? 'rgba(56, 189, 248, 0.15)' : 'rgba(168, 85, 247, 0.15)'}; color:${isParticular ? '#38bdf8' : '#c084fc'}; font-size:0.72rem; font-weight:600; padding:2px 8px; border-radius:9999px;">
-                  ${isParticular ? `🎯 Finding Ending Node (${targetNode})` : '🌐 Full Graph (All Nodes)'}
+                <span class="count-tag" style="background:${tagBg}; color:${tagColor}; font-size:0.72rem; font-weight:600; padding:2px 8px; border-radius:9999px;">
+                  ${tagLabel}
                 </span>
                 <span style="font-size:0.75rem; color:var(--text-muted); font-weight:500;">${v.size_mb || 1.0} MB</span>
               </div>

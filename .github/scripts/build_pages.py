@@ -167,6 +167,15 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                 "size_kb": round(os.path.getsize(spec_pdf) / 1024, 1),
             })
 
+        sc_pdf = os.path.join(gen_dir, "short-circuit", "short_circuit_bfs_dfs_walkthrough.pdf")
+        if os.path.exists(sc_pdf):
+            pdf_items.append({
+                "title": "Short-Circuit Target Search Walkthrough",
+                "filename": "generated/short-circuit/short_circuit_bfs_dfs_walkthrough.pdf",
+                "description": "Eager short-circuit step-by-step exploration halting the instant the destination node is discovered along an edge.",
+                "size_kb": round(os.path.getsize(sc_pdf) / 1024, 1),
+            })
+
         # 4b. Traversal Videos (All Nodes & Particular Node)
         video_items = []
 
@@ -266,6 +275,73 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                         "start_node": spec_start_node,
                         "target_node": spec_target_node,
                         "target_hop_distance": spec_target_dist,
+                        "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
+                    })
+
+        # Eager short-circuit target ending node videos in generated/short-circuit/
+        sc_dir = os.path.join(gen_dir, "short-circuit")
+        if os.path.exists(sc_dir):
+            sc_start_node = "A"
+            sc_target_node = "K"
+            sc_manifest = os.path.join(sc_dir, "video_manifest.json")
+            sc_meta_graph = os.path.join(sc_dir, "short_circuit_graph.json")
+
+            sc_target_dist = None
+            if os.path.exists(sc_manifest):
+                try:
+                    with open(sc_manifest, "r", encoding="utf-8") as f:
+                        s_meta = json.load(f)
+                        sc_start_node = s_meta.get("start_node", sc_start_node)
+                        sc_target_node = s_meta.get("target_node", sc_target_node)
+                        sc_target_dist = s_meta.get("target_hop_distance", None)
+                except Exception:
+                    pass
+            elif os.path.exists(sc_meta_graph):
+                try:
+                    with open(sc_meta_graph, "r", encoding="utf-8") as f:
+                        s_meta = json.load(f)
+                        sc_start_node = s_meta.get("start_node", sc_start_node)
+                        sc_target_node = s_meta.get("target_node", sc_target_node)
+                        sc_target_dist = s_meta.get("target_hop_distance", None)
+                except Exception:
+                    pass
+
+            target_label = f"Node {sc_target_node}" if sc_target_node else f"Node {sc_start_node}"
+            sc_scope = f"short_circuit_target_{sc_target_node}" if sc_target_node else "short_circuit"
+            dist_desc = f" ({sc_target_dist} hops away)" if sc_target_dist else ""
+
+            sc_vids = [
+                (
+                    "bfs_dfs_comparison.mp4",
+                    f"Short-Circuit Target Search (Finding {target_label}): Comparative Traversal",
+                    f"Synchronized eager search from Node {sc_start_node} seeking destination {target_label}{dist_desc}. Halts immediately upon target discovery on edge inspection.",
+                    sc_scope,
+                ),
+                (
+                    "bfs_traversal.mp4",
+                    f"Short-Circuit Target Search (Finding {target_label}): BFS Animation",
+                    f"Breadth-first search originating from Node {sc_start_node} seeking destination {target_label}{dist_desc}, halting eagerly upon discovering target along edge without waiting in FIFO Queue.",
+                    sc_scope,
+                ),
+                (
+                    "dfs_traversal.mp4",
+                    f"Short-Circuit Target Search (Finding {target_label}): DFS Animation",
+                    f"Depth-first search originating from Node {sc_start_node} seeking destination {target_label}{dist_desc}, halting eagerly upon discovering target along edge without waiting in LIFO Stack.",
+                    sc_scope,
+                ),
+            ]
+            for fname, v_title, v_desc, v_scope in sc_vids:
+                vpath = os.path.join(sc_dir, fname)
+                if os.path.exists(vpath):
+                    video_items.append({
+                        "title": v_title,
+                        "filename": f"generated/short-circuit/{fname}",
+                        "description": v_desc,
+                        "scope": v_scope,
+                        "short_circuit": True,
+                        "start_node": sc_start_node,
+                        "target_node": sc_target_node,
+                        "target_hop_distance": sc_target_dist,
                         "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
                     })
 

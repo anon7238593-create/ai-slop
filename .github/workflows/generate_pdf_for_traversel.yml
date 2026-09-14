@@ -65,11 +65,27 @@ jobs:
             --step-duration 1.8 \
             --save-frames \
             --output "$ARTIFACT_DIRECTORY/specific-node"
-          mkdir -p "$ARTIFACT_DIRECTORY/specific-node/code"
+          python3 2026-09-05/bfs_dfs_tutorial/short_circuit_traversal.py \
+            --algorithm all \
+            --start-node A \
+            --target-node K \
+            --min-distance 2 \
+            --graph-json "$ARTIFACT_DIRECTORY/graph.json" \
+            --fps 30 \
+            --step-duration 1.8 \
+            --save-frames \
+            --output "$ARTIFACT_DIRECTORY/short-circuit"
+          mkdir -p "$ARTIFACT_DIRECTORY/specific-node/code" "$ARTIFACT_DIRECTORY/short-circuit/code"
           cp 2026-09-05/bfs_dfs_tutorial/bfs_dfs_visualizer.py \
             2026-09-05/bfs_dfs_tutorial/specific_node_traversal.py \
+            2026-09-05/bfs_dfs_tutorial/short_circuit_traversal.py \
             2026-09-05/bfs_dfs_tutorial/traversal_animator.py \
             "$ARTIFACT_DIRECTORY/specific-node/code/"
+          cp 2026-09-05/bfs_dfs_tutorial/bfs_dfs_visualizer.py \
+            2026-09-05/bfs_dfs_tutorial/specific_node_traversal.py \
+            2026-09-05/bfs_dfs_tutorial/short_circuit_traversal.py \
+            2026-09-05/bfs_dfs_tutorial/traversal_animator.py \
+            "$ARTIFACT_DIRECTORY/short-circuit/code/"
 
       - name: Combine all traversal steps into one PDF
         env:
@@ -83,6 +99,10 @@ jobs:
             "$ARTIFACT_DIRECTORY"/specific-node/bfs/step_*.pdf \
             "$ARTIFACT_DIRECTORY"/specific-node/dfs/step_*.pdf \
             "$ARTIFACT_DIRECTORY"/specific-node/specific_node_bfs_dfs_walkthrough.pdf
+          pdfunite \
+            "$ARTIFACT_DIRECTORY"/short-circuit/bfs/step_*.pdf \
+            "$ARTIFACT_DIRECTORY"/short-circuit/dfs/step_*.pdf \
+            "$ARTIFACT_DIRECTORY"/short-circuit/short_circuit_bfs_dfs_walkthrough.pdf
 
       - name: Create GitHub Release for traversal PDFs and videos
         env:
