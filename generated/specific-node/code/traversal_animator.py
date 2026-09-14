@@ -731,7 +731,27 @@ class TraversalVideoRenderer:
                 ctx.line_to(p2[0], p2[1])
                 ctx.stroke()
 
-        # 3. Active Exploration Signal Particle
+        # 3. Solved Target Path (when TARGET_REACHED or FINISHED)
+        if step.action_type in ("TARGET_REACHED", "FINISHED") and step.active_edges:
+            for u, v in self.unique_edges:
+                if frozenset((u, v)) in step.active_edges:
+                    p1 = self.layout[u]
+                    p2 = self.layout[v]
+                    # Glowing golden path halo
+                    ctx.set_source_rgba(0.98, 0.78, 0.15, 0.85)
+                    ctx.set_line_width(max(4.5, 11.0 * self.scale))
+                    ctx.move_to(p1[0], p1[1])
+                    ctx.line_to(p2[0], p2[1])
+                    ctx.stroke()
+
+                    # Bright golden core line
+                    ctx.set_source_rgba(1.0, 0.95, 0.35, 1.0)
+                    ctx.set_line_width(max(2.5, 6.0 * self.scale))
+                    ctx.move_to(p1[0], p1[1])
+                    ctx.line_to(p2[0], p2[1])
+                    ctx.stroke()
+
+        # 4. Active Exploration Signal Particle
         if step.action_type in ("DISCOVER", "SKIP") and step.active_node and step.target_neighbor:
             u = step.active_node
             v = step.target_neighbor
@@ -836,26 +856,60 @@ class TraversalVideoRenderer:
                     color=(1.0, 1.0, 1.0),
                 )
 
-            # Start Node Outer Accent Ring
+            # Start Node Indicator and Badge
             if node == getattr(self, "start_node", None):
                 ctx.new_sub_path()
                 ctx.arc(nx, ny, r + 6.0 * self.scale, 0.0, 2.0 * math.pi)
-                ctx.set_source_rgba(0.02, 0.71, 0.83, 0.7)
+                ctx.set_source_rgba(0.02, 0.71, 0.83, 0.8)
                 ctx.set_line_width(max(1.5, 2.5 * self.scale))
                 ctx.stroke()
 
-            # Target Node Concentric Reticle
+                # START tag pill above start node when target_node is active
+                if getattr(self, "target_node", None):
+                    tag_w = 40.0 * self.scale
+                    tag_h = 16.0 * self.scale
+                    tag_x = nx - tag_w / 2.0
+                    tag_y = ny - r - 22.0 * self.scale
+                    draw_rounded_rect(ctx, tag_x, tag_y, tag_w, tag_h, 4.0 * self.scale)
+                    ctx.set_source_rgba(0.02, 0.71, 0.83, 0.9)
+                    ctx.fill()
+                    draw_text_centered(ctx, "START", nx, tag_y + tag_h / 2.0, font_size=max(7.5, 9.5 * self.scale), font_bold=True, color=(1.0, 1.0, 1.0))
+
+            # Target Node Concentric Reticle, Crosshairs & Badge
             if node == getattr(self, "target_node", None):
+                reticle_r = r + 8.5 * self.scale
                 ctx.new_sub_path()
-                ctx.arc(nx, ny, r + 8.5 * self.scale, 0.0, 2.0 * math.pi)
-                if step.action_type == "TARGET_REACHED":
-                    # Golden celebratory celebration glow
-                    ctx.set_source_rgba(0.96, 0.75, 0.10, 0.9)
+                ctx.arc(nx, ny, reticle_r, 0.0, 2.0 * math.pi)
+                if step.action_type in ("TARGET_REACHED", "FINISHED"):
+                    # Golden celebratory glow
+                    ctx.set_source_rgba(0.98, 0.78, 0.15, 0.95)
                     ctx.set_line_width(max(2.5, 4.5 * self.scale))
                 else:
-                    ctx.set_source_rgba(0.96, 0.62, 0.04, 0.75)
+                    ctx.set_source_rgba(0.96, 0.62, 0.04, 0.85)
                     ctx.set_line_width(max(1.8, 3.0 * self.scale))
                 ctx.stroke()
+
+                # Crosshair tick marks
+                tick = 4.5 * self.scale
+                for angle in (0.0, math.pi / 2.0, math.pi, 3.0 * math.pi / 2.0):
+                    ctx.move_to(nx + (reticle_r - tick) * math.cos(angle), ny + (reticle_r - tick) * math.sin(angle))
+                    ctx.line_to(nx + (reticle_r + tick) * math.cos(angle), ny + (reticle_r + tick) * math.sin(angle))
+                ctx.stroke()
+
+                # TARGET / GOAL tag pill above target node
+                tag_w = 52.0 * self.scale
+                tag_h = 17.0 * self.scale
+                tag_x = nx - tag_w / 2.0
+                tag_y = ny - r - 23.0 * self.scale
+                draw_rounded_rect(ctx, tag_x, tag_y, tag_w, tag_h, 4.0 * self.scale)
+                if step.action_type in ("TARGET_REACHED", "FINISHED"):
+                    ctx.set_source_rgba(0.98, 0.78, 0.15, 0.95)
+                    ctx.fill()
+                    draw_text_centered(ctx, "FOUND!", nx, tag_y + tag_h / 2.0, font_size=max(7.5, 9.5 * self.scale), font_bold=True, color=(0.10, 0.10, 0.10))
+                else:
+                    ctx.set_source_rgba(0.96, 0.62, 0.04, 0.90)
+                    ctx.fill()
+                    draw_text_centered(ctx, "TARGET", nx, tag_y + tag_h / 2.0, font_size=max(7.5, 9.5 * self.scale), font_bold=True, color=(1.0, 1.0, 1.0))
 
     def _draw_hud(
         self,
@@ -896,7 +950,12 @@ class TraversalVideoRenderer:
         ctx.set_font_size(max(12.0, 20.0 * self.scale))
         ctx.set_source_rgb(0.95, 0.98, 1.0)
         ctx.move_to(inner_x, curr_y + 18.0 * self.scale)
-        header_title = f"{alg_name} [Node {self.start_node}]" if self.start_node != "A" else alg_name
+        if getattr(self, "target_node", None):
+            header_title = f"{alg_name} [Goal: Find Node {self.target_node}]"
+        elif self.start_node != "A":
+            header_title = f"{alg_name} [Start: Node {self.start_node}]"
+        else:
+            header_title = alg_name
         ctx.show_text(header_title)
 
         # Complexity & Scope Pills
@@ -1477,12 +1536,14 @@ class ComparativeTraversalRenderer:
         ctx.set_line_width(max(1.0, 1.5 * self.scale))
         ctx.stroke()
 
-        top_title = f"GRAPH TRAVERSAL COMPARISON (START: NODE {self.start_node}): BFS vs DFS" if self.start_node != "A" else "GRAPH TRAVERSAL COMPARISON: BREADTH-FIRST SEARCH vs DEPTH-FIRST SEARCH"
         if getattr(self, "target_node", None):
-            top_subtitle = f"Target Node Search: Finding Node {self.target_node} from Node {self.start_node} | BFS Wavefront vs DFS Branch Diving"
+            top_title = f"TARGET NODE SEARCH (FINDING NODE {self.target_node}): BFS vs DFS"
+            top_subtitle = f"Origin: Node {self.start_node}  →  Destination: Node {self.target_node} | BFS Shortest Path vs DFS Branch Diving"
         elif self.start_node != "A":
+            top_title = f"GRAPH TRAVERSAL COMPARISON (START: NODE {self.start_node}): BFS vs DFS"
             top_subtitle = f"Origin: Node {self.start_node} | Wavefront Expansion (Queue) vs Deep Branch Diving (Stack)"
         else:
+            top_title = "GRAPH TRAVERSAL COMPARISON: BREADTH-FIRST SEARCH vs DEPTH-FIRST SEARCH"
             top_subtitle = "Wavefront Level-by-Level Expansion (Queue)  vs  Deep Branch Diving with Backtracking (Stack)"
 
         draw_text_centered(

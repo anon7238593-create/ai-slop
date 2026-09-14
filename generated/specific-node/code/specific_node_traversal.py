@@ -34,10 +34,24 @@ from traversal_animator import (
 )
 
 
+def find_furthest_node(graph: dict[str, list[str]], start_node: str) -> str:
+    """Find a node with the maximum shortest-path hop distance from start_node."""
+    dist = {start_node: 0}
+    q = [start_node]
+    while q:
+        curr = q.pop(0)
+        for n in graph.get(curr, []):
+            if n not in dist:
+                dist[n] = dist[curr] + 1
+                q.append(n)
+    candidates = sorted(dist.items(), key=lambda x: (-x[1], x[0]))
+    return candidates[0][0] if candidates else start_node
+
+
 def generate_specific_node_traversal(
     graph: dict[str, list[str]],
-    start_node: str = "E",
-    target_node: Optional[str] = None,
+    start_node: str = "A",
+    target_node: Optional[str] = "K",
     output_dir: Path | str = Path("specific_node_output"),
     algorithm: str = "all",
     fps: int = 30,
@@ -52,16 +66,15 @@ def generate_specific_node_traversal(
     seed: Optional[int] = None,
     edge_probability: Optional[float] = None,
 ) -> dict:
-    """Generate traversal animation videos and PDF walkthroughs for a specific start node."""
+    """Generate traversal animation videos and PDF walkthroughs to locate a specific ending target node."""
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
     if start_node not in graph:
-        raise ValueError(f"Unknown start node {start_node!r}. Choose one of: {', '.join(graph)}")
+        start_node = next(iter(graph))
 
-    if target_node and target_node not in graph:
-        print(f"Warning: target node {target_node!r} not in graph. Ignoring target node.")
-        target_node = None
+    if not target_node or target_node not in graph:
+        target_node = "K" if "K" in graph else find_furthest_node(graph, start_node)
 
     # Resolution calculation
     RESOLUTION_PRESETS = {
@@ -152,14 +165,16 @@ def generate_specific_node_traversal(
                     save_preview_frame=prev_bfs,
                     step_duration=step_duration,
                 )
+                target_label = f"Node {target_node}" if target_node else f"Node {start_node}"
                 manifest["generated_videos"].append({
                     "algorithm": "bfs",
                     "filename": out_bfs.name,
-                    "title": f"Particular Node ({start_node}): BFS Animation",
+                    "title": f"Target Search (Finding {target_label}): BFS Animation",
+                    "description": f"Breadth-first search originating from Node {start_node} seeking destination {target_label}, stopping upon discovery to reveal the optimal shortest path.",
                     "data_structure": "FIFO Queue",
                     "start_node": start_node,
                     "target_node": target_node,
-                    "scope": "particular_node",
+                    "scope": f"target_{target_node}" if target_node else "particular_node",
                     "resolution": f"{video_width}x{video_height}",
                     "step_duration": step_duration,
                 })
@@ -181,14 +196,16 @@ def generate_specific_node_traversal(
                     save_preview_frame=prev_dfs,
                     step_duration=step_duration,
                 )
+                target_label = f"Node {target_node}" if target_node else f"Node {start_node}"
                 manifest["generated_videos"].append({
                     "algorithm": "dfs",
                     "filename": out_dfs.name,
-                    "title": f"Particular Node ({start_node}): DFS Animation",
+                    "title": f"Target Search (Finding {target_label}): DFS Animation",
+                    "description": f"Depth-first search originating from Node {start_node} seeking destination {target_label}, demonstrating deep exploration and backtracking until target reached.",
                     "data_structure": "LIFO Stack",
                     "start_node": start_node,
                     "target_node": target_node,
-                    "scope": "particular_node",
+                    "scope": f"target_{target_node}" if target_node else "particular_node",
                     "resolution": f"{video_width}x{video_height}",
                     "step_duration": step_duration,
                 })
@@ -209,14 +226,16 @@ def generate_specific_node_traversal(
                     save_preview_frame=prev_comp,
                     step_duration=step_duration,
                 )
+                target_label = f"Node {target_node}" if target_node else f"Node {start_node}"
                 manifest["generated_videos"].append({
                     "algorithm": "comparison",
                     "filename": out_comp.name,
-                    "title": f"Particular Node ({start_node}): Comparative Traversal (BFS vs DFS)",
+                    "title": f"Target Search (Finding {target_label}): Comparative Traversal (BFS vs DFS)",
+                    "description": f"Synchronized search from Node {start_node} seeking destination {target_label}. Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
                     "data_structure": "Queue vs Stack",
                     "start_node": start_node,
                     "target_node": target_node,
-                    "scope": "particular_node",
+                    "scope": f"target_{target_node}" if target_node else "particular_node",
                     "resolution": f"{video_width}x{video_height}",
                     "step_duration": step_duration,
                 })
@@ -224,13 +243,15 @@ def generate_specific_node_traversal(
             (output_path / "video_manifest.json").write_text(
                 json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
             )
-            print(f"[SUCCESS] All requested animations for Node {start_node} generated in {output_path}")
+            print(f"[SUCCESS] All requested animations for target search ({start_node} -> {target_node}) generated in {output_path}")
 
     # 3. Generate Graphviz DOT & PDF Walkthroughs (if dot is installed and render_pdf is True)
     if render_pdf:
         if shutil.which("dot"):
             visualizer.GRAPH = graph
             visualizer.START_NODE = start_node
+            if hasattr(visualizer, "TARGET_NODE"):
+                visualizer.TARGET_NODE = target_node
             for alg in (("bfs", "dfs") if algorithm in ("both", "all", "comparison") else (algorithm,)):
                 visualizer.render(alg, output_path)
         else:
@@ -241,12 +262,16 @@ def generate_specific_node_traversal(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Create BFS/DFS video animations and PDF walkthroughs for a particular node."
+        description="Create BFS/DFS video animations and PDF walkthroughs to locate a particular ending target node."
     )
-    parser.add_argument("--node", default="E", help="node at which to begin traversal (default: E)")
+    parser.add_argument("--start-node", default="A", help="node at which to begin traversal (default: A)")
     parser.add_argument(
         "--target-node",
-        help="optional destination node to search for (stops and highlights path when reached)",
+        "--target",
+        "--node",
+        dest="target_node",
+        default=None,
+        help="destination ending node to search for and stop upon reaching (default: K or furthest node)",
     )
     parser.add_argument(
         "--algorithm",
@@ -317,10 +342,18 @@ def main() -> None:
     else:
         graph = DEFAULT_GRAPH
 
+    start_node = args.start_node
+    if start_node not in graph:
+        start_node = next(iter(graph))
+
+    target_node = args.target_node
+    if not target_node or target_node not in graph:
+        target_node = "K" if "K" in graph else find_furthest_node(graph, start_node)
+
     generate_specific_node_traversal(
         graph=graph,
-        start_node=args.node,
-        target_node=args.target_node,
+        start_node=start_node,
+        target_node=target_node,
         output_dir=args.output,
         algorithm=args.algorithm,
         fps=args.fps,

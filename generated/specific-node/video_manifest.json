@@ -2,122 +2,100 @@
   "graph": {
     "A": [
       "B",
-      "C",
-      "E",
-      "F",
-      "H",
-      "J",
-      "L",
-      "M"
+      "I",
+      "K",
+      "L"
     ],
     "B": [
       "A",
       "C",
-      "J",
-      "K",
+      "F",
       "L"
     ],
     "C": [
-      "A",
       "B",
       "D",
-      "F",
-      "J",
-      "K",
-      "O"
+      "G",
+      "H",
+      "I",
+      "K"
     ],
     "D": [
       "C",
-      "G",
+      "E",
+      "F",
+      "H",
       "J",
       "K",
+      "L",
+      "N",
       "O"
     ],
     "E": [
-      "A",
-      "G",
-      "H",
-      "I",
+      "D",
       "N"
     ],
     "F": [
-      "A",
-      "C",
-      "H",
-      "I",
-      "J",
-      "K",
-      "N",
-      "O"
+      "B",
+      "D",
+      "M",
+      "N"
     ],
     "G": [
-      "D",
-      "E",
+      "C",
       "I",
-      "J",
-      "M",
-      "N",
-      "O"
+      "J"
     ],
     "H": [
-      "A",
-      "E",
-      "F",
-      "O"
-    ],
-    "I": [
-      "E",
-      "F",
-      "G"
-    ],
-    "J": [
-      "A",
-      "B",
       "C",
       "D",
-      "F",
+      "L"
+    ],
+    "I": [
+      "A",
+      "C",
+      "G",
+      "K"
+    ],
+    "J": [
+      "D",
       "G",
       "K"
     ],
     "K": [
-      "B",
+      "A",
       "C",
       "D",
-      "F",
+      "I",
       "J",
-      "N"
+      "O"
     ],
     "L": [
       "A",
       "B",
-      "M"
+      "D",
+      "H",
+      "O"
     ],
     "M": [
-      "A",
-      "G",
-      "L",
-      "N"
+      "F"
     ],
     "N": [
+      "D",
       "E",
-      "F",
-      "G",
-      "K",
-      "M"
+      "F"
     ],
     "O": [
-      "C",
       "D",
-      "F",
-      "G",
-      "H"
+      "K",
+      "L"
     ]
   },
-  "start_node": "E",
-  "target_node": null,
-  "seed": 1789366060,
+  "start_node": "A",
+  "target_node": "K",
+  "seed": 1789367937,
   "nodes": 15,
-  "edges": 41,
+  "edges": 30,
   "resolution": "1920x1080",
   "fps": 30,
   "step_duration_seconds": 1.8,
@@ -127,33 +105,36 @@
     {
       "algorithm": "bfs",
       "filename": "bfs_traversal.mp4",
-      "title": "Particular Node (E): BFS Animation",
+      "title": "Target Search (Finding Node K): BFS Animation",
+      "description": "Breadth-first search originating from Node A seeking destination Node K, stopping upon discovery to reveal the optimal shortest path.",
       "data_structure": "FIFO Queue",
-      "start_node": "E",
-      "target_node": null,
-      "scope": "particular_node",
+      "start_node": "A",
+      "target_node": "K",
+      "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
     },
     {
       "algorithm": "dfs",
       "filename": "dfs_traversal.mp4",
-      "title": "Particular Node (E): DFS Animation",
+      "title": "Target Search (Finding Node K): DFS Animation",
+      "description": "Depth-first search originating from Node A seeking destination Node K, demonstrating deep exploration and backtracking until target reached.",
       "data_structure": "LIFO Stack",
-      "start_node": "E",
-      "target_node": null,
-      "scope": "particular_node",
+      "start_node": "A",
+      "target_node": "K",
+      "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
     },
     {
       "algorithm": "comparison",
       "filename": "bfs_dfs_comparison.mp4",
-      "title": "Particular Node (E): Comparative Traversal (BFS vs DFS)",
+      "title": "Target Search (Finding Node K): Comparative Traversal (BFS vs DFS)",
+      "description": "Synchronized search from Node A seeking destination Node K. Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
       "data_structure": "Queue vs Stack",
-      "start_node": "E",
-      "target_node": null,
-      "scope": "particular_node",
+      "start_node": "A",
+      "target_node": "K",
+      "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
     }

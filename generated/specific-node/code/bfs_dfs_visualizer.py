@@ -13,6 +13,7 @@ import random
 import shutil
 import subprocess
 from collections import deque
+import html
 from pathlib import Path
 from typing import Iterable
 
@@ -36,6 +37,7 @@ GRAPH: dict[str, list[str]] = {
     "O": ["I", "N"],
 }
 START_NODE = "A"
+TARGET_NODE: str | None = None
 
 COLORS = {
     "unseen": ("#F8FAFC", "#94A3B8", "#334155"),
@@ -96,12 +98,15 @@ def make_dot(
     frontier_label = "  →  ".join(frontier_list) if algorithm == "bfs" else "  |  ".join(frontier_list)
     frontier_label = frontier_label or "(empty)"
     title = algorithm.upper() + " Traversal"
+    safe_title = html.escape(title)
+    safe_action = html.escape(action)
+    safe_frontier_label = html.escape(frontier_label)
     lines = [
         "graph traversal {",
         '  graph [layout=dot, rankdir=TB, bgcolor="#FFFFFF", pad="0.35", nodesep="0.65", ranksep="0.8", fontname="Arial"];',
         '  node [shape=circle, style="filled", fontname="Arial Bold", fontsize=18, width=0.72, fixedsize=true, penwidth=2.4];',
         '  edge [color="#94A3B8", penwidth=2.0];',
-        f'  label=<<B>{title}</B><BR/><FONT POINT-SIZE="16">Step {step}: {action}</FONT>>; labelloc="t"; fontsize=26; fontname="Arial"; fontcolor="#0F172A";',
+        f'  label=<<B>{safe_title}</B><BR/><FONT POINT-SIZE="16">Step {step}: {safe_action}</FONT>>; labelloc="t"; fontsize=26; fontname="Arial"; fontcolor="#0F172A";',
         '  subgraph cluster_legend { label="Legend"; color="#CBD5E1"; penwidth=1.2; style="rounded"; fontsize=14; fontname="Arial Bold";',
         '    key_unseen [label="Unseen", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", fontsize=12, width=0.82];',
         '    key_frontier [label="Discovered", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", fontsize=12, width=0.95];',
@@ -113,7 +118,12 @@ def make_dot(
     for node in GRAPH:
         state = "current" if node == current else "done" if node in done_set else "frontier" if node in frontier_set else "unseen"
         fill, border, text = COLORS[state]
-        lines.append(f"  {node} [fillcolor={dot_quote(fill)}, color={dot_quote(border)}, fontcolor={dot_quote(text)}];")
+        peripheries = 2 if (TARGET_NODE and node == TARGET_NODE) else 1
+        penwidth = 3.2 if (TARGET_NODE and node == TARGET_NODE) else 2.4
+        is_target_label = bool(TARGET_NODE and node == TARGET_NODE and node != current)
+        label_text = f"{node}\\n(TARGET)" if is_target_label else node
+        extra_dim = ", fontsize=11, width=0.85, height=0.85" if is_target_label else ""
+        lines.append(f'  {node} [label="{label_text}", fillcolor={dot_quote(fill)}, color={dot_quote(border)}, fontcolor={dot_quote(text)}, peripheries={peripheries}, penwidth={penwidth}{extra_dim}];')
     for left, right in undirected_edges(GRAPH):
         if frozenset((left, right)) in discovery_edges:
             lines.append(f'  {left} -- {right} [color="#7C3AED", penwidth=3.8];')
@@ -122,7 +132,7 @@ def make_dot(
     lines.extend([
         '  status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<',
         '    <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">',
-        f'      <TR><TD ALIGN="LEFT"><B>{queue_name}:</B> {frontier_label}</TD></TR>',
+        f'      <TR><TD ALIGN="LEFT"><B>{queue_name}:</B> {safe_frontier_label}</TD></TR>',
         f'      <TR><TD ALIGN="LEFT"><B>Visited:</B> {", ".join(sorted(done_set)) or "(none)"}</TD></TR>',
         '    </TABLE>',
         '  >];',
@@ -133,20 +143,40 @@ def make_dot(
 
 def traversal_steps(algorithm: str) -> list[tuple[str, str | None, list[str], set[str], set[frozenset[str]]]]:
     """Capture visual states immediately before and after each processing action."""
-    frontier: deque[str] | list[str] = deque([START_NODE]) if algorithm == "bfs" else [START_NODE]
-    discovered = {START_NODE}
+    start_node = START_NODE
+    target_node = TARGET_NODE
+    frontier: deque[str] | list[str] = deque([start_node]) if algorithm == "bfs" else [start_node]
+    discovered = {start_node}
     done: set[str] = set()
     discovery_edges: set[frozenset[str]] = set()
-    steps = [(f"Start at {START_NODE}", None, list(frontier), set(done), set(discovery_edges))]
+    parent: dict[str, str] = {}
+    init_desc = f"Start at {start_node}"
+    if target_node:
+        init_desc += f" (Seeking target node {target_node})"
+    steps = [(init_desc, None, list(frontier), set(done), set(discovery_edges))]
 
     while frontier:
         current = frontier.popleft() if algorithm == "bfs" else frontier.pop()
         steps.append((f"Process node {current}", current, list(frontier), set(done), set(discovery_edges)))
+
+        if target_node and current == target_node:
+            done.add(current)
+            path = [current]
+            curr = current
+            while curr in parent:
+                curr = parent[curr]
+                path.append(curr)
+            path.reverse()
+            path_str = " → ".join(path)
+            steps.append((f"TARGET NODE {target_node} REACHED! Path ({len(path)-1} hops): {path_str}", current, list(frontier), set(done), set(discovery_edges)))
+            return steps
+
         neighbors = GRAPH[current] if algorithm == "bfs" else list(reversed(GRAPH[current]))
         new_nodes: list[str] = []
         for neighbor in neighbors:
             if neighbor not in discovered:
                 discovered.add(neighbor)
+                parent[neighbor] = current
                 frontier.append(neighbor)
                 new_nodes.append(neighbor)
                 discovery_edges.add(frozenset((current, neighbor)))
@@ -170,7 +200,7 @@ def render(algorithm: str, output_root: Path) -> None:
 
 
 def main() -> None:
-    global GRAPH, START_NODE
+    global GRAPH, START_NODE, TARGET_NODE
     parser = argparse.ArgumentParser(description="Create BFS/DFS Graphviz walkthrough PDFs.")
     parser.add_argument("--algorithm", choices=("bfs", "dfs", "both"), default="both")
     parser.add_argument("--output", type=Path, default=Path("output"), help="directory for generated files")
@@ -179,6 +209,7 @@ def main() -> None:
     parser.add_argument("--edge-probability", type=float, default=0.18, help="chance of each extra edge in a random graph")
     parser.add_argument("--seed", type=int, help="seed for reproducible random graph generation")
     parser.add_argument("--start-node", help="node from which to start the traversal")
+    parser.add_argument("--target-node", help="optional destination ending node to search for and stop upon reaching")
     args = parser.parse_args()
     if not shutil.which("dot"):
         raise SystemExit("Graphviz is required. Install it, then ensure the 'dot' command is on PATH.")
@@ -189,11 +220,16 @@ def main() -> None:
         if args.start_node not in GRAPH:
             raise SystemExit(f"Unknown start node {args.start_node!r}. Choose one of: {', '.join(GRAPH)}")
         START_NODE = args.start_node
+    if args.target_node:
+        if args.target_node not in GRAPH:
+            raise SystemExit(f"Unknown target node {args.target_node!r}. Choose one of: {', '.join(GRAPH)}")
+        TARGET_NODE = args.target_node
 
     args.output.mkdir(parents=True, exist_ok=True)
     metadata = {
         "graph": GRAPH,
         "start_node": START_NODE,
+        "target_node": TARGET_NODE,
         "random_seed": args.seed,
         "edge_probability": args.edge_probability if args.random_graph else None,
         "nodes": len(GRAPH),
