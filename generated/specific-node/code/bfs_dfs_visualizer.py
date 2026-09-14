@@ -52,8 +52,17 @@ def undirected_edges(graph: dict[str, list[str]]) -> list[tuple[str, str]]:
     return [(node, neighbor) for node in graph for neighbor in graph[node] if node < neighbor]
 
 
-def random_connected_graph(nodes: int, edge_probability: float, seed: int | None) -> dict[str, list[str]]:
-    """Make a connected, undirected graph with a reproducible optional seed."""
+def random_connected_graph(
+    nodes: int,
+    edge_probability: float,
+    seed: int | None,
+    avoid_edges: set[frozenset[str]] | None = None,
+) -> dict[str, list[str]]:
+    """Make a connected, undirected graph with a reproducible optional seed.
+    
+    avoid_edges: optional set of frozenset((u, v)) edge pairs that must NOT be created,
+                 guaranteeing specific nodes (like start and target) are not adjacent.
+    """
     if not 3 <= nodes <= 26:
         raise ValueError("--nodes must be between 3 and 26")
     if not 0 <= edge_probability <= 1:
@@ -64,13 +73,20 @@ def random_connected_graph(nodes: int, edge_probability: float, seed: int | None
 
     # First create a random spanning tree, guaranteeing every node is reachable.
     for index in range(1, nodes):
-        parent = labels[generator.randrange(index)]
         child = labels[index]
+        valid_parents = [
+            labels[p]
+            for p in range(index)
+            if not (avoid_edges and frozenset((labels[p], child)) in avoid_edges)
+        ]
+        parent = generator.choice(valid_parents) if valid_parents else labels[generator.randrange(index)]
         connections[parent].add(child)
         connections[child].add(parent)
     # Then add extra edges to make the demonstration graph more interesting.
     for left_index, left in enumerate(labels):
         for right in labels[left_index + 1 :]:
+            if avoid_edges and frozenset((left, right)) in avoid_edges:
+                continue
             if right not in connections[left] and generator.random() < edge_probability:
                 connections[left].add(right)
                 connections[right].add(left)
@@ -213,9 +229,13 @@ def main() -> None:
     args = parser.parse_args()
     if not shutil.which("dot"):
         raise SystemExit("Graphviz is required. Install it, then ensure the 'dot' command is on PATH.")
+    start_req = args.start_node or "A"
+    target_req = args.target_node
+    avoid = {frozenset((start_req, target_req))} if target_req else None
+
     if args.random_graph:
-        GRAPH = random_connected_graph(args.nodes, args.edge_probability, args.seed)
-        START_NODE = next(iter(GRAPH))
+        GRAPH = random_connected_graph(args.nodes, args.edge_probability, args.seed, avoid_edges=avoid)
+        START_NODE = start_req if start_req in GRAPH else next(iter(GRAPH))
     if args.start_node:
         if args.start_node not in GRAPH:
             raise SystemExit(f"Unknown start node {args.start_node!r}. Choose one of: {', '.join(GRAPH)}")

@@ -34,8 +34,17 @@ from traversal_animator import (
 )
 
 
-def find_furthest_node(graph: dict[str, list[str]], start_node: str) -> str:
-    """Find a node with the maximum shortest-path hop distance from start_node."""
+def pick_target_node(
+    graph: dict[str, list[str]],
+    start_node: str,
+    preferred_target: Optional[str] = None,
+    min_distance: int = 2,
+) -> tuple[str, int]:
+    """Select a target node that is NOT adjacent to start_node (shortest-path distance >= min_distance).
+
+    Returns (target_node, hop_distance).
+    Guarantees the beginning and ending nodes are never next to each other apart by a single edge.
+    """
     dist = {start_node: 0}
     q = [start_node]
     while q:
@@ -44,8 +53,36 @@ def find_furthest_node(graph: dict[str, list[str]], start_node: str) -> str:
             if n not in dist:
                 dist[n] = dist[curr] + 1
                 q.append(n)
-    candidates = sorted(dist.items(), key=lambda x: (-x[1], x[0]))
-    return candidates[0][0] if candidates else start_node
+
+    # 1. If preferred target is in graph and satisfies min_distance, honor it
+    if preferred_target and preferred_target in graph:
+        target_dist = dist.get(preferred_target, 0)
+        if target_dist >= min_distance:
+            return preferred_target, target_dist
+        print(
+            f"[NOTICE] Beginning node '{start_node}' and requested ending node '{preferred_target}' "
+            f"are only {target_dist} hop(s) apart (adjacent by a single edge). "
+            f"Selecting a non-adjacent node (distance >= {min_distance}) to guarantee a demonstrative multi-edge traversal."
+        )
+
+    # 2. Filter candidate nodes with hop distance >= min_distance
+    candidates = [item for item in dist.items() if item[1] >= min_distance]
+    if not candidates:
+        # Fallback if graph diameter < min_distance
+        candidates = [item for item in dist.items() if item[1] > 0]
+
+    if not candidates:
+        return start_node, 0
+
+    # Sort descending by distance (furthest node), then alphabetically
+    candidates.sort(key=lambda x: (-x[1], x[0]))
+    return candidates[0][0], candidates[0][1]
+
+
+def find_furthest_node(graph: dict[str, list[str]], start_node: str, min_distance: int = 2) -> str:
+    """Find a node with the maximum shortest-path hop distance from start_node (at least min_distance)."""
+    node, _ = pick_target_node(graph, start_node, None, min_distance=min_distance)
+    return node
 
 
 def generate_specific_node_traversal(
@@ -65,6 +102,7 @@ def generate_specific_node_traversal(
     ffmpeg_bin: Optional[str] = None,
     seed: Optional[int] = None,
     edge_probability: Optional[float] = None,
+    min_distance: int = 2,
 ) -> dict:
     """Generate traversal animation videos and PDF walkthroughs to locate a specific ending target node."""
     output_path = Path(output_dir)
@@ -73,8 +111,13 @@ def generate_specific_node_traversal(
     if start_node not in graph:
         start_node = next(iter(graph))
 
-    if not target_node or target_node not in graph:
-        target_node = "K" if "K" in graph else find_furthest_node(graph, start_node)
+    target_node, target_dist = pick_target_node(
+        graph=graph,
+        start_node=start_node,
+        preferred_target=target_node,
+        min_distance=min_distance,
+    )
+    print(f"[INFO] Traversal start node: '{start_node}', destination target node: '{target_node}' (shortest-path distance: {target_dist} hops, min_distance={min_distance})")
 
     # Resolution calculation
     RESOLUTION_PRESETS = {
@@ -93,6 +136,8 @@ def generate_specific_node_traversal(
         "graph": graph,
         "start_node": start_node,
         "target_node": target_node,
+        "target_hop_distance": target_dist,
+        "min_distance": min_distance,
         "random_seed": seed,
         "edge_probability": edge_probability,
         "nodes": len(graph),
@@ -108,6 +153,8 @@ def generate_specific_node_traversal(
         "graph": graph,
         "start_node": start_node,
         "target_node": target_node,
+        "target_hop_distance": target_dist,
+        "min_distance": min_distance,
         "seed": seed,
         "nodes": len(graph),
         "edges": sum(len(v) for v in graph.values()) // 2,
@@ -170,10 +217,11 @@ def generate_specific_node_traversal(
                     "algorithm": "bfs",
                     "filename": out_bfs.name,
                     "title": f"Target Search (Finding {target_label}): BFS Animation",
-                    "description": f"Breadth-first search originating from Node {start_node} seeking destination {target_label}, stopping upon discovery to reveal the optimal shortest path.",
+                    "description": f"Breadth-first search originating from Node {start_node} seeking destination {target_label} ({target_dist} hops away), stopping upon discovery to reveal the optimal shortest path.",
                     "data_structure": "FIFO Queue",
                     "start_node": start_node,
                     "target_node": target_node,
+                    "target_hop_distance": target_dist,
                     "scope": f"target_{target_node}" if target_node else "particular_node",
                     "resolution": f"{video_width}x{video_height}",
                     "step_duration": step_duration,
@@ -201,10 +249,11 @@ def generate_specific_node_traversal(
                     "algorithm": "dfs",
                     "filename": out_dfs.name,
                     "title": f"Target Search (Finding {target_label}): DFS Animation",
-                    "description": f"Depth-first search originating from Node {start_node} seeking destination {target_label}, demonstrating deep exploration and backtracking until target reached.",
+                    "description": f"Depth-first search originating from Node {start_node} seeking destination {target_label} ({target_dist} hops away), demonstrating deep exploration and backtracking until target reached.",
                     "data_structure": "LIFO Stack",
                     "start_node": start_node,
                     "target_node": target_node,
+                    "target_hop_distance": target_dist,
                     "scope": f"target_{target_node}" if target_node else "particular_node",
                     "resolution": f"{video_width}x{video_height}",
                     "step_duration": step_duration,
@@ -231,10 +280,11 @@ def generate_specific_node_traversal(
                     "algorithm": "comparison",
                     "filename": out_comp.name,
                     "title": f"Target Search (Finding {target_label}): Comparative Traversal (BFS vs DFS)",
-                    "description": f"Synchronized search from Node {start_node} seeking destination {target_label}. Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
+                    "description": f"Synchronized search from Node {start_node} seeking destination {target_label} ({target_dist} hops away). Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
                     "data_structure": "Queue vs Stack",
                     "start_node": start_node,
                     "target_node": target_node,
+                    "target_hop_distance": target_dist,
                     "scope": f"target_{target_node}" if target_node else "particular_node",
                     "resolution": f"{video_width}x{video_height}",
                     "step_duration": step_duration,
@@ -318,6 +368,12 @@ def main() -> None:
         help="pacing preset: slow (2.5s/step), normal (1.8s/step, default), fast (1.0s/step)",
     )
     parser.add_argument("--step-duration", type=float, help="duration in seconds for each traversal step")
+    parser.add_argument(
+        "--min-distance",
+        type=int,
+        default=2,
+        help="minimum shortest-path hop distance between start and ending target node (default: 2, ensuring they are not adjacent by a single edge)",
+    )
     parser.add_argument("--ffmpeg-bin", help="path to ffmpeg binary executable")
     parser.add_argument("--save-frames", action="store_true", help="export sample preview PNG frames")
 
@@ -346,14 +402,10 @@ def main() -> None:
     if start_node not in graph:
         start_node = next(iter(graph))
 
-    target_node = args.target_node
-    if not target_node or target_node not in graph:
-        target_node = "K" if "K" in graph else find_furthest_node(graph, start_node)
-
     generate_specific_node_traversal(
         graph=graph,
         start_node=start_node,
-        target_node=target_node,
+        target_node=args.target_node,
         output_dir=args.output,
         algorithm=args.algorithm,
         fps=args.fps,
@@ -367,6 +419,7 @@ def main() -> None:
         ffmpeg_bin=args.ffmpeg_bin,
         seed=seed,
         edge_probability=args.edge_probability if args.random_graph else None,
+        min_distance=args.min_distance,
     )
 
 

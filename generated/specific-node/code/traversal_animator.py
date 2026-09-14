@@ -102,8 +102,17 @@ def find_ffmpeg(custom_path: Optional[str] = None) -> Optional[str]:
     return None
 
 
-def random_connected_graph(nodes: int, edge_probability: float, seed: Optional[int]) -> dict[str, list[str]]:
-    """Generate a connected undirected graph with a reproducible seed."""
+def random_connected_graph(
+    nodes: int,
+    edge_probability: float,
+    seed: Optional[int],
+    avoid_edges: Optional[set[frozenset[str]]] = None,
+) -> dict[str, list[str]]:
+    """Generate a connected undirected graph with a reproducible seed.
+    
+    avoid_edges: optional set of frozenset((u, v)) edge pairs that must NOT be created,
+                 guaranteeing specific nodes (like start and target) are not adjacent.
+    """
     if not 3 <= nodes <= 26:
         raise ValueError("nodes must be between 3 and 26")
     if not 0.0 <= edge_probability <= 1.0:
@@ -115,8 +124,13 @@ def random_connected_graph(nodes: int, edge_probability: float, seed: Optional[i
 
     # Spanning tree guarantees connectivity
     for idx in range(1, nodes):
-        parent = labels[rng.randrange(idx)]
         child = labels[idx]
+        valid_parents = [
+            labels[p]
+            for p in range(idx)
+            if not (avoid_edges and frozenset((labels[p], child)) in avoid_edges)
+        ]
+        parent = rng.choice(valid_parents) if valid_parents else labels[rng.randrange(idx)]
         graph[parent].add(child)
         graph[child].add(parent)
 
@@ -124,6 +138,8 @@ def random_connected_graph(nodes: int, edge_probability: float, seed: Optional[i
     for i in range(nodes):
         for j in range(i + 1, nodes):
             u, v = labels[i], labels[j]
+            if avoid_edges and frozenset((u, v)) in avoid_edges:
+                continue
             if v not in graph[u] and rng.random() < edge_probability:
                 graph[u].add(v)
                 graph[v].add(u)
