@@ -10,6 +10,7 @@ on:
         type: string
       min_balls:
         description: "Minimum number of balls per video (optional, defaults to min(12, max_balls))"
+        default: 100
         required: false
         type: string
       max_balls:
