@@ -1,0 +1,156 @@
+{
+  "graph": {
+    "A": [
+      "B",
+      "C",
+      "L",
+      "N"
+    ],
+    "B": [
+      "A",
+      "E",
+      "F",
+      "G",
+      "H",
+      "O"
+    ],
+    "C": [
+      "A",
+      "D",
+      "E",
+      "I",
+      "K"
+    ],
+    "D": [
+      "C",
+      "H",
+      "I",
+      "K",
+      "L"
+    ],
+    "E": [
+      "B",
+      "C",
+      "F",
+      "G",
+      "H",
+      "K",
+      "L",
+      "M",
+      "O"
+    ],
+    "F": [
+      "B",
+      "E",
+      "J"
+    ],
+    "G": [
+      "B",
+      "E",
+      "O"
+    ],
+    "H": [
+      "B",
+      "D",
+      "E"
+    ],
+    "I": [
+      "C",
+      "D",
+      "N"
+    ],
+    "J": [
+      "F",
+      "K"
+    ],
+    "K": [
+      "C",
+      "D",
+      "E",
+      "J",
+      "L",
+      "O"
+    ],
+    "L": [
+      "A",
+      "D",
+      "E",
+      "K",
+      "M"
+    ],
+    "M": [
+      "E",
+      "L"
+    ],
+    "N": [
+      "A",
+      "I"
+    ],
+    "O": [
+      "B",
+      "E",
+      "G",
+      "K"
+    ]
+  },
+  "start_node": "A",
+  "target_node": "K",
+  "target_hop_distance": 2,
+  "min_distance": 2,
+  "short_circuit": true,
+  "seed": 1789370375,
+  "nodes": 15,
+  "edges": 31,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "step_duration_seconds": 1.8,
+  "preset": "1080p",
+  "scope": "short_circuit_target_K",
+  "generated_videos": [
+    {
+      "algorithm": "bfs",
+      "filename": "bfs_traversal.mp4",
+      "alias": "bfs_short_circuit.mp4",
+      "title": "Short-Circuit Target Search (Finding Node K): BFS Animation",
+      "description": "Breadth-first search from Node A seeking Node K (2 hops away). Halts immediately upon discovery edge (u -> K) without waiting in FIFO Queue.",
+      "data_structure": "FIFO Queue (Short-Circuited)",
+      "start_node": "A",
+      "target_node": "K",
+      "target_hop_distance": 2,
+      "short_circuit": true,
+      "scope": "short_circuit_target_K",
+      "resolution": "1920x1080",
+      "step_duration": 1.8
+    },
+    {
+      "algorithm": "dfs",
+      "filename": "dfs_traversal.mp4",
+      "alias": "dfs_short_circuit.mp4",
+      "title": "Short-Circuit Target Search (Finding Node K): DFS Animation",
+      "description": "Depth-first search from Node A seeking Node K (2 hops away). Halts eagerly on finding K along active branch without waiting in LIFO Stack.",
+      "data_structure": "LIFO Stack (Short-Circuited)",
+      "start_node": "A",
+      "target_node": "K",
+      "target_hop_distance": 2,
+      "short_circuit": true,
+      "scope": "short_circuit_target_K",
+      "resolution": "1920x1080",
+      "step_duration": 1.8
+    },
+    {
+      "algorithm": "comparison",
+      "filename": "bfs_dfs_comparison.mp4",
+      "alias": "bfs_dfs_short_circuit_comparison.mp4",
+      "title": "Short-Circuit Target Search (Finding Node K): Comparative Traversal (BFS vs DFS)",
+      "description": "Synchronized eager search from Node A seeking Node K (2 hops away). Contrasts BFS eager level-by-level discovery vs DFS eager branch discovery.",
+      "data_structure": "Queue vs Stack (Short-Circuited)",
+      "start_node": "A",
+      "target_node": "K",
+      "target_hop_distance": 2,
+      "short_circuit": true,
+      "scope": "short_circuit_target_K",
+      "resolution": "1920x1080",
+      "step_duration": 1.8
+    }
+  ]
+}
