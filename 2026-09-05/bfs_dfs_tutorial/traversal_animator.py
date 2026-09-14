@@ -1716,8 +1716,22 @@ def render_standalone_video(
     if save_preview_frame and not save_preview_frame.exists():
         surface.write_to_png(str(save_preview_frame))
 
-    proc.stdin.close()
-    _, err = proc.communicate()
+    if proc.stdin and not proc.stdin.closed:
+        try:
+            proc.stdin.close()
+        except Exception:
+            pass
+    err = proc.stderr.read() if proc.stderr else b""
+    if proc.stderr and not proc.stderr.closed:
+        try:
+            proc.stderr.close()
+        except Exception:
+            pass
+    if proc.stdout and not proc.stdout.closed:
+        try:
+            proc.stdout.close()
+        except Exception:
+            pass
     proc.wait()
 
     if proc.returncode != 0:
@@ -1817,8 +1831,22 @@ def render_comparative_video(
     if save_preview_frame and not save_preview_frame.exists():
         surface.write_to_png(str(save_preview_frame))
 
-    proc.stdin.close()
-    _, err = proc.communicate()
+    if proc.stdin and not proc.stdin.closed:
+        try:
+            proc.stdin.close()
+        except Exception:
+            pass
+    err = proc.stderr.read() if proc.stderr else b""
+    if proc.stderr and not proc.stderr.closed:
+        try:
+            proc.stderr.close()
+        except Exception:
+            pass
+    if proc.stdout and not proc.stdout.closed:
+        try:
+            proc.stdout.close()
+        except Exception:
+            pass
     proc.wait()
 
     if proc.returncode != 0:
