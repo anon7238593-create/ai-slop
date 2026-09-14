@@ -150,7 +150,7 @@ if [ -d "$ARTIFACT_DIRECTORY/specific-node" ]; then
     [ -f "$f" ] || continue
     bname="$(basename "$f")"
     case "$bname" in
-      *.pdf)
+      *.pdf|*.mp4|*.json|*.png)
         UPLOAD_ASSETS+=("$f")
         echo "    - specific-node/$bname ($(du -h "$f" | cut -f1))"
         ;;

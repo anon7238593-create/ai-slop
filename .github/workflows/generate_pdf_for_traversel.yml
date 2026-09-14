@@ -42,23 +42,24 @@ jobs:
           python3 2026-09-05/bfs_dfs_tutorial/bfs_dfs_visualizer.py \
             --algorithm both \
             --random-graph \
-            --nodes 10 \
-            --edge-probability 0.30 \
+            --nodes 15 \
+            --edge-probability 0.18 \
             --seed "$seed" \
             --output "$ARTIFACT_DIRECTORY"
           python3 2026-09-05/bfs_dfs_tutorial/traversal_animator.py \
             --algorithm all \
             --graph-json "$ARTIFACT_DIRECTORY/graph.json" \
             --fps 30 \
+            --step-duration 1.8 \
             --save-frames \
             --output "$ARTIFACT_DIRECTORY"
           python3 2026-09-05/bfs_dfs_tutorial/specific_node_traversal.py \
-            --algorithm both \
+            --algorithm all \
             --node E \
-            --random-graph \
-            --nodes 10 \
-            --edge-probability 0.30 \
-            --seed "$seed" \
+            --graph-json "$ARTIFACT_DIRECTORY/graph.json" \
+            --fps 30 \
+            --step-duration 1.8 \
+            --save-frames \
             --output "$ARTIFACT_DIRECTORY/specific-node"
           mkdir -p "$ARTIFACT_DIRECTORY/specific-node/code"
           cp 2026-09-05/bfs_dfs_tutorial/bfs_dfs_visualizer.py \

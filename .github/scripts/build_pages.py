@@ -167,34 +167,95 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                 "size_kb": round(os.path.getsize(spec_pdf) / 1024, 1),
             })
 
-        # 4b. Traversal Videos
+        # 4b. Traversal Videos (All Nodes & Particular Node)
         video_items = []
-        vids = [
+
+        # All-nodes videos in root generated/
+        root_vids = [
+            (
+                "bfs_dfs_comparison.mp4",
+                "Comparative Traversal: BFS vs DFS (All Nodes)",
+                "Side-by-side synchronized comparison demonstrating Queue vs Stack on the identical graph topology.",
+                "all_nodes",
+            ),
             (
                 "bfs_traversal.mp4",
-                "Breadth-First Search (BFS) Animation",
+                "Breadth-First Search (BFS) Animation (All Nodes)",
                 "Level-by-level wavefront exploration with FIFO Queue visualization and signal propagation.",
+                "all_nodes",
             ),
             (
                 "dfs_traversal.mp4",
-                "Depth-First Search (DFS) Animation",
+                "Depth-First Search (DFS) Animation (All Nodes)",
                 "Deep branch exploration and backtracking with LIFO Stack visualization.",
-            ),
-            (
-                "bfs_dfs_comparison.mp4",
-                "Comparative Traversal: BFS vs DFS",
-                "Side-by-side synchronized comparison demonstrating Queue vs Stack on the identical graph topology.",
+                "all_nodes",
             ),
         ]
-        for fname, v_title, v_desc in vids:
+        for fname, v_title, v_desc, v_scope in root_vids:
             vpath = os.path.join(gen_dir, fname)
             if os.path.exists(vpath):
                 video_items.append({
                     "title": v_title,
                     "filename": f"generated/{fname}",
                     "description": v_desc,
+                    "scope": v_scope,
+                    "start_node": "A",
                     "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
                 })
+
+        # Particular-node videos in generated/specific-node/
+        spec_dir = os.path.join(gen_dir, "specific-node")
+        if os.path.exists(spec_dir):
+            spec_start_node = "E"
+            spec_manifest = os.path.join(spec_dir, "video_manifest.json")
+            spec_meta_graph = os.path.join(spec_dir, "specific_node_graph.json")
+
+            if os.path.exists(spec_manifest):
+                try:
+                    with open(spec_manifest, "r", encoding="utf-8") as f:
+                        s_meta = json.load(f)
+                        spec_start_node = s_meta.get("start_node", spec_start_node)
+                except Exception:
+                    pass
+            elif os.path.exists(spec_meta_graph):
+                try:
+                    with open(spec_meta_graph, "r", encoding="utf-8") as f:
+                        s_meta = json.load(f)
+                        spec_start_node = s_meta.get("start_node", spec_start_node)
+                except Exception:
+                    pass
+
+            spec_vids = [
+                (
+                    "bfs_dfs_comparison.mp4",
+                    f"Particular Node ({spec_start_node}): Comparative Traversal",
+                    f"Synchronized comparison from start Node {spec_start_node} demonstrating differential discovery branches and traversal order.",
+                    f"node_{spec_start_node}",
+                ),
+                (
+                    "bfs_traversal.mp4",
+                    f"Particular Node ({spec_start_node}): BFS Animation",
+                    f"Focused wavefront search originating strictly from Node {spec_start_node} with queue state tracking and path discovery.",
+                    f"node_{spec_start_node}",
+                ),
+                (
+                    "dfs_traversal.mp4",
+                    f"Particular Node ({spec_start_node}): DFS Animation",
+                    f"Targeted depth-first search originating from Node {spec_start_node} tracking stack state and deep backtracking.",
+                    f"node_{spec_start_node}",
+                ),
+            ]
+            for fname, v_title, v_desc, v_scope in spec_vids:
+                vpath = os.path.join(spec_dir, fname)
+                if os.path.exists(vpath):
+                    video_items.append({
+                        "title": v_title,
+                        "filename": f"generated/specific-node/{fname}",
+                        "description": v_desc,
+                        "scope": v_scope,
+                        "start_node": spec_start_node,
+                        "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
+                    })
 
         data["traversal"]["files"] = pdf_items
         data["traversal"]["videos"] = video_items
@@ -348,7 +409,7 @@ def build_site(artifacts_dir: str, output_dir: str):
     print(f"  - Collision Videos: {data['collision']['total']} items ({data['collision']['size_mb']} MB)")
     print(f"  - GCD Grids:        {data['gcd']['total']} items")
     print(f"  - Voronoi Diagrams: {data['voronoi']['total']} items")
-    print(f"  - Traversal PDFs:   {data['traversal']['total']} items")
+    print(f"  - Traversal Assets: {data['traversal']['total']} items ({len(data['traversal']['videos'])} videos, {len(data['traversal']['files'])} PDFs)")
     print(f"  - Matrix Videos:    {data['matrix']['total']} items")
     print(f"  - RSA Videos:       {data['rsa']['total']} items")
 

@@ -30,16 +30,23 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import cairo
 
-# Default graph matching bfs_dfs_visualizer.py
+# Demonstrative graph matching bfs_dfs_visualizer.py (15 nodes: A through O)
 DEFAULT_GRAPH: dict[str, list[str]] = {
-    "A": ["B", "C"],
-    "B": ["A", "D", "E"],
-    "C": ["A", "F"],
-    "D": ["B", "G"],
-    "E": ["B", "G", "H"],
-    "F": ["C", "H"],
-    "G": ["D", "E"],
-    "H": ["E", "F"],
+    "A": ["B", "C", "D"],
+    "B": ["A", "E", "F"],
+    "C": ["A", "G", "H"],
+    "D": ["A", "H", "I"],
+    "E": ["B", "J", "K"],
+    "F": ["B", "K", "L"],
+    "G": ["C", "L", "M"],
+    "H": ["C", "D", "M"],
+    "I": ["D", "N", "O"],
+    "J": ["E", "K"],
+    "K": ["E", "F", "J", "L"],
+    "L": ["F", "G", "K", "M"],
+    "M": ["G", "H", "L", "N"],
+    "N": ["I", "M", "O"],
+    "O": ["I", "N"],
 }
 DEFAULT_START_NODE = "A"
 
@@ -159,11 +166,11 @@ def layout_graph(
 
     # Fruchterman-Reingold relaxation
     area = (box_w - 2 * margin) * (box_h - 2 * margin)
-    k = math.sqrt(area / max(1, n)) * 0.72
-    temp = min(box_w, box_h) * 0.12
-    cooling = 0.95
+    k = math.sqrt(area / max(1, n)) * 0.85
+    temp = min(box_w, box_h) * 0.15
+    cooling = 0.96
 
-    for _ in range(85):
+    for _ in range(120):
         disp: dict[str, list[float]] = {u: [0.0, 0.0] for u in nodes}
 
         # Repulsion
@@ -264,6 +271,7 @@ def build_traversal_steps(
     graph: dict[str, list[str]],
     start_node: str,
     algorithm: str,
+    target_node: Optional[str] = None,
     frames_per_step: int = 54,
 ) -> list[TraversalStep]:
     """Generate fine-grained traversal events with animated transitions at clear pedagogical pacing."""
@@ -275,17 +283,21 @@ def build_traversal_steps(
     visited_nodes: set[str] = set()
     visited_order: list[str] = []
     tree_edges: set[frozenset[str]] = set()
+    parent: dict[str, str] = {}
 
     is_bfs = algorithm == "bfs"
     ds_name = "FIFO Queue" if is_bfs else "LIFO Stack"
 
     # Step 0: Initialization
+    init_desc = f"Push start node {start_node} to {ds_name}. Node marked Frontier."
+    if target_node:
+        init_desc += f" Search target: Node {target_node}."
     steps.append(
         TraversalStep(
             step_number=step_counter,
             action_type="INIT",
             title=f"INITIALIZE {ds_name.upper()}",
-            description=f"Push start node {start_node} to {ds_name}. Node marked Frontier.",
+            description=init_desc,
             active_node=None,
             target_neighbor=None,
             frontier=frontier,
@@ -293,7 +305,7 @@ def build_traversal_steps(
             visited_order=visited_order,
             tree_edges=tree_edges,
             active_edges=set(),
-            frame_duration=max(15, int(frames_per_step * 1.1)),
+            frame_duration=max(15, int(frames_per_step * 1.2)),
         )
     )
 
@@ -326,6 +338,60 @@ def build_traversal_steps(
             )
         )
 
+        # Check if target node reached on activation
+        if target_node and current == target_node:
+            step_counter += 1
+            visited_nodes.add(current)
+            if current not in visited_order:
+                visited_order.append(current)
+
+            # Reconstruct path from start_node to target_node
+            path = [current]
+            curr = current
+            while curr in parent:
+                curr = parent[curr]
+                path.append(curr)
+            path.reverse()
+            path_edges = {frozenset((path[i], path[i + 1])) for i in range(len(path) - 1)}
+
+            path_str = " -> ".join(path)
+            steps.append(
+                TraversalStep(
+                    step_number=step_counter,
+                    action_type="TARGET_REACHED",
+                    title=f"TARGET NODE {target_node} REACHED!",
+                    description=f"Destination {target_node} reached! {'Shortest path' if is_bfs else 'Traversal path'} ({len(path)-1} hops): {path_str}.",
+                    active_node=current,
+                    target_neighbor=None,
+                    frontier=frontier,
+                    visited_nodes=visited_nodes,
+                    visited_order=visited_order,
+                    tree_edges=tree_edges | path_edges,
+                    active_edges=path_edges,
+                    frame_duration=max(25, int(frames_per_step * 2.2)),
+                )
+            )
+
+            # Target search complete
+            step_counter += 1
+            steps.append(
+                TraversalStep(
+                    step_number=step_counter,
+                    action_type="FINISHED",
+                    title="TARGET SEARCH COMPLETE",
+                    description=f"Path from {start_node} to {target_node} successfully resolved ({len(path)-1} hops). Search complete!",
+                    active_node=None,
+                    target_neighbor=None,
+                    frontier=frontier,
+                    visited_nodes=visited_nodes,
+                    visited_order=visited_order,
+                    tree_edges=tree_edges | path_edges,
+                    active_edges=path_edges,
+                    frame_duration=max(30, int(frames_per_step * 2.5)),
+                )
+            )
+            return steps
+
         neighbors = graph[current] if is_bfs else list(reversed(graph[current]))
 
         for neighbor in neighbors:
@@ -336,6 +402,7 @@ def build_traversal_steps(
             # Signal traversal animation along edge
             if is_unvisited:
                 discovered.add(neighbor)
+                parent[neighbor] = current
                 frontier.append(neighbor)
                 tree_edges.add(edge)
 
@@ -410,7 +477,7 @@ def build_traversal_steps(
             visited_order=visited_order,
             tree_edges=tree_edges,
             active_edges=set(),
-            frame_duration=max(20, int(frames_per_step * 1.8)),
+            frame_duration=max(20, int(frames_per_step * 2.0)),
         )
     )
 
@@ -536,12 +603,16 @@ class TraversalVideoRenderer:
         algorithm: str,
         width: int = 2560,
         height: int = 1440,
+        start_node: str = "A",
+        target_node: Optional[str] = None,
     ):
         self.graph = graph
         self.layout = layout
         self.algorithm = algorithm
         self.width = width
         self.height = height
+        self.start_node = start_node
+        self.target_node = target_node
         self.scale = max(0.2, min(width / 1920.0, height / 1080.0))
 
         # Precompute unique edges
@@ -765,6 +836,27 @@ class TraversalVideoRenderer:
                     color=(1.0, 1.0, 1.0),
                 )
 
+            # Start Node Outer Accent Ring
+            if node == getattr(self, "start_node", None):
+                ctx.new_sub_path()
+                ctx.arc(nx, ny, r + 6.0 * self.scale, 0.0, 2.0 * math.pi)
+                ctx.set_source_rgba(0.02, 0.71, 0.83, 0.7)
+                ctx.set_line_width(max(1.5, 2.5 * self.scale))
+                ctx.stroke()
+
+            # Target Node Concentric Reticle
+            if node == getattr(self, "target_node", None):
+                ctx.new_sub_path()
+                ctx.arc(nx, ny, r + 8.5 * self.scale, 0.0, 2.0 * math.pi)
+                if step.action_type == "TARGET_REACHED":
+                    # Golden celebratory celebration glow
+                    ctx.set_source_rgba(0.96, 0.75, 0.10, 0.9)
+                    ctx.set_line_width(max(2.5, 4.5 * self.scale))
+                else:
+                    ctx.set_source_rgba(0.96, 0.62, 0.04, 0.75)
+                    ctx.set_line_width(max(1.8, 3.0 * self.scale))
+                ctx.stroke()
+
     def _draw_hud(
         self,
         ctx: cairo.Context,
@@ -801,14 +893,20 @@ class TraversalVideoRenderer:
 
         # Section A: Header & Complexities
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(max(12.0, 21.0 * self.scale))
+        ctx.set_font_size(max(12.0, 20.0 * self.scale))
         ctx.set_source_rgb(0.95, 0.98, 1.0)
         ctx.move_to(inner_x, curr_y + 18.0 * self.scale)
-        ctx.show_text(alg_name)
+        header_title = f"{alg_name} [Node {self.start_node}]" if self.start_node != "A" else alg_name
+        ctx.show_text(header_title)
 
-        # Complexity Pills
+        # Complexity & Scope Pills
         curr_y += 32.0 * self.scale
-        comp_text = "Time: O(V + E)   |   Space: O(V)"
+        if getattr(self, "target_node", None):
+            comp_text = f"Origin: Node {self.start_node}  →  Target: Node {self.target_node}  |  O(V + E)"
+        elif self.start_node != "A":
+            comp_text = f"Origin: Node {self.start_node}   |   Time: O(V + E)   |   Space: O(V)"
+        else:
+            comp_text = "Time: O(V + E)   |   Space: O(V)"
         pill_h = 30.0 * self.scale
         draw_rounded_rect(ctx, inner_x, curr_y, inner_w, pill_h, 6.0 * self.scale)
         ctx.set_source_rgba(0.12, 0.18, 0.28, 0.8)
@@ -1106,8 +1204,26 @@ class TraversalVideoRenderer:
         step: TraversalStep,
         global_frame: int,
     ) -> float:
-        """Draw the sequential order ribbon of visited nodes."""
-        container_h = 145.0 * self.scale
+        """Draw the sequential order ribbon of visited nodes with dynamic sizing for 15+ nodes."""
+        n_graph = len(self.graph)
+        if n_graph > 10:
+            pill_w = 34.0 * self.scale
+            pill_h = 32.0 * self.scale
+            gap_x = 16.0 * self.scale
+            gap_y = 8.0 * self.scale
+            font_sz = max(9.5, 14.0 * self.scale)
+        else:
+            pill_w = 44.0 * self.scale
+            pill_h = 40.0 * self.scale
+            gap_x = 22.0 * self.scale
+            gap_y = 12.0 * self.scale
+            font_sz = max(11.0, 17.0 * self.scale)
+
+        max_per_row = max(1, int((w - 32.0 * self.scale) / (pill_w + gap_x)))
+        total_items = max(1, len(step.visited_order))
+        num_rows = max(1, math.ceil(total_items / max_per_row))
+        container_h = max(135.0 * self.scale, (44.0 + num_rows * (pill_h + gap_y) + 14.0) * self.scale)
+
         draw_rounded_rect(ctx, x, y, w, container_h, 10.0 * self.scale)
         ctx.set_source_rgb(0.08, 0.12, 0.19)
         ctx.fill_preserve()
@@ -1129,10 +1245,6 @@ class TraversalVideoRenderer:
 
         # Ribbon rack
         rack_y = y + 38.0 * self.scale
-        pill_w = 44.0 * self.scale
-        pill_h = 40.0 * self.scale
-        gap_x = 22.0 * self.scale
-        gap_y = 12.0 * self.scale
 
         if not step.visited_order:
             draw_text_centered(
@@ -1145,7 +1257,6 @@ class TraversalVideoRenderer:
                 color=(0.40, 0.48, 0.60),
             )
         else:
-            max_per_row = max(1, int((w - 30.0 * self.scale) / (pill_w + gap_x)))
             for idx, node in enumerate(step.visited_order):
                 row = idx // max_per_row
                 col = idx % max_per_row
@@ -1172,24 +1283,25 @@ class TraversalVideoRenderer:
                     node,
                     px + pill_w / 2.0,
                     py + pill_h / 2.0,
-                    font_size=max(11.0, 17.0 * self.scale),
+                    font_size=font_sz,
                     font_bold=True,
                     color=(1.0, 1.0, 1.0),
                 )
 
                 # Small connector arrow if not end of row and has next
                 if col < max_per_row - 1 and idx < len(step.visited_order) - 1:
-                    arrow_x = px + pill_w + 4.0 * self.scale
+                    arrow_x = px + pill_w + 3.0 * self.scale
                     arrow_y = py + pill_h / 2.0
+                    arrow_len = max(5.0, gap_x - 6.0 * self.scale)
                     ctx.set_source_rgb(0.35, 0.45, 0.58)
-                    ctx.set_line_width(max(1.2, 1.8 * self.scale))
+                    ctx.set_line_width(max(1.0, 1.5 * self.scale))
                     ctx.move_to(arrow_x, arrow_y)
-                    ctx.line_to(arrow_x + 10.0 * self.scale, arrow_y)
+                    ctx.line_to(arrow_x + arrow_len, arrow_y)
                     ctx.stroke()
                     # Small arrowhead
-                    ctx.move_to(arrow_x + 7.0 * self.scale, arrow_y - 3.5 * self.scale)
-                    ctx.line_to(arrow_x + 10.5 * self.scale, arrow_y)
-                    ctx.line_to(arrow_x + 7.0 * self.scale, arrow_y + 3.5 * self.scale)
+                    ctx.move_to(arrow_x + arrow_len - 3.0 * self.scale, arrow_y - 3.0 * self.scale)
+                    ctx.line_to(arrow_x + arrow_len, arrow_y)
+                    ctx.line_to(arrow_x + arrow_len - 3.0 * self.scale, arrow_y + 3.0 * self.scale)
                     ctx.stroke()
 
         return y + container_h
@@ -1300,6 +1412,8 @@ class ComparativeTraversalRenderer:
         dfs_steps: list[TraversalStep],
         width: int = 2560,
         height: int = 1440,
+        start_node: str = "A",
+        target_node: Optional[str] = None,
     ):
         self.graph = graph
         self.layout = layout
@@ -1307,6 +1421,8 @@ class ComparativeTraversalRenderer:
         self.dfs_steps = dfs_steps
         self.width = width
         self.height = height
+        self.start_node = start_node
+        self.target_node = target_node
         self.scale = max(0.2, min(width / 1920.0, height / 1080.0))
 
         # Compute dual layouts: one for left half, one for right half
@@ -1325,8 +1441,8 @@ class ComparativeTraversalRenderer:
         self.bfs_layout = layout_graph(graph, box_x=left_x + 20.0 * self.scale, box_y=panel_y + 55.0 * self.scale, box_w=box_w, box_h=box_h, margin=55.0 * self.scale)
         self.dfs_layout = layout_graph(graph, box_x=right_x + 20.0 * self.scale, box_y=panel_y + 55.0 * self.scale, box_w=box_w, box_h=box_h, margin=55.0 * self.scale)
 
-        self.bfs_renderer = TraversalVideoRenderer(graph, self.bfs_layout, "bfs", width=int(panel_w), height=height)
-        self.dfs_renderer = TraversalVideoRenderer(graph, self.dfs_layout, "dfs", width=int(panel_w), height=height)
+        self.bfs_renderer = TraversalVideoRenderer(graph, self.bfs_layout, "bfs", width=int(panel_w), height=height, start_node=start_node, target_node=target_node)
+        self.dfs_renderer = TraversalVideoRenderer(graph, self.dfs_layout, "dfs", width=int(panel_w), height=height, start_node=start_node, target_node=target_node)
 
     def render_frame(
         self,
@@ -1361,18 +1477,26 @@ class ComparativeTraversalRenderer:
         ctx.set_line_width(max(1.0, 1.5 * self.scale))
         ctx.stroke()
 
+        top_title = f"GRAPH TRAVERSAL COMPARISON (START: NODE {self.start_node}): BFS vs DFS" if self.start_node != "A" else "GRAPH TRAVERSAL COMPARISON: BREADTH-FIRST SEARCH vs DEPTH-FIRST SEARCH"
+        if getattr(self, "target_node", None):
+            top_subtitle = f"Target Node Search: Finding Node {self.target_node} from Node {self.start_node} | BFS Wavefront vs DFS Branch Diving"
+        elif self.start_node != "A":
+            top_subtitle = f"Origin: Node {self.start_node} | Wavefront Expansion (Queue) vs Deep Branch Diving (Stack)"
+        else:
+            top_subtitle = "Wavefront Level-by-Level Expansion (Queue)  vs  Deep Branch Diving with Backtracking (Stack)"
+
         draw_text_centered(
             ctx,
-            "GRAPH TRAVERSAL COMPARISON: BREADTH-FIRST SEARCH vs DEPTH-FIRST SEARCH",
+            top_title,
             self.width / 2.0,
             38.0 * self.scale,
-            font_size=max(12.0, 20.0 * self.scale),
+            font_size=max(11.0, 19.0 * self.scale),
             font_bold=True,
             color=(0.95, 0.98, 1.0),
         )
         draw_text_centered(
             ctx,
-            "Wavefront Level-by-Level Expansion (Queue)  vs  Deep Branch Diving with Backtracking (Stack)",
+            top_subtitle,
             self.width / 2.0,
             64.0 * self.scale,
             font_size=max(9.0, 13.0 * self.scale),
@@ -1470,10 +1594,13 @@ class ComparativeTraversalRenderer:
         # Frontier sequence
         ds_type = "Queue (Front -> Rear)" if algorithm == "bfs" else "Stack (Top -> Bottom)"
         frontier_items = step.frontier if algorithm == "bfs" else list(reversed(step.frontier))
-        frontier_str = " -> ".join(frontier_items) if frontier_items else "(empty)"
+        if len(frontier_items) > 7:
+            frontier_str = " -> ".join(frontier_items[:6]) + f" ... (+{len(frontier_items)-6})"
+        else:
+            frontier_str = " -> ".join(frontier_items) if frontier_items else "(empty)"
 
         ctx.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        ctx.set_font_size(max(9.0, 12.0 * self.scale))
+        ctx.set_font_size(max(8.5, 11.5 * self.scale))
         ctx.set_source_rgb(0.65, 0.75, 0.88)
         ctx.move_to(x + 14.0 * self.scale, y + 74.0 * self.scale)
         ctx.show_text(f"{ds_type}:  ")
@@ -1482,7 +1609,10 @@ class ComparativeTraversalRenderer:
         ctx.show_text(frontier_str)
 
         # Visited sequence
-        vis_str = " -> ".join(step.visited_order) if step.visited_order else "(none)"
+        if len(step.visited_order) > 9:
+            vis_str = " -> ".join(step.visited_order[:4]) + " -> ... -> " + " -> ".join(step.visited_order[-4:])
+        else:
+            vis_str = " -> ".join(step.visited_order) if step.visited_order else "(none)"
         ctx.set_source_rgb(0.06, 0.73, 0.51)
         ctx.move_to(x + 14.0 * self.scale, y + 102.0 * self.scale)
         ctx.show_text("Visited Order:  ")
@@ -1503,6 +1633,7 @@ def render_standalone_video(
     algorithm: str,
     output_path: Path,
     start_node: str = "A",
+    target_node: Optional[str] = None,
     fps: int = 30,
     width: int = 2560,
     height: int = 1440,
@@ -1516,11 +1647,11 @@ def render_standalone_video(
         raise RuntimeError("FFmpeg executable not found. Please install ffmpeg or specify --ffmpeg-bin.")
 
     frames_per_step = max(6, int(fps * step_duration))
-    steps = build_traversal_steps(graph, start_node, algorithm, frames_per_step=frames_per_step)
-    renderer = TraversalVideoRenderer(graph, layout, algorithm, width=width, height=height)
+    steps = build_traversal_steps(graph, start_node, algorithm, target_node=target_node, frames_per_step=frames_per_step)
+    renderer = TraversalVideoRenderer(graph, layout, algorithm, width=width, height=height, start_node=start_node, target_node=target_node)
 
-    init_hold_frames = max(10, int(fps * 1.5))
-    final_hold_frames = max(15, int(fps * 3.0))
+    init_hold_frames = max(15, int(fps * 2.0))
+    final_hold_frames = max(20, int(fps * 3.5))
     total_frames = init_hold_frames + sum(s.frame_duration for s in steps) + final_hold_frames
     print(f"[{algorithm.upper()}] Encoding {total_frames} frames ({total_frames / fps:.1f}s) at {width}x{height} to {output_path}...")
 
@@ -1559,18 +1690,17 @@ def render_standalone_video(
         proc.stdin.write(surface.get_data())
         global_frame += 1
 
-    # 2. Main Traversal Steps
-    mid_frame_saved = False
+    # 2. Step by Step Animation
     for step_idx, step in enumerate(steps):
-        for f in range(step.frame_duration):
+        duration = step.frame_duration
+        for f in range(duration):
             renderer.render_frame(ctx, step, f, len(steps), global_frame)
             surface.flush()
             proc.stdin.write(surface.get_data())
 
-            # Save preview frame if requested
-            if save_preview_frame and not mid_frame_saved and step_idx == len(steps) // 2:
+            # Save preview thumbnail at midpoint of active exploration
+            if save_preview_frame and global_frame == total_frames // 2:
                 surface.write_to_png(str(save_preview_frame))
-                mid_frame_saved = True
 
             global_frame += 1
 
@@ -1582,10 +1712,12 @@ def render_standalone_video(
         proc.stdin.write(surface.get_data())
         global_frame += 1
 
+    # Flush preview frame if not saved yet
+    if save_preview_frame and not save_preview_frame.exists():
+        surface.write_to_png(str(save_preview_frame))
+
     proc.stdin.close()
-    err = proc.stderr.read() if proc.stderr else b""
-    if proc.stderr:
-        proc.stderr.close()
+    _, err = proc.communicate()
     proc.wait()
 
     if proc.returncode != 0:
@@ -1600,6 +1732,7 @@ def render_comparative_video(
     layout: dict[str, tuple[float, float]],
     output_path: Path,
     start_node: str = "A",
+    target_node: Optional[str] = None,
     fps: int = 30,
     width: int = 2560,
     height: int = 1440,
@@ -1613,15 +1746,15 @@ def render_comparative_video(
         raise RuntimeError("FFmpeg executable not found. Please install ffmpeg or specify --ffmpeg-bin.")
 
     frames_per_step = max(6, int(fps * step_duration))
-    bfs_steps = build_traversal_steps(graph, start_node, "bfs", frames_per_step=frames_per_step)
-    dfs_steps = build_traversal_steps(graph, start_node, "dfs", frames_per_step=frames_per_step)
+    bfs_steps = build_traversal_steps(graph, start_node, "bfs", target_node=target_node, frames_per_step=frames_per_step)
+    dfs_steps = build_traversal_steps(graph, start_node, "dfs", target_node=target_node, frames_per_step=frames_per_step)
 
-    renderer = ComparativeTraversalRenderer(graph, layout, bfs_steps, dfs_steps, width=width, height=height)
+    renderer = ComparativeTraversalRenderer(graph, layout, bfs_steps, dfs_steps, width=width, height=height, start_node=start_node, target_node=target_node)
 
     # Align step sequences by step progress
     max_steps = max(len(bfs_steps), len(dfs_steps))
-    init_hold_frames = max(10, int(fps * 1.5))
-    final_hold_frames = max(15, int(fps * 3.0))
+    init_hold_frames = max(15, int(fps * 2.0))
+    final_hold_frames = max(20, int(fps * 3.5))
     total_frames = init_hold_frames + max_steps * frames_per_step + final_hold_frames
     print(f"[COMPARISON] Encoding {total_frames} frames ({total_frames / fps:.1f}s) at {width}x{height} to {output_path}...")
 
@@ -1659,20 +1792,18 @@ def render_comparative_video(
         proc.stdin.write(surface.get_data())
         global_frame += 1
 
-    # 2. Stepping Loop
-    mid_saved = False
+    # 2. Step by Step Animation
     for s_idx in range(max_steps):
-        b_step = bfs_steps[min(s_idx, len(bfs_steps) - 1)]
-        d_step = dfs_steps[min(s_idx, len(dfs_steps) - 1)]
+        bfs_s = bfs_steps[min(s_idx, len(bfs_steps) - 1)]
+        dfs_s = dfs_steps[min(s_idx, len(dfs_steps) - 1)]
 
         for f in range(frames_per_step):
-            renderer.render_frame(ctx, b_step, d_step, f, f, global_frame)
+            renderer.render_frame(ctx, bfs_s, dfs_s, f, f, global_frame)
             surface.flush()
             proc.stdin.write(surface.get_data())
 
-            if save_preview_frame and not mid_saved and s_idx == max_steps // 2:
+            if save_preview_frame and global_frame == total_frames // 2:
                 surface.write_to_png(str(save_preview_frame))
-                mid_saved = True
 
             global_frame += 1
 
@@ -1683,10 +1814,11 @@ def render_comparative_video(
         proc.stdin.write(surface.get_data())
         global_frame += 1
 
+    if save_preview_frame and not save_preview_frame.exists():
+        surface.write_to_png(str(save_preview_frame))
+
     proc.stdin.close()
-    err = proc.stderr.read() if proc.stderr else b""
-    if proc.stderr:
-        proc.stderr.close()
+    _, err = proc.communicate()
     proc.wait()
 
     if proc.returncode != 0:
@@ -1707,10 +1839,11 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("output"), help="directory for generated MP4 files")
     parser.add_argument("--graph-json", type=Path, help="path to graph.json metadata file to reuse existing graph")
     parser.add_argument("--random-graph", action="store_true", help="generate a random connected graph")
-    parser.add_argument("--nodes", type=int, default=10, help="number of nodes (3-26) for random graph")
-    parser.add_argument("--edge-probability", type=float, default=0.30, help="edge probability for random graph")
+    parser.add_argument("--nodes", type=int, default=15, help="number of nodes (3-26) for random graph (default 15)")
+    parser.add_argument("--edge-probability", type=float, default=0.18, help="edge probability for random graph (default 0.18)")
     parser.add_argument("--seed", type=int, default=42, help="random seed for reproducible graph generation")
     parser.add_argument("--start-node", help="node from which to start the traversal")
+    parser.add_argument("--target-node", help="optional target node to search for (stops and highlights path when reached)")
     parser.add_argument("--fps", type=int, default=30, help="video framerate (default 30)")
     parser.add_argument(
         "--preset",
@@ -1724,7 +1857,7 @@ def main() -> None:
         "--speed",
         choices=("slow", "normal", "fast"),
         default="normal",
-        help="pacing preset: slow (2.0s/step), normal (1.2s/step, default), fast (0.7s/step)",
+        help="pacing preset: slow (2.5s/step), normal (1.8s/step, default), fast (1.0s/step)",
     )
     parser.add_argument("--step-duration", type=float, help="duration in seconds for each traversal action step (overrides --speed)")
     parser.add_argument("--ffmpeg-bin", help="path to ffmpeg binary executable")
@@ -1744,13 +1877,13 @@ def main() -> None:
     video_width = args.width if args.width is not None else preset_w
     video_height = args.height if args.height is not None else preset_h
 
-    # Pacing calculation
+    # Pacing calculation (relaxed, clearly visible pacing)
     SPEED_PRESETS = {
-        "slow": 2.0,
-        "normal": 1.2,
-        "fast": 0.7,
+        "slow": 2.5,
+        "normal": 1.8,
+        "fast": 1.0,
     }
-    step_duration = args.step_duration if args.step_duration is not None else SPEED_PRESETS.get(args.speed, 1.2)
+    step_duration = args.step_duration if args.step_duration is not None else SPEED_PRESETS.get(args.speed, 1.8)
 
     # Determine Graph
     if args.graph_json and args.graph_json.exists():
@@ -1771,6 +1904,11 @@ def main() -> None:
     if start_node not in graph:
         start_node = next(iter(graph))
 
+    target_node = args.target_node
+    if target_node and target_node not in graph:
+        print(f"Warning: target node {target_node!r} not in graph. Ignoring target node.")
+        target_node = None
+
     args.output.mkdir(parents=True, exist_ok=True)
 
     # Compute graph layout scaled to video dimensions
@@ -1787,10 +1925,16 @@ def main() -> None:
 
     layout = layout_graph(graph, box_x=box_x, box_y=box_y, box_w=box_w, box_h=box_h, margin=75.0 * scale, seed=seed)
 
+    # Descriptive titles based on scope
+    is_particular_node = (start_node != "A") or (target_node is not None)
+    scope_str = "particular_node" if is_particular_node else "all_nodes"
+    scope_prefix = f"Particular Node ({start_node}): " if is_particular_node else ""
+
     # Write manifest / metadata
     manifest = {
         "graph": graph,
         "start_node": start_node,
+        "target_node": target_node,
         "seed": seed,
         "nodes": len(graph),
         "edges": sum(len(neighbors) for neighbors in graph.values()) // 2,
@@ -1798,6 +1942,7 @@ def main() -> None:
         "fps": args.fps,
         "step_duration_seconds": step_duration,
         "preset": args.preset,
+        "scope": scope_str,
         "generated_videos": [],
     }
 
@@ -1813,6 +1958,7 @@ def main() -> None:
             "bfs",
             out_bfs,
             start_node=start_node,
+            target_node=target_node,
             fps=args.fps,
             width=video_width,
             height=video_height,
@@ -1823,8 +1969,11 @@ def main() -> None:
         manifest["generated_videos"].append({
             "algorithm": "bfs",
             "filename": out_bfs.name,
-            "title": "Breadth-First Search (BFS) Animation",
+            "title": f"{scope_prefix}Breadth-First Search (BFS) Animation",
             "data_structure": "FIFO Queue",
+            "start_node": start_node,
+            "target_node": target_node,
+            "scope": scope_str,
             "resolution": f"{video_width}x{video_height}",
             "step_duration": step_duration,
         })
@@ -1838,6 +1987,7 @@ def main() -> None:
             "dfs",
             out_dfs,
             start_node=start_node,
+            target_node=target_node,
             fps=args.fps,
             width=video_width,
             height=video_height,
@@ -1848,8 +1998,11 @@ def main() -> None:
         manifest["generated_videos"].append({
             "algorithm": "dfs",
             "filename": out_dfs.name,
-            "title": "Depth-First Search (DFS) Animation",
+            "title": f"{scope_prefix}Depth-First Search (DFS) Animation",
             "data_structure": "LIFO Stack",
+            "start_node": start_node,
+            "target_node": target_node,
+            "scope": scope_str,
             "resolution": f"{video_width}x{video_height}",
             "step_duration": step_duration,
         })
@@ -1862,6 +2015,7 @@ def main() -> None:
             layout,
             out_comp,
             start_node=start_node,
+            target_node=target_node,
             fps=args.fps,
             width=video_width,
             height=video_height,
@@ -1872,8 +2026,11 @@ def main() -> None:
         manifest["generated_videos"].append({
             "algorithm": "comparison",
             "filename": out_comp.name,
-            "title": "Comparative Traversal: BFS vs DFS",
+            "title": f"{scope_prefix}Comparative Traversal: BFS vs DFS",
             "data_structure": "Queue vs Stack",
+            "start_node": start_node,
+            "target_node": target_node,
+            "scope": scope_str,
             "resolution": f"{video_width}x{video_height}",
             "step_duration": step_duration,
         })

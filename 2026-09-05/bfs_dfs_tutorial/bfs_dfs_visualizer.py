@@ -17,16 +17,23 @@ from pathlib import Path
 from typing import Iterable
 
 
-# An undirected graph. List order intentionally makes the traversal repeatable.
+# Demonstrative undirected graph (15 nodes, A through O).
 GRAPH: dict[str, list[str]] = {
-    "A": ["B", "C"],
-    "B": ["A", "D", "E"],
-    "C": ["A", "F"],
-    "D": ["B", "G"],
-    "E": ["B", "G", "H"],
-    "F": ["C", "H"],
-    "G": ["D", "E"],
-    "H": ["E", "F"],
+    "A": ["B", "C", "D"],
+    "B": ["A", "E", "F"],
+    "C": ["A", "G", "H"],
+    "D": ["A", "H", "I"],
+    "E": ["B", "J", "K"],
+    "F": ["B", "K", "L"],
+    "G": ["C", "L", "M"],
+    "H": ["C", "D", "M"],
+    "I": ["D", "N", "O"],
+    "J": ["E", "K"],
+    "K": ["E", "F", "J", "L"],
+    "L": ["F", "G", "K", "M"],
+    "M": ["G", "H", "L", "N"],
+    "N": ["I", "M", "O"],
+    "O": ["I", "N"],
 }
 START_NODE = "A"
 
@@ -168,8 +175,8 @@ def main() -> None:
     parser.add_argument("--algorithm", choices=("bfs", "dfs", "both"), default="both")
     parser.add_argument("--output", type=Path, default=Path("output"), help="directory for generated files")
     parser.add_argument("--random-graph", action="store_true", help="generate a random connected graph instead of the example graph")
-    parser.add_argument("--nodes", type=int, default=10, help="number of nodes for --random-graph (3-26)")
-    parser.add_argument("--edge-probability", type=float, default=0.30, help="chance of each extra edge in a random graph")
+    parser.add_argument("--nodes", type=int, default=15, help="number of nodes for --random-graph (3-26)")
+    parser.add_argument("--edge-probability", type=float, default=0.18, help="chance of each extra edge in a random graph")
     parser.add_argument("--seed", type=int, help="seed for reproducible random graph generation")
     parser.add_argument("--start-node", help="node from which to start the traversal")
     args = parser.parse_args()
@@ -178,18 +185,21 @@ def main() -> None:
     if args.random_graph:
         GRAPH = random_connected_graph(args.nodes, args.edge_probability, args.seed)
         START_NODE = next(iter(GRAPH))
-        args.output.mkdir(parents=True, exist_ok=True)
-        metadata = {
-            "graph": GRAPH,
-            "start_node": START_NODE,
-            "random_seed": args.seed,
-            "edge_probability": args.edge_probability,
-        }
-        (args.output / "graph.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
     if args.start_node:
         if args.start_node not in GRAPH:
             raise SystemExit(f"Unknown start node {args.start_node!r}. Choose one of: {', '.join(GRAPH)}")
         START_NODE = args.start_node
+
+    args.output.mkdir(parents=True, exist_ok=True)
+    metadata = {
+        "graph": GRAPH,
+        "start_node": START_NODE,
+        "random_seed": args.seed,
+        "edge_probability": args.edge_probability if args.random_graph else None,
+        "nodes": len(GRAPH),
+        "edges": sum(len(v) for v in GRAPH.values()) // 2,
+    }
+    (args.output / "graph.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
     for algorithm in (("bfs", "dfs") if args.algorithm == "both" else (args.algorithm,)):
         render(algorithm, args.output)
 

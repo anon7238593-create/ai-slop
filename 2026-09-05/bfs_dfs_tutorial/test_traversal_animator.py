@@ -114,6 +114,72 @@ class TestTraversalAnimator(unittest.TestCase):
             self.assertTrue(out_file.exists())
             self.assertGreater(out_file.stat().st_size, 1000)
 
+    def test_fifteen_node_default_graph(self):
+        self.assertEqual(len(DEFAULT_GRAPH), 15)
+        expected_nodes = [chr(ord("A") + i) for i in range(15)]
+        for n in expected_nodes:
+            self.assertIn(n, DEFAULT_GRAPH)
+
+        layout = layout_graph(DEFAULT_GRAPH, box_x=0.0, box_y=0.0, box_w=1920.0, box_h=1080.0, seed=42)
+        self.assertEqual(len(layout), 15)
+        for n in expected_nodes:
+            x, y = layout[n]
+            self.assertTrue(0.0 <= x <= 1920.0)
+            self.assertTrue(0.0 <= y <= 1080.0)
+
+    def test_traversal_from_particular_start_node(self):
+        # BFS and DFS originating specifically from Node E
+        bfs_steps = build_traversal_steps(DEFAULT_GRAPH, "E", "bfs")
+        self.assertEqual(bfs_steps[0].action_type, "INIT")
+        self.assertEqual(bfs_steps[0].frontier, ["E"])
+        self.assertEqual(bfs_steps[1].active_node, "E")
+        self.assertEqual(bfs_steps[-1].action_type, "FINISHED")
+        self.assertEqual(bfs_steps[-1].visited_order[0], "E")
+        self.assertEqual(len(bfs_steps[-1].visited_order), 15)
+
+        dfs_steps = build_traversal_steps(DEFAULT_GRAPH, "E", "dfs")
+        self.assertEqual(dfs_steps[0].action_type, "INIT")
+        self.assertEqual(dfs_steps[0].frontier, ["E"])
+        self.assertEqual(dfs_steps[1].active_node, "E")
+        self.assertEqual(dfs_steps[-1].action_type, "FINISHED")
+        self.assertEqual(dfs_steps[-1].visited_order[0], "E")
+        self.assertEqual(len(dfs_steps[-1].visited_order), 15)
+
+    def test_target_node_stopping_and_path(self):
+        steps = build_traversal_steps(DEFAULT_GRAPH, "A", "bfs", target_node="E")
+        self.assertEqual(steps[-1].action_type, "FINISHED")
+        self.assertIn("E", steps[-1].visited_order)
+        # Should stop before exploring all 15 nodes
+        self.assertLess(len(steps[-1].visited_order), 15)
+        target_steps = [s for s in steps if s.action_type == "TARGET_REACHED"]
+        self.assertEqual(len(target_steps), 1)
+        self.assertIn("TARGET NODE E REACHED", target_steps[0].title)
+        self.assertIn("Path from A to E", steps[-1].description)
+
+    def test_specific_node_traversal_integration(self):
+        from specific_node_traversal import generate_specific_node_traversal
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_dir = Path(tmpdir)
+            manifest = generate_specific_node_traversal(
+                graph=DEFAULT_GRAPH,
+                start_node="E",
+                target_node=None,
+                output_dir=out_dir,
+                algorithm="bfs",
+                fps=10,
+                width=320,
+                height=240,
+                step_duration=0.1,
+                preset="720p",
+                save_frames=True,
+            )
+            self.assertTrue((out_dir / "bfs_traversal.mp4").exists())
+            self.assertTrue((out_dir / "video_manifest.json").exists())
+            self.assertTrue((out_dir / "specific_node_graph.json").exists())
+            self.assertEqual(manifest["start_node"], "E")
+            self.assertEqual(len(manifest["generated_videos"]), 1)
+            self.assertEqual(manifest["generated_videos"][0]["algorithm"], "bfs")
+
 
 if __name__ == "__main__":
     unittest.main()
