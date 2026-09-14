@@ -5,6 +5,16 @@ on:
     branches:
       - master
       - artifacts
+  workflow_run:
+    workflows:
+      - "Generate traversal PDFs"
+      - "Generate ball collision videos"
+      - "Generate GCD grid visualizations"
+      - "Generate Voronoi diagrams"
+      - "Generate Matrix Multiplication Animations"
+      - "Generate RSA Key Generation Animations"
+    types:
+      - completed
   schedule:
     - cron: "10 * * * *"
   workflow_dispatch:

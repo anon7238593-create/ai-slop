@@ -390,6 +390,54 @@
       color: #ffffff;
     }
 
+    /* Traversal Filter Pills */
+    .traversal-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 0.35rem;
+    }
+    .traversal-pill-btn {
+      padding: 5px 13px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+    }
+    .traversal-pill-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-heading);
+      border-color: var(--border-hover);
+    }
+    .traversal-pill-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+    }
+    .traversal-pill-btn.active[data-scope="short_circuit"] {
+      background: #ca8a04;
+      border-color: #eab308;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(234, 179, 8, 0.4);
+    }
+    .traversal-pill-btn.active[data-scope="particular"] {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
     /* Traversal Table */
     .doc-list {
       display: flex;
@@ -669,10 +717,18 @@
           </div>
         </div>
       </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem;">
-        <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-heading);">Animation Videos</h3>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <select id="traversal-scope-filter" class="select" style="min-width: 190px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem;">
+        <div>
+          <h3 style="margin: 0 0 0.4rem 0; font-size: 1.1rem; color: var(--text-heading);">Animation Videos</h3>
+          <div class="traversal-pill-group" id="traversal-pills">
+            <button class="traversal-pill-btn active" data-scope="all">Show All (9)</button>
+            <button class="traversal-pill-btn" data-scope="short_circuit">⚡ Short-Circuit Search (3)</button>
+            <button class="traversal-pill-btn" data-scope="particular">🎯 Target Search (3)</button>
+            <button class="traversal-pill-btn" data-scope="full">🌐 Full Graph (3)</button>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+          <select id="traversal-scope-filter" class="select" style="min-width: 190px; display: none;">
             <option value="all">All Modes & Scopes</option>
             <option value="short_circuit">⚡ Eager Short-Circuit Search</option>
             <option value="particular">🎯 Target Ending Node Search (Standard)</option>
@@ -1093,25 +1149,34 @@
 
       const allVideos = (DATA.traversal.videos && DATA.traversal.videos.length > 0) ? DATA.traversal.videos : [
         {
-          title: "Comparative Traversal: BFS vs DFS (All Nodes)",
-          filename: "generated/bfs_dfs_comparison.mp4",
-          description: "Side-by-side synchronized comparison demonstrating Queue vs Stack on the identical graph topology.",
-          scope: "all_nodes",
+          title: "Short-Circuit Target Search (Finding Node K): Comparative Traversal",
+          filename: "generated/short-circuit/bfs_dfs_comparison.mp4",
+          description: "Synchronized eager search from Node A seeking destination Node K. Halts immediately upon target discovery on edge inspection.",
+          scope: "short_circuit_target_K",
+          short_circuit: true,
+          start_node: "A",
+          target_node: "K",
+          size_mb: 0.85
+        },
+        {
+          title: "Short-Circuit Target Search (Finding Node K): BFS Animation",
+          filename: "generated/short-circuit/bfs_traversal.mp4",
+          description: "Breadth-first search from Node A seeking destination Node K, halting eagerly upon discovering target along edge without waiting in FIFO Queue.",
+          scope: "short_circuit_target_K",
+          short_circuit: true,
+          start_node: "A",
+          target_node: "K",
           size_mb: 0.90
         },
         {
-          title: "Breadth-First Search (BFS) Animation (All Nodes)",
-          filename: "generated/bfs_traversal.mp4",
-          description: "Level-by-level wavefront exploration with FIFO Queue visualization and signal propagation.",
-          scope: "all_nodes",
-          size_mb: 0.56
-        },
-        {
-          title: "Depth-First Search (DFS) Animation (All Nodes)",
-          filename: "generated/dfs_traversal.mp4",
-          description: "Deep branch exploration and backtracking with LIFO Stack visualization.",
-          scope: "all_nodes",
-          size_mb: 0.56
+          title: "Short-Circuit Target Search (Finding Node K): DFS Animation",
+          filename: "generated/short-circuit/dfs_traversal.mp4",
+          description: "Depth-first search from Node A seeking destination Node K, halting eagerly upon discovering target along edge without waiting in LIFO Stack.",
+          scope: "short_circuit_target_K",
+          short_circuit: true,
+          start_node: "A",
+          target_node: "K",
+          size_mb: 0.90
         },
         {
           title: "Target Search (Finding Node K): Comparative Traversal",
@@ -1141,34 +1206,25 @@
           size_mb: 0.90
         },
         {
-          title: "Short-Circuit Target Search (Finding Node K): Comparative Traversal",
-          filename: "generated/short-circuit/bfs_dfs_comparison.mp4",
-          description: "Synchronized eager search from Node A seeking destination Node K. Halts immediately upon target discovery on edge inspection.",
-          scope: "short_circuit_target_K",
-          short_circuit: true,
-          start_node: "A",
-          target_node: "K",
-          size_mb: 0.85
-        },
-        {
-          title: "Short-Circuit Target Search (Finding Node K): BFS Animation",
-          filename: "generated/short-circuit/bfs_traversal.mp4",
-          description: "Breadth-first search from Node A seeking destination Node K, halting eagerly upon discovering target along edge without waiting in FIFO Queue.",
-          scope: "short_circuit_target_K",
-          short_circuit: true,
-          start_node: "A",
-          target_node: "K",
+          title: "Comparative Traversal: BFS vs DFS (All Nodes)",
+          filename: "generated/bfs_dfs_comparison.mp4",
+          description: "Side-by-side synchronized comparison demonstrating Queue vs Stack on the identical graph topology.",
+          scope: "all_nodes",
           size_mb: 0.90
         },
         {
-          title: "Short-Circuit Target Search (Finding Node K): DFS Animation",
-          filename: "generated/short-circuit/dfs_traversal.mp4",
-          description: "Depth-first search from Node A seeking destination Node K, halting eagerly upon discovering target along edge without waiting in LIFO Stack.",
-          scope: "short_circuit_target_K",
-          short_circuit: true,
-          start_node: "A",
-          target_node: "K",
-          size_mb: 0.90
+          title: "Breadth-First Search (BFS) Animation (All Nodes)",
+          filename: "generated/bfs_traversal.mp4",
+          description: "Level-by-level wavefront exploration with FIFO Queue visualization and signal propagation.",
+          scope: "all_nodes",
+          size_mb: 0.56
+        },
+        {
+          title: "Depth-First Search (DFS) Animation (All Nodes)",
+          filename: "generated/dfs_traversal.mp4",
+          description: "Deep branch exploration and backtracking with LIFO Stack visualization.",
+          scope: "all_nodes",
+          size_mb: 0.56
         }
       ];
 
@@ -1245,9 +1301,29 @@
         });
       }
 
+      const pills = document.querySelectorAll('.traversal-pill-btn');
+      pills.forEach(pill => {
+        if (!pill.dataset.bound) {
+          pill.dataset.bound = 'true';
+          pill.addEventListener('click', () => {
+            pills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            if (scopeFilter) {
+              scopeFilter.value = pill.dataset.scope;
+              updateVideoGrid();
+            }
+          });
+        }
+      });
+
       if (scopeFilter && !scopeFilter.dataset.bound) {
         scopeFilter.dataset.bound = 'true';
-        scopeFilter.addEventListener('change', updateVideoGrid);
+        scopeFilter.addEventListener('change', () => {
+          pills.forEach(p => {
+            p.classList.toggle('active', p.dataset.scope === scopeFilter.value);
+          });
+          updateVideoGrid();
+        });
       }
       if (algoFilter && !algoFilter.dataset.bound) {
         algoFilter.dataset.bound = 'true';
@@ -1267,6 +1343,12 @@
 
       if (files.length === 0) {
         files.push(
+          {
+            title: "Short-Circuit Target Search Walkthrough",
+            filename: "generated/short-circuit/short_circuit_bfs_dfs_walkthrough.pdf",
+            description: "Eager short-circuit step-by-step exploration halting the instant the destination node is discovered along an edge.",
+            size_kb: 950
+          },
           {
             title: "Complete BFS & DFS Walkthrough",
             filename: "generated/bfs_dfs_complete_walkthrough.pdf",

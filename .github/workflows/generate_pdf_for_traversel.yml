@@ -11,7 +11,7 @@ on:
 
 permissions:
   contents: write
-  actions: read
+  actions: write
 
 jobs:
   generate-and-publish:
@@ -125,3 +125,10 @@ jobs:
         run: |
           export COMMIT_DESCRIPTION="Random graph seed: $(jq -r .random_seed "$ARTIFACT_DIRECTORY"/graph.json)"
           bash .github/scripts/push_artifacts.sh
+
+      - name: Trigger immediate website deployment to GitHub Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Triggering immediate GitHub Pages deployment for updated traversal assets..."
+          gh workflow run deploy_pages.yml || true

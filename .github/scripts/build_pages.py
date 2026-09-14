@@ -176,109 +176,10 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                 "size_kb": round(os.path.getsize(sc_pdf) / 1024, 1),
             })
 
-        # 4b. Traversal Videos (All Nodes & Particular Node)
+        # 4b. Traversal Videos (Short-Circuit, Target Search, and Full Graph)
         video_items = []
 
-        # All-nodes videos in root generated/
-        root_vids = [
-            (
-                "bfs_dfs_comparison.mp4",
-                "Comparative Traversal: BFS vs DFS (All Nodes)",
-                "Side-by-side synchronized comparison demonstrating Queue vs Stack on the identical graph topology.",
-                "all_nodes",
-            ),
-            (
-                "bfs_traversal.mp4",
-                "Breadth-First Search (BFS) Animation (All Nodes)",
-                "Level-by-level wavefront exploration with FIFO Queue visualization and signal propagation.",
-                "all_nodes",
-            ),
-            (
-                "dfs_traversal.mp4",
-                "Depth-First Search (DFS) Animation (All Nodes)",
-                "Deep branch exploration and backtracking with LIFO Stack visualization.",
-                "all_nodes",
-            ),
-        ]
-        for fname, v_title, v_desc, v_scope in root_vids:
-            vpath = os.path.join(gen_dir, fname)
-            if os.path.exists(vpath):
-                video_items.append({
-                    "title": v_title,
-                    "filename": f"generated/{fname}",
-                    "description": v_desc,
-                    "scope": v_scope,
-                    "start_node": "A",
-                    "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
-                })
-
-        # Particular target ending node videos in generated/specific-node/
-        spec_dir = os.path.join(gen_dir, "specific-node")
-        if os.path.exists(spec_dir):
-            spec_start_node = "A"
-            spec_target_node = "K"
-            spec_manifest = os.path.join(spec_dir, "video_manifest.json")
-            spec_meta_graph = os.path.join(spec_dir, "specific_node_graph.json")
-
-            spec_target_dist = None
-            if os.path.exists(spec_manifest):
-                try:
-                    with open(spec_manifest, "r", encoding="utf-8") as f:
-                        s_meta = json.load(f)
-                        spec_start_node = s_meta.get("start_node", spec_start_node)
-                        spec_target_node = s_meta.get("target_node", spec_target_node)
-                        spec_target_dist = s_meta.get("target_hop_distance", None)
-                except Exception:
-                    pass
-            elif os.path.exists(spec_meta_graph):
-                try:
-                    with open(spec_meta_graph, "r", encoding="utf-8") as f:
-                        s_meta = json.load(f)
-                        spec_start_node = s_meta.get("start_node", spec_start_node)
-                        spec_target_node = s_meta.get("target_node", spec_target_node)
-                        spec_target_dist = s_meta.get("target_hop_distance", None)
-                except Exception:
-                    pass
-
-            target_label = f"Node {spec_target_node}" if spec_target_node else f"Node {spec_start_node}"
-            spec_scope = f"target_{spec_target_node}" if spec_target_node else f"node_{spec_start_node}"
-            dist_desc = f" ({spec_target_dist} hops away)" if spec_target_dist else ""
-
-            spec_vids = [
-                (
-                    "bfs_dfs_comparison.mp4",
-                    f"Target Search (Finding {target_label}): Comparative Traversal",
-                    f"Synchronized search from Node {spec_start_node} seeking destination {target_label}{dist_desc}. Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
-                    spec_scope,
-                ),
-                (
-                    "bfs_traversal.mp4",
-                    f"Target Search (Finding {target_label}): BFS Animation",
-                    f"Breadth-first search originating from Node {spec_start_node} seeking destination {target_label}{dist_desc}, stopping upon discovery to reveal the optimal shortest path.",
-                    spec_scope,
-                ),
-                (
-                    "dfs_traversal.mp4",
-                    f"Target Search (Finding {target_label}): DFS Animation",
-                    f"Depth-first search originating from Node {spec_start_node} seeking destination {target_label}{dist_desc}, demonstrating deep exploration and backtracking until target reached.",
-                    spec_scope,
-                ),
-            ]
-            for fname, v_title, v_desc, v_scope in spec_vids:
-                vpath = os.path.join(spec_dir, fname)
-                if os.path.exists(vpath):
-                    video_items.append({
-                        "title": v_title,
-                        "filename": f"generated/specific-node/{fname}",
-                        "description": v_desc,
-                        "scope": v_scope,
-                        "start_node": spec_start_node,
-                        "target_node": spec_target_node,
-                        "target_hop_distance": spec_target_dist,
-                        "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
-                    })
-
-        # Eager short-circuit target ending node videos in generated/short-circuit/
+        # 1. Eager short-circuit target ending node videos in generated/short-circuit/ (featured first)
         sc_dir = os.path.join(gen_dir, "short-circuit")
         if os.path.exists(sc_dir):
             sc_start_node = "A"
@@ -344,6 +245,105 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                         "target_hop_distance": sc_target_dist,
                         "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
                     })
+
+        # 2. Particular target ending node videos in generated/specific-node/ (standard search)
+        spec_dir = os.path.join(gen_dir, "specific-node")
+        if os.path.exists(spec_dir):
+            spec_start_node = "A"
+            spec_target_node = "K"
+            spec_manifest = os.path.join(spec_dir, "video_manifest.json")
+            spec_meta_graph = os.path.join(spec_dir, "specific_node_graph.json")
+
+            spec_target_dist = None
+            if os.path.exists(spec_manifest):
+                try:
+                    with open(spec_manifest, "r", encoding="utf-8") as f:
+                        s_meta = json.load(f)
+                        spec_start_node = s_meta.get("start_node", spec_start_node)
+                        spec_target_node = s_meta.get("target_node", spec_target_node)
+                        spec_target_dist = s_meta.get("target_hop_distance", None)
+                except Exception:
+                    pass
+            elif os.path.exists(spec_meta_graph):
+                try:
+                    with open(spec_meta_graph, "r", encoding="utf-8") as f:
+                        s_meta = json.load(f)
+                        spec_start_node = s_meta.get("start_node", spec_start_node)
+                        spec_target_node = s_meta.get("target_node", spec_target_node)
+                        spec_target_dist = s_meta.get("target_hop_distance", None)
+                except Exception:
+                    pass
+
+            target_label = f"Node {spec_target_node}" if spec_target_node else f"Node {spec_start_node}"
+            spec_scope = f"target_{spec_target_node}" if spec_target_node else f"node_{spec_start_node}"
+            dist_desc = f" ({spec_target_dist} hops away)" if spec_target_dist else ""
+
+            spec_vids = [
+                (
+                    "bfs_dfs_comparison.mp4",
+                    f"Target Search (Finding {target_label}): Comparative Traversal",
+                    f"Synchronized search from Node {spec_start_node} seeking destination {target_label}{dist_desc}. Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
+                    spec_scope,
+                ),
+                (
+                    "bfs_traversal.mp4",
+                    f"Target Search (Finding {target_label}): BFS Animation",
+                    f"Breadth-first search originating from Node {spec_start_node} seeking destination {target_label}{dist_desc}, stopping upon discovery to reveal the optimal shortest path.",
+                    spec_scope,
+                ),
+                (
+                    "dfs_traversal.mp4",
+                    f"Target Search (Finding {target_label}): DFS Animation",
+                    f"Depth-first search originating from Node {spec_start_node} seeking destination {target_label}{dist_desc}, demonstrating deep exploration and backtracking until target reached.",
+                    spec_scope,
+                ),
+            ]
+            for fname, v_title, v_desc, v_scope in spec_vids:
+                vpath = os.path.join(spec_dir, fname)
+                if os.path.exists(vpath):
+                    video_items.append({
+                        "title": v_title,
+                        "filename": f"generated/specific-node/{fname}",
+                        "description": v_desc,
+                        "scope": v_scope,
+                        "start_node": spec_start_node,
+                        "target_node": spec_target_node,
+                        "target_hop_distance": spec_target_dist,
+                        "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
+                    })
+
+        # 3. All-nodes videos in root generated/
+        root_vids = [
+            (
+                "bfs_dfs_comparison.mp4",
+                "Comparative Traversal: BFS vs DFS (All Nodes)",
+                "Side-by-side synchronized comparison demonstrating Queue vs Stack on the identical graph topology.",
+                "all_nodes",
+            ),
+            (
+                "bfs_traversal.mp4",
+                "Breadth-First Search (BFS) Animation (All Nodes)",
+                "Level-by-level wavefront exploration with FIFO Queue visualization and signal propagation.",
+                "all_nodes",
+            ),
+            (
+                "dfs_traversal.mp4",
+                "Depth-First Search (DFS) Animation (All Nodes)",
+                "Deep branch exploration and backtracking with LIFO Stack visualization.",
+                "all_nodes",
+            ),
+        ]
+        for fname, v_title, v_desc, v_scope in root_vids:
+            vpath = os.path.join(gen_dir, fname)
+            if os.path.exists(vpath):
+                video_items.append({
+                    "title": v_title,
+                    "filename": f"generated/{fname}",
+                    "description": v_desc,
+                    "scope": v_scope,
+                    "start_node": "A",
+                    "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
+                })
 
         data["traversal"]["files"] = pdf_items
         data["traversal"]["videos"] = video_items
