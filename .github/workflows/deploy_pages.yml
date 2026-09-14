@@ -1,22 +1,12 @@
 name: Deploy website to GitHub Pages
 
 on:
-  workflow_run:
-    workflows:
-      - "Generate ball collision videos"
-      - "Generate GCD grid visualizations"
-      - "Generate Voronoi diagrams"
-      - "Generate traversal PDFs"
-      - "Generate Matrix Multiplication Animations"
-      - "Generate RSA Key Generation Animations"
-    types:
-      - completed
-  schedule:
-    - cron: "10 * * * *"
   push:
     branches:
       - master
       - artifacts
+  schedule:
+    - cron: "10 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -24,13 +14,13 @@ permissions:
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment, letting in-progress production deployments complete cleanly.
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
