@@ -35,7 +35,7 @@ from ball_collision import SimulationConfig, generate_video
 
 
 MAX_BALLS: int = 1000
-DEFAULT_MIN_BALLS: int = 12
+DEFAULT_MIN_BALLS: int = 100
 DEFAULT_MAX_BALLS: int = 1000
 
 
