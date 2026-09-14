@@ -2,111 +2,107 @@
   "graph": {
     "A": [
       "B",
-      "C",
       "E",
       "I",
+      "L",
       "M"
     ],
     "B": [
       "A",
-      "E",
-      "H",
-      "I",
-      "K",
-      "L",
-      "M"
+      "C",
+      "D",
+      "N"
     ],
     "C": [
-      "A",
-      "D",
-      "E",
-      "K",
-      "O"
-    ],
-    "D": [
-      "C",
+      "B",
       "E",
       "F",
-      "G",
       "H",
+      "L"
+    ],
+    "D": [
+      "B",
+      "E",
+      "I",
+      "J",
       "K"
     ],
     "E": [
       "A",
-      "B",
       "C",
       "D",
       "G",
-      "K",
-      "L"
+      "I",
+      "L",
+      "O"
     ],
     "F": [
-      "D",
-      "H",
-      "L"
+      "C",
+      "G",
+      "J",
+      "M"
     ],
     "G": [
-      "D",
       "E",
-      "J",
-      "N"
+      "F"
     ],
     "H": [
-      "B",
-      "D",
-      "F",
-      "I",
+      "C",
       "K",
-      "L"
+      "M"
     ],
     "I": [
       "A",
-      "B",
-      "H",
-      "L"
-    ],
-    "J": [
-      "G",
-      "M"
-    ],
-    "K": [
-      "B",
-      "C",
       "D",
       "E",
-      "H",
       "N"
     ],
-    "L": [
-      "B",
-      "E",
+    "J": [
+      "D",
       "F",
+      "L"
+    ],
+    "K": [
+      "D",
       "H",
-      "I",
-      "M"
+      "L",
+      "M",
+      "N",
+      "O"
+    ],
+    "L": [
+      "A",
+      "C",
+      "E",
+      "J",
+      "K"
     ],
     "M": [
       "A",
-      "B",
-      "J",
-      "L"
+      "F",
+      "H",
+      "K",
+      "O"
     ],
     "N": [
-      "G",
+      "B",
+      "I",
       "K"
     ],
     "O": [
-      "C"
+      "E",
+      "K",
+      "M"
     ]
   },
   "start_node": "A",
   "target_node": "K",
   "target_hop_distance": 2,
   "min_distance": 2,
-  "random_seed": 1789377481,
+  "random_seed": 1789380948,
   "edge_probability": null,
   "nodes": 15,
-  "edges": 34,
+  "edges": 32,
   "step_duration_seconds": 1.8,
   "scope": "particular_node"
 }
