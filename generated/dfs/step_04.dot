@@ -12,47 +12,63 @@ graph traversal {
   }
   A [fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D"];
   B [fillcolor="#FFEDD5", color="#EA580C", fontcolor="#9A3412"];
-  C [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
+  C [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   D [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
-  E [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
-  F [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
+  E [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  F [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   G [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   H [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   I [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   J [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   K [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
-  L [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
-  M [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
+  L [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
+  M [fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A"];
   N [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   O [fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155"];
   A -- B [color="#7C3AED", penwidth=3.8];
+  A -- C [color="#7C3AED", penwidth=3.8];
+  A -- E [color="#7C3AED", penwidth=3.8];
+  A -- F [color="#7C3AED", penwidth=3.8];
   A -- H [color="#7C3AED", penwidth=3.8];
   A -- J [color="#7C3AED", penwidth=3.8];
+  A -- L [color="#7C3AED", penwidth=3.8];
+  A -- M [color="#7C3AED", penwidth=3.8];
   B -- C;
-  B -- N;
+  B -- J;
+  B -- K;
+  B -- L;
   C -- D;
-  C -- G;
-  C -- I;
+  C -- F;
+  C -- J;
   C -- K;
-  D -- E;
-  D -- F;
+  C -- O;
   D -- G;
-  D -- I;
   D -- J;
+  D -- K;
+  D -- O;
+  E -- G;
+  E -- H;
   E -- I;
   E -- N;
+  F -- H;
+  F -- I;
   F -- J;
-  F -- M;
+  F -- K;
+  F -- N;
+  F -- O;
+  G -- I;
+  G -- J;
+  G -- M;
   G -- N;
-  H -- L;
-  I -- L;
-  K -- M;
-  K -- O;
-  M -- O;
-  N -- O;
+  G -- O;
+  H -- O;
+  J -- K;
+  K -- N;
+  L -- M;
+  M -- N;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> J  |  H</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> M  |  L  |  J  |  H  |  F  |  E  |  C</TD></TR>
       <TR><TD ALIGN="LEFT"><B>Visited:</B> A</TD></TR>
     </TABLE>
   >];
