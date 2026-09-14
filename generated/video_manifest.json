@@ -2,101 +2,128 @@
   "graph": {
     "A": [
       "B",
-      "C",
-      "D",
-      "F",
-      "G",
-      "I",
+      "H",
       "J"
     ],
     "B": [
       "A",
       "C",
-      "H",
-      "I"
+      "N"
     ],
     "C": [
-      "A",
       "B",
-      "E"
+      "D",
+      "G",
+      "I",
+      "K"
     ],
     "D": [
-      "A",
-      "E",
-      "F",
-      "G"
-    ],
-    "E": [
       "C",
-      "D",
+      "E",
       "F",
       "G",
       "I",
       "J"
     ],
-    "F": [
-      "A",
+    "E": [
       "D",
-      "E",
-      "H",
-      "J"
+      "I",
+      "N"
+    ],
+    "F": [
+      "D",
+      "J",
+      "M"
     ],
     "G": [
-      "A",
+      "C",
       "D",
-      "E",
-      "H",
-      "I"
+      "N"
     ],
     "H": [
-      "B",
-      "F",
-      "G"
+      "A",
+      "L"
     ],
     "I": [
-      "A",
-      "B",
+      "C",
+      "D",
       "E",
-      "G"
+      "L"
     ],
     "J": [
       "A",
-      "E",
+      "D",
       "F"
+    ],
+    "K": [
+      "C",
+      "M",
+      "O"
+    ],
+    "L": [
+      "H",
+      "I"
+    ],
+    "M": [
+      "F",
+      "K",
+      "O"
+    ],
+    "N": [
+      "B",
+      "E",
+      "G",
+      "O"
+    ],
+    "O": [
+      "K",
+      "M",
+      "N"
     ]
   },
   "start_node": "A",
-  "seed": 1789362864,
-  "nodes": 10,
-  "edges": 22,
+  "target_node": null,
+  "seed": 1789365343,
+  "nodes": 15,
+  "edges": 25,
   "resolution": "1920x1080",
   "fps": 30,
-  "step_duration_seconds": 1.2,
+  "step_duration_seconds": 1.8,
   "preset": "1080p",
+  "scope": "all_nodes",
   "generated_videos": [
     {
       "algorithm": "bfs",
       "filename": "bfs_traversal.mp4",
       "title": "Breadth-First Search (BFS) Animation",
       "data_structure": "FIFO Queue",
+      "start_node": "A",
+      "target_node": null,
+      "scope": "all_nodes",
       "resolution": "1920x1080",
-      "step_duration": 1.2
+      "step_duration": 1.8
     },
     {
       "algorithm": "dfs",
       "filename": "dfs_traversal.mp4",
       "title": "Depth-First Search (DFS) Animation",
       "data_structure": "LIFO Stack",
+      "start_node": "A",
+      "target_node": null,
+      "scope": "all_nodes",
       "resolution": "1920x1080",
-      "step_duration": 1.2
+      "step_duration": 1.8
     },
     {
       "algorithm": "comparison",
       "filename": "bfs_dfs_comparison.mp4",
       "title": "Comparative Traversal: BFS vs DFS",
       "data_structure": "Queue vs Stack",
+      "start_node": "A",
+      "target_node": null,
+      "scope": "all_nodes",
       "resolution": "1920x1080",
-      "step_duration": 1.2
+      "step_duration": 1.8
     }
   ]
 }

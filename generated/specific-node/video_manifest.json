@@ -1,0 +1,129 @@
+{
+  "graph": {
+    "A": [
+      "B",
+      "H",
+      "J"
+    ],
+    "B": [
+      "A",
+      "C",
+      "N"
+    ],
+    "C": [
+      "B",
+      "D",
+      "G",
+      "I",
+      "K"
+    ],
+    "D": [
+      "C",
+      "E",
+      "F",
+      "G",
+      "I",
+      "J"
+    ],
+    "E": [
+      "D",
+      "I",
+      "N"
+    ],
+    "F": [
+      "D",
+      "J",
+      "M"
+    ],
+    "G": [
+      "C",
+      "D",
+      "N"
+    ],
+    "H": [
+      "A",
+      "L"
+    ],
+    "I": [
+      "C",
+      "D",
+      "E",
+      "L"
+    ],
+    "J": [
+      "A",
+      "D",
+      "F"
+    ],
+    "K": [
+      "C",
+      "M",
+      "O"
+    ],
+    "L": [
+      "H",
+      "I"
+    ],
+    "M": [
+      "F",
+      "K",
+      "O"
+    ],
+    "N": [
+      "B",
+      "E",
+      "G",
+      "O"
+    ],
+    "O": [
+      "K",
+      "M",
+      "N"
+    ]
+  },
+  "start_node": "E",
+  "target_node": null,
+  "seed": 1789365343,
+  "nodes": 15,
+  "edges": 25,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "step_duration_seconds": 1.8,
+  "preset": "1080p",
+  "scope": "particular_node",
+  "generated_videos": [
+    {
+      "algorithm": "bfs",
+      "filename": "bfs_traversal.mp4",
+      "title": "Particular Node (E): BFS Animation",
+      "data_structure": "FIFO Queue",
+      "start_node": "E",
+      "target_node": null,
+      "scope": "particular_node",
+      "resolution": "1920x1080",
+      "step_duration": 1.8
+    },
+    {
+      "algorithm": "dfs",
+      "filename": "dfs_traversal.mp4",
+      "title": "Particular Node (E): DFS Animation",
+      "data_structure": "LIFO Stack",
+      "start_node": "E",
+      "target_node": null,
+      "scope": "particular_node",
+      "resolution": "1920x1080",
+      "step_duration": 1.8
+    },
+    {
+      "algorithm": "comparison",
+      "filename": "bfs_dfs_comparison.mp4",
+      "title": "Particular Node (E): Comparative Traversal (BFS vs DFS)",
+      "data_structure": "Queue vs Stack",
+      "start_node": "E",
+      "target_node": null,
+      "scope": "particular_node",
+      "resolution": "1920x1080",
+      "step_duration": 1.8
+    }
+  ]
+}
