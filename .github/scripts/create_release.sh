@@ -146,13 +146,21 @@ done < <(find "$ARTIFACT_DIRECTORY" -maxdepth 1 -type f | sort)
 
 # Include key documents in immediate subdirectories (e.g. traversal walkthroughs)
 if [ -d "$ARTIFACT_DIRECTORY/specific-node" ]; then
+  STAGE_SUBDIR="${TEMP_ARCHIVE_DIR}/staged_specific_node"
+  mkdir -p "$STAGE_SUBDIR"
   while IFS= read -r f; do
     [ -f "$f" ] || continue
     bname="$(basename "$f")"
     case "$bname" in
       *.pdf|*.mp4|*.json|*.png)
-        UPLOAD_ASSETS+=("$f")
-        echo "    - specific-node/$bname ($(du -h "$f" | cut -f1))"
+        if [[ "$bname" == specific_node_* ]]; then
+          staged_file="$STAGE_SUBDIR/$bname"
+        else
+          staged_file="$STAGE_SUBDIR/specific_node_$bname"
+        fi
+        cp "$f" "$staged_file"
+        UPLOAD_ASSETS+=("$staged_file")
+        echo "    - $(basename "$staged_file") ($(du -h "$staged_file" | cut -f1))"
         ;;
     esac
   done < <(find "$ARTIFACT_DIRECTORY/specific-node" -maxdepth 1 -type f | sort)
