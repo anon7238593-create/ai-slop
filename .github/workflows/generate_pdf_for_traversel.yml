@@ -45,6 +45,8 @@ jobs:
             --nodes 15 \
             --edge-probability 0.18 \
             --seed "$seed" \
+            --start-node A \
+            --target-node K \
             --output "$ARTIFACT_DIRECTORY"
           python3 2026-09-05/bfs_dfs_tutorial/traversal_animator.py \
             --algorithm all \
@@ -57,6 +59,7 @@ jobs:
             --algorithm all \
             --start-node A \
             --target-node K \
+            --min-distance 2 \
             --graph-json "$ARTIFACT_DIRECTORY/graph.json" \
             --fps 30 \
             --step-duration 1.8 \

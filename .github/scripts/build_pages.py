@@ -211,12 +211,14 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
             spec_manifest = os.path.join(spec_dir, "video_manifest.json")
             spec_meta_graph = os.path.join(spec_dir, "specific_node_graph.json")
 
+            spec_target_dist = None
             if os.path.exists(spec_manifest):
                 try:
                     with open(spec_manifest, "r", encoding="utf-8") as f:
                         s_meta = json.load(f)
                         spec_start_node = s_meta.get("start_node", spec_start_node)
                         spec_target_node = s_meta.get("target_node", spec_target_node)
+                        spec_target_dist = s_meta.get("target_hop_distance", None)
                 except Exception:
                     pass
             elif os.path.exists(spec_meta_graph):
@@ -225,29 +227,31 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                         s_meta = json.load(f)
                         spec_start_node = s_meta.get("start_node", spec_start_node)
                         spec_target_node = s_meta.get("target_node", spec_target_node)
+                        spec_target_dist = s_meta.get("target_hop_distance", None)
                 except Exception:
                     pass
 
             target_label = f"Node {spec_target_node}" if spec_target_node else f"Node {spec_start_node}"
             spec_scope = f"target_{spec_target_node}" if spec_target_node else f"node_{spec_start_node}"
+            dist_desc = f" ({spec_target_dist} hops away)" if spec_target_dist else ""
 
             spec_vids = [
                 (
                     "bfs_dfs_comparison.mp4",
                     f"Target Search (Finding {target_label}): Comparative Traversal",
-                    f"Synchronized search from Node {spec_start_node} seeking destination {target_label}. Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
+                    f"Synchronized search from Node {spec_start_node} seeking destination {target_label}{dist_desc}. Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
                     spec_scope,
                 ),
                 (
                     "bfs_traversal.mp4",
                     f"Target Search (Finding {target_label}): BFS Animation",
-                    f"Breadth-first search originating from Node {spec_start_node} seeking destination {target_label}, stopping upon discovery to reveal the optimal shortest path.",
+                    f"Breadth-first search originating from Node {spec_start_node} seeking destination {target_label}{dist_desc}, stopping upon discovery to reveal the optimal shortest path.",
                     spec_scope,
                 ),
                 (
                     "dfs_traversal.mp4",
                     f"Target Search (Finding {target_label}): DFS Animation",
-                    f"Depth-first search originating from Node {spec_start_node} seeking destination {target_label}, demonstrating deep exploration and backtracking until target reached.",
+                    f"Depth-first search originating from Node {spec_start_node} seeking destination {target_label}{dist_desc}, demonstrating deep exploration and backtracking until target reached.",
                     spec_scope,
                 ),
             ]
@@ -261,6 +265,7 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
                         "scope": v_scope,
                         "start_node": spec_start_node,
                         "target_node": spec_target_node,
+                        "target_hop_distance": spec_target_dist,
                         "size_mb": round(os.path.getsize(vpath) / (1024 * 1024), 2),
                     })
 

@@ -196,6 +196,37 @@ class TestTraversalAnimator(unittest.TestCase):
             self.assertEqual(vid["algorithm"], "bfs")
             self.assertEqual(vid["scope"], "target_K")
             self.assertEqual(vid["target_node"], "K")
+            self.assertGreaterEqual(manifest["target_hop_distance"], 2)
+
+    def test_non_adjacent_target_selection(self):
+        from specific_node_traversal import pick_target_node
+        # When user requests node B (which is directly adjacent to A in DEFAULT_GRAPH, 1 hop away)
+        target, dist = pick_target_node(DEFAULT_GRAPH, start_node="A", preferred_target="B", min_distance=2)
+        self.assertNotEqual(target, "B")
+        self.assertNotIn(target, DEFAULT_GRAPH["A"])
+        self.assertGreaterEqual(dist, 2)
+
+        # When user requests node K (which is 3 hops away from A in DEFAULT_GRAPH)
+        target_k, dist_k = pick_target_node(DEFAULT_GRAPH, start_node="A", preferred_target="K", min_distance=2)
+        self.assertEqual(target_k, "K")
+        self.assertEqual(dist_k, 3)
+
+    def test_random_graph_avoid_direct_edge(self):
+        # Using seed 1789367937 which previously generated an edge between A and K
+        graph = random_connected_graph(15, 0.18, 1789367937, avoid_edges={frozenset(("A", "K"))})
+        self.assertNotIn("K", graph["A"])
+        self.assertNotIn("A", graph["K"])
+        # Verify A and K are still connected through intermediate nodes
+        dist = {"A": 0}
+        q = ["A"]
+        while q:
+            curr = q.pop(0)
+            for n in graph.get(curr, []):
+                if n not in dist:
+                    dist[n] = dist[curr] + 1
+                    q.append(n)
+        self.assertIn("K", dist)
+        self.assertGreaterEqual(dist["K"], 2)
 
 
 if __name__ == "__main__":
