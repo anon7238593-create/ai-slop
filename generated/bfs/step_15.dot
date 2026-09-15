@@ -2,7 +2,7 @@ graph traversal {
   graph [layout=dot, rankdir=TB, bgcolor="#FFFFFF", pad="0.35", nodesep="0.65", ranksep="0.8", fontname="Arial"];
   node [shape=circle, style="filled", fontname="Arial Bold", fontsize=18, width=0.72, fixedsize=true, penwidth=2.4];
   edge [color="#94A3B8", penwidth=2.0];
-  label=<<B>BFS Traversal</B><BR/><FONT POINT-SIZE="16">Step 15: No new neighbors from O</FONT>>; labelloc="t"; fontsize=26; fontname="Arial"; fontcolor="#0F172A";
+  label=<<B>BFS Traversal</B><BR/><FONT POINT-SIZE="16">Step 15: No new neighbors from E</FONT>>; labelloc="t"; fontsize=26; fontname="Arial"; fontcolor="#0F172A";
   subgraph cluster_legend { label="Legend"; color="#CBD5E1"; penwidth=1.2; style="rounded"; fontsize=14; fontname="Arial Bold";
     key_unseen [label="Unseen", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", fontsize=12, width=0.82];
     key_frontier [label="Discovered", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", fontsize=12, width=0.95];
@@ -12,47 +12,55 @@ graph traversal {
   }
   A [label="A", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
   B [label="B", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
-  C [label="C", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
+  C [label="C", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
   D [label="D", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
-  E [label="E", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
+  E [label="E", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
   F [label="F", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
   G [label="G", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
   H [label="H", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
-  I [label="I", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  I [label="I", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
   J [label="J", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
   K [label="K\n(TARGET)", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=2, penwidth=3.2, fontsize=11, width=0.85, height=0.85];
-  L [label="L", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
-  M [label="M", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
-  N [label="N", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
-  O [label="O", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
+  L [label="L", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  M [label="M", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
+  N [label="N", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
+  O [label="O", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
   A -- B [color="#7C3AED", penwidth=3.8];
+  A -- C [color="#7C3AED", penwidth=3.8];
   A -- D [color="#7C3AED", penwidth=3.8];
   A -- F [color="#7C3AED", penwidth=3.8];
   A -- H [color="#7C3AED", penwidth=3.8];
-  A -- M [color="#7C3AED", penwidth=3.8];
-  A -- O [color="#7C3AED", penwidth=3.8];
-  B -- C [color="#7C3AED", penwidth=3.8];
+  B -- C;
+  B -- E [color="#7C3AED", penwidth=3.8];
   B -- F;
-  B -- L [color="#7C3AED", penwidth=3.8];
-  C -- F;
-  C -- G;
-  D -- E [color="#7C3AED", penwidth=3.8];
-  D -- K [color="#7C3AED", penwidth=3.8];
-  D -- L;
+  B -- H;
+  C -- D;
+  C -- K [color="#7C3AED", penwidth=3.8];
+  C -- M [color="#7C3AED", penwidth=3.8];
+  C -- N [color="#7C3AED", penwidth=3.8];
+  D -- F;
+  D -- G [color="#7C3AED", penwidth=3.8];
+  D -- I [color="#7C3AED", penwidth=3.8];
+  E -- F;
   E -- H;
   E -- I;
-  E -- O;
-  F -- J [color="#7C3AED", penwidth=3.8];
-  F -- O;
-  G -- M [color="#7C3AED", penwidth=3.8];
+  F -- G;
+  F -- M;
+  G -- H;
   G -- N;
-  H -- K;
-  I -- K;
-  L -- O;
+  H -- J [color="#7C3AED", penwidth=3.8];
+  H -- N;
+  I -- L;
+  I -- N;
+  I -- O;
+  J -- K;
+  K -- N;
+  L -- M;
+  N -- O;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Queue:</B> C  →  L  →  E  →  K  →  J  →  G</TD></TR>
-      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, D, F, H, M, O</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Queue:</B> K  →  M  →  N  →  G  →  I  →  J</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Visited:</B> A, B, C, D, E, F, H</TD></TR>
     </TABLE>
   >];
 }
