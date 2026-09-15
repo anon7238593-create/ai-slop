@@ -1,13 +1,13 @@
-> 📦 **GitHub Release**: [`collision-videos-20260915-064212-run34936483555`](https://github.com/anon7238593-create/ai-slop/releases/tag/collision-videos-20260915-064212-run34936483555) &middot; **Full Bundle**: [`collision-videos-20260915-064212-run34936483555.zip`](https://github.com/anon7238593-create/ai-slop/releases/download/collision-videos-20260915-064212-run34936483555/collision-videos-20260915-064212-run34936483555.zip)
+> 📦 **GitHub Release**: [`collision-videos-20260915-073747-run34940927808`](https://github.com/anon7238593-create/ai-slop/releases/tag/collision-videos-20260915-073747-run34940927808) &middot; **Full Bundle**: [`collision-videos-20260915-073747-run34940927808.zip`](https://github.com/anon7238593-create/ai-slop/releases/download/collision-videos-20260915-073747-run34940927808/collision-videos-20260915-073747-run34940927808.zip)
 # Collision Video Visualizations
 
 Collection of 20 distinct, randomized 1920x1080 Full HD ball collision simulations with slow, analytical speeds and organic random inward deflection angles.
 
-- **Generated at**: `2026-09-15T06:42:12Z`
+- **Generated at**: `2026-09-15T07:37:46Z`
 - **Total Videos**: 20
 - **Resolution**: 1920×1080 Full HD
-- **Total Storage**: 784.38 MB
-- **Base Entropy Seed**: `515047139`
+- **Total Storage**: 688.45 MB
+- **Base Entropy Seed**: `2276267698`
 
 Each simulation varies randomly across:
 1. **Target Balls ($N$)**: Varied between 100 and 300 balls (upper limit: 1000).
@@ -20,23 +20,23 @@ Each simulation varies randomly across:
 
 | File | Balls ($N$) | Starting Angle | Canvas | Speed | File Size |
 |---|---|---|---|---|---|
-| `collision_001.mp4` | 138 | 35.3° | 1920×1080 | 204.8 px/s | 24.93 MB |
-| `collision_002.mp4` | 276 | 331.1° | 1920×1080 | 233.3 px/s | 55.93 MB |
-| `collision_003.mp4` | 214 | 210.3° | 1920×1080 | 203.2 px/s | 40.04 MB |
-| `collision_004.mp4` | 191 | 240.7° | 1920×1080 | 194.1 px/s | 33.96 MB |
-| `collision_005.mp4` | 271 | 33.3° | 1920×1080 | 186.4 px/s | 44.32 MB |
-| `collision_006.mp4` | 206 | 217.1° | 1920×1080 | 211.2 px/s | 36.43 MB |
-| `collision_007.mp4` | 275 | 23.8° | 1920×1080 | 220.9 px/s | 48.0 MB |
-| `collision_008.mp4` | 186 | 102.0° | 1920×1080 | 241.6 px/s | 36.15 MB |
-| `collision_009.mp4` | 225 | 194.9° | 1920×1080 | 250.9 px/s | 45.03 MB |
-| `collision_010.mp4` | 164 | 337.8° | 1920×1080 | 228.3 px/s | 30.98 MB |
-| `collision_011.mp4` | 229 | 71.9° | 1920×1080 | 200.6 px/s | 39.73 MB |
-| `collision_012.mp4` | 168 | 348.4° | 1920×1080 | 210.3 px/s | 29.35 MB |
-| `collision_013.mp4` | 153 | 304.9° | 1920×1080 | 233.4 px/s | 29.83 MB |
-| `collision_014.mp4` | 262 | 15.6° | 1920×1080 | 257.0 px/s | 52.38 MB |
-| `collision_015.mp4` | 241 | 168.4° | 1920×1080 | 160.4 px/s | 37.77 MB |
-| `collision_016.mp4` | 214 | 143.4° | 1920×1080 | 178.8 px/s | 37.73 MB |
-| `collision_017.mp4` | 278 | 290.5° | 1920×1080 | 253.5 px/s | 53.05 MB |
-| `collision_018.mp4` | 244 | 228.4° | 1920×1080 | 184.8 px/s | 40.39 MB |
-| `collision_019.mp4` | 220 | 318.9° | 1920×1080 | 239.4 px/s | 40.73 MB |
-| `collision_020.mp4` | 141 | 139.5° | 1920×1080 | 236.9 px/s | 27.65 MB |
+| `collision_001.mp4` | 229 | 142.8° | 1920×1080 | 175.4 px/s | 37.98 MB |
+| `collision_002.mp4` | 155 | 283.1° | 1920×1080 | 197.5 px/s | 26.36 MB |
+| `collision_003.mp4` | 177 | 149.8° | 1920×1080 | 247.4 px/s | 32.32 MB |
+| `collision_004.mp4` | 107 | 225.5° | 1920×1080 | 248.5 px/s | 19.84 MB |
+| `collision_005.mp4` | 230 | 324.4° | 1920×1080 | 187.0 px/s | 39.74 MB |
+| `collision_006.mp4` | 278 | 125.4° | 1920×1080 | 163.3 px/s | 43.48 MB |
+| `collision_007.mp4` | 292 | 168.0° | 1920×1080 | 199.8 px/s | 51.77 MB |
+| `collision_008.mp4` | 197 | 348.9° | 1920×1080 | 197.0 px/s | 35.43 MB |
+| `collision_009.mp4` | 101 | 247.8° | 1920×1080 | 191.9 px/s | 18.03 MB |
+| `collision_010.mp4` | 103 | 157.9° | 1920×1080 | 229.8 px/s | 19.35 MB |
+| `collision_011.mp4` | 200 | 218.7° | 1920×1080 | 225.9 px/s | 35.89 MB |
+| `collision_012.mp4` | 287 | 156.6° | 1920×1080 | 174.1 px/s | 50.03 MB |
+| `collision_013.mp4` | 232 | 345.9° | 1920×1080 | 219.8 px/s | 42.66 MB |
+| `collision_014.mp4` | 163 | 316.2° | 1920×1080 | 182.3 px/s | 28.48 MB |
+| `collision_015.mp4` | 262 | 312.3° | 1920×1080 | 198.7 px/s | 47.04 MB |
+| `collision_016.mp4` | 201 | 342.0° | 1920×1080 | 163.4 px/s | 33.08 MB |
+| `collision_017.mp4` | 233 | 67.4° | 1920×1080 | 246.6 px/s | 43.43 MB |
+| `collision_018.mp4` | 146 | 333.2° | 1920×1080 | 234.2 px/s | 29.21 MB |
+| `collision_019.mp4` | 174 | 248.0° | 1920×1080 | 186.0 px/s | 28.02 MB |
+| `collision_020.mp4` | 143 | 134.2° | 1920×1080 | 206.3 px/s | 26.31 MB |
