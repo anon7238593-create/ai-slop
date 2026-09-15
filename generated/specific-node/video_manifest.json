@@ -2,102 +2,94 @@
   "graph": {
     "A": [
       "B",
-      "E",
-      "J",
-      "M"
+      "G",
+      "I",
+      "M",
+      "O"
     ],
     "B": [
       "A",
       "C",
-      "D",
-      "F",
-      "G",
-      "L",
-      "M",
-      "N"
+      "J"
     ],
     "C": [
       "B",
       "D",
       "E",
-      "J",
-      "L"
-    ],
-    "D": [
-      "B",
-      "C",
-      "G",
-      "M"
-    ],
-    "E": [
-      "A",
-      "C",
-      "G",
-      "K",
+      "F",
       "O"
     ],
+    "D": [
+      "C",
+      "G",
+      "N"
+    ],
+    "E": [
+      "C",
+      "G",
+      "H",
+      "J",
+      "K",
+      "M"
+    ],
     "F": [
-      "B",
-      "I",
-      "K"
+      "C",
+      "G",
+      "J"
     ],
     "G": [
-      "B",
+      "A",
       "D",
       "E",
+      "F",
       "H",
       "J"
     ],
     "H": [
+      "E",
       "G",
-      "N"
+      "L"
     ],
     "I": [
-      "F",
-      "K"
+      "A"
     ],
     "J": [
-      "A",
-      "C",
-      "G",
-      "L",
-      "N"
+      "B",
+      "E",
+      "F",
+      "G"
     ],
     "K": [
       "E",
-      "F",
-      "I",
-      "L"
+      "N"
     ],
     "L": [
-      "B",
-      "C",
-      "J",
-      "K",
-      "M"
+      "H",
+      "N"
     ],
     "M": [
       "A",
-      "B",
-      "D",
-      "L"
+      "E"
     ],
     "N": [
-      "B",
-      "H",
-      "J"
+      "D",
+      "K",
+      "L",
+      "O"
     ],
     "O": [
-      "E"
+      "A",
+      "C",
+      "N"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 2,
+  "target_hop_distance": 3,
   "min_distance": 2,
-  "seed": 1789485295,
+  "seed": 1789488921,
   "nodes": 15,
-  "edges": 30,
+  "edges": 26,
   "resolution": "1920x1080",
   "fps": 30,
   "step_duration_seconds": 1.8,
@@ -108,11 +100,11 @@
       "algorithm": "bfs",
       "filename": "bfs_traversal.mp4",
       "title": "Target Search (Finding Node K): BFS Animation",
-      "description": "Breadth-first search originating from Node A seeking destination Node K (2 hops away), stopping upon discovery to reveal the optimal shortest path.",
+      "description": "Breadth-first search originating from Node A seeking destination Node K (3 hops away), stopping upon discovery to reveal the optimal shortest path.",
       "data_structure": "FIFO Queue",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
@@ -121,11 +113,11 @@
       "algorithm": "dfs",
       "filename": "dfs_traversal.mp4",
       "title": "Target Search (Finding Node K): DFS Animation",
-      "description": "Depth-first search originating from Node A seeking destination Node K (2 hops away), demonstrating deep exploration and backtracking until target reached.",
+      "description": "Depth-first search originating from Node A seeking destination Node K (3 hops away), demonstrating deep exploration and backtracking until target reached.",
       "data_structure": "LIFO Stack",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
@@ -134,11 +126,11 @@
       "algorithm": "comparison",
       "filename": "bfs_dfs_comparison.mp4",
       "title": "Target Search (Finding Node K): Comparative Traversal (BFS vs DFS)",
-      "description": "Synchronized search from Node A seeking destination Node K (2 hops away). Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
+      "description": "Synchronized search from Node A seeking destination Node K (3 hops away). Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
       "data_structure": "Queue vs Stack",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
