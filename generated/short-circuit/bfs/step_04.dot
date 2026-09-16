@@ -12,49 +12,49 @@ graph traversal {
   }
   A [label="A", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
   B [label="B", fillcolor="#FFEDD5", color="#EA580C", fontcolor="#9A3412", peripheries=1, penwidth=2.4];
-  C [label="C", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
-  D [label="D", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  C [label="C", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
+  D [label="D", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
   E [label="E", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
   F [label="F", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
-  G [label="G", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
-  H [label="H", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
-  I [label="I", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  G [label="G", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  H [label="H", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  I [label="I", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
   J [label="J", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
   K [label="K\n(TARGET)", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=2, penwidth=3.2, fontsize=11, width=0.85, height=0.85];
   L [label="L", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
   M [label="M", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
   N [label="N", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
-  O [label="O", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  O [label="O", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
   A -- B [color="#7C3AED", penwidth=3.8];
-  A -- G [color="#7C3AED", penwidth=3.8];
-  A -- H [color="#7C3AED", penwidth=3.8];
+  A -- C [color="#7C3AED", penwidth=3.8];
+  A -- D [color="#7C3AED", penwidth=3.8];
+  A -- I [color="#7C3AED", penwidth=3.8];
+  A -- O [color="#7C3AED", penwidth=3.8];
   B -- C;
-  B -- D;
   B -- E;
-  B -- F;
   B -- H;
   B -- K;
-  B -- L;
-  C -- E;
-  C -- J;
-  C -- N;
-  C -- O;
+  C -- D;
+  C -- G;
+  C -- H;
   D -- F;
-  E -- F;
-  E -- O;
-  F -- H;
-  F -- M;
+  D -- I;
+  D -- J;
+  D -- K;
+  D -- M;
+  E -- G;
+  E -- L;
   F -- N;
-  F -- O;
   G -- K;
-  G -- O;
-  H -- I;
-  H -- M;
-  K -- L;
-  M -- N;
+  H -- N;
+  I -- J;
+  I -- M;
+  J -- L;
+  J -- M;
+  J -- N;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Queue:</B> G  →  H</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Queue:</B> C  →  D  →  I  →  O</TD></TR>
       <TR><TD ALIGN="LEFT"><B>Visited:</B> A</TD></TR>
     </TABLE>
   >];
