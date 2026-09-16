@@ -3,117 +3,105 @@
     "A": [
       "B",
       "C",
-      "F",
+      "D",
       "G",
-      "J",
-      "O"
+      "H",
+      "M"
     ],
     "B": [
       "A",
       "D",
-      "E",
-      "I"
+      "G",
+      "H",
+      "M",
+      "N"
     ],
     "C": [
       "A",
       "D",
-      "G",
-      "H",
-      "K",
-      "N"
+      "I",
+      "M"
     ],
     "D": [
+      "A",
       "B",
       "C",
       "E",
-      "H",
-      "J",
-      "N"
+      "G",
+      "O"
     ],
     "E": [
-      "B",
       "D",
-      "G",
-      "J",
-      "K",
-      "M"
+      "F"
     ],
     "F": [
-      "A",
-      "K"
+      "E",
+      "M"
     ],
     "G": [
       "A",
-      "C",
-      "E",
-      "I",
-      "K"
-    ],
-    "H": [
-      "C",
+      "B",
       "D",
       "I",
-      "J",
-      "K",
-      "M",
-      "O"
+      "J"
+    ],
+    "H": [
+      "A",
+      "B",
+      "I",
+      "L",
+      "M"
     ],
     "I": [
-      "B",
+      "C",
       "G",
       "H",
-      "J",
+      "K"
+    ],
+    "J": [
+      "G",
       "K",
       "L",
       "N"
     ],
-    "J": [
-      "A",
-      "D",
-      "E",
-      "H",
-      "I",
-      "M"
-    ],
     "K": [
-      "C",
-      "E",
-      "F",
-      "G",
-      "H",
-      "I"
+      "I",
+      "J"
     ],
     "L": [
-      "I",
+      "H",
+      "J",
+      "N"
+    ],
+    "M": [
+      "A",
+      "B",
+      "C",
+      "F",
+      "H",
       "N",
       "O"
     ],
-    "M": [
-      "E",
-      "H",
+    "N": [
+      "B",
       "J",
+      "L",
+      "M",
       "O"
     ],
-    "N": [
-      "C",
-      "D",
-      "I",
-      "L"
-    ],
     "O": [
-      "A",
-      "H",
-      "L",
-      "M"
+      "D",
+      "M",
+      "N"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 2,
+  "target_hop_distance": 3,
   "min_distance": 2,
-  "seed": 1789532136,
+  "seed": 1789535666,
   "nodes": 15,
-  "edges": 38,
+  "edges": 32,
   "resolution": "1920x1080",
   "fps": 30,
   "step_duration_seconds": 1.8,
@@ -124,11 +112,11 @@
       "algorithm": "bfs",
       "filename": "bfs_traversal.mp4",
       "title": "Target Search (Finding Node K): BFS Animation",
-      "description": "Breadth-first search originating from Node A seeking destination Node K (2 hops away), stopping upon discovery to reveal the optimal shortest path.",
+      "description": "Breadth-first search originating from Node A seeking destination Node K (3 hops away), stopping upon discovery to reveal the optimal shortest path.",
       "data_structure": "FIFO Queue",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
@@ -137,11 +125,11 @@
       "algorithm": "dfs",
       "filename": "dfs_traversal.mp4",
       "title": "Target Search (Finding Node K): DFS Animation",
-      "description": "Depth-first search originating from Node A seeking destination Node K (2 hops away), demonstrating deep exploration and backtracking until target reached.",
+      "description": "Depth-first search originating from Node A seeking destination Node K (3 hops away), demonstrating deep exploration and backtracking until target reached.",
       "data_structure": "LIFO Stack",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
@@ -150,11 +138,11 @@
       "algorithm": "comparison",
       "filename": "bfs_dfs_comparison.mp4",
       "title": "Target Search (Finding Node K): Comparative Traversal (BFS vs DFS)",
-      "description": "Synchronized search from Node A seeking destination Node K (2 hops away). Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
+      "description": "Synchronized search from Node A seeking destination Node K (3 hops away). Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
       "data_structure": "Queue vs Stack",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8

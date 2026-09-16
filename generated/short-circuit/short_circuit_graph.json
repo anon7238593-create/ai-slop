@@ -3,119 +3,107 @@
     "A": [
       "B",
       "C",
-      "F",
+      "D",
       "G",
-      "J",
-      "O"
+      "H",
+      "M"
     ],
     "B": [
       "A",
       "D",
-      "E",
-      "I"
+      "G",
+      "H",
+      "M",
+      "N"
     ],
     "C": [
       "A",
       "D",
-      "G",
-      "H",
-      "K",
-      "N"
+      "I",
+      "M"
     ],
     "D": [
+      "A",
       "B",
       "C",
       "E",
-      "H",
-      "J",
-      "N"
+      "G",
+      "O"
     ],
     "E": [
-      "B",
       "D",
-      "G",
-      "J",
-      "K",
-      "M"
+      "F"
     ],
     "F": [
-      "A",
-      "K"
+      "E",
+      "M"
     ],
     "G": [
       "A",
-      "C",
-      "E",
-      "I",
-      "K"
-    ],
-    "H": [
-      "C",
+      "B",
       "D",
       "I",
-      "J",
-      "K",
-      "M",
-      "O"
+      "J"
+    ],
+    "H": [
+      "A",
+      "B",
+      "I",
+      "L",
+      "M"
     ],
     "I": [
-      "B",
+      "C",
       "G",
       "H",
-      "J",
+      "K"
+    ],
+    "J": [
+      "G",
       "K",
       "L",
       "N"
     ],
-    "J": [
-      "A",
-      "D",
-      "E",
-      "H",
-      "I",
-      "M"
-    ],
     "K": [
-      "C",
-      "E",
-      "F",
-      "G",
-      "H",
-      "I"
+      "I",
+      "J"
     ],
     "L": [
-      "I",
+      "H",
+      "J",
+      "N"
+    ],
+    "M": [
+      "A",
+      "B",
+      "C",
+      "F",
+      "H",
       "N",
       "O"
     ],
-    "M": [
-      "E",
-      "H",
+    "N": [
+      "B",
       "J",
+      "L",
+      "M",
       "O"
     ],
-    "N": [
-      "C",
-      "D",
-      "I",
-      "L"
-    ],
     "O": [
-      "A",
-      "H",
-      "L",
-      "M"
+      "D",
+      "M",
+      "N"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 2,
+  "target_hop_distance": 3,
   "min_distance": 2,
   "short_circuit": true,
-  "random_seed": 1789532136,
+  "random_seed": 1789535666,
   "edge_probability": null,
   "nodes": 15,
-  "edges": 38,
+  "edges": 32,
   "step_duration_seconds": 1.8,
   "scope": "short_circuit_target_K"
 }
