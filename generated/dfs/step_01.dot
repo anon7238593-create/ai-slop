@@ -27,33 +27,28 @@ graph traversal {
   O [label="O", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
   A -- B;
   A -- C;
-  A -- D;
   A -- I;
-  A -- L;
   A -- N;
-  B -- G;
-  B -- I;
+  B -- E;
+  B -- H;
   B -- J;
-  B -- M;
-  C -- E;
+  B -- K;
+  B -- N;
+  C -- D;
   C -- F;
-  C -- L;
-  D -- E;
-  D -- H;
-  D -- L;
-  E -- G;
+  D -- G;
+  D -- M;
   E -- H;
-  E -- N;
-  F -- I;
   F -- K;
-  F -- M;
   F -- O;
-  G -- N;
-  H -- J;
-  H -- O;
-  I -- J;
-  I -- K;
-  L -- N;
+  G -- H;
+  G -- I;
+  G -- L;
+  G -- M;
+  K -- L;
+  K -- N;
+  M -- N;
+  N -- O;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
       <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> A</TD></TR>
