@@ -3,89 +3,105 @@
     "A": [
       "B",
       "C",
-      "E",
-      "O"
+      "D",
+      "G",
+      "H",
+      "I",
+      "J"
     ],
     "B": [
       "A",
-      "D"
+      "D",
+      "E",
+      "H",
+      "L"
     ],
     "C": [
       "A",
-      "E",
-      "M"
+      "F",
+      "G",
+      "J",
+      "L",
+      "N"
     ],
     "D": [
-      "B",
-      "G",
-      "K",
-      "M",
-      "O"
-    ],
-    "E": [
       "A",
-      "C",
-      "F",
-      "I",
-      "J",
-      "K",
-      "M"
-    ],
-    "F": [
-      "E",
+      "B",
       "L"
     ],
-    "G": [
-      "D",
+    "E": [
+      "B",
+      "F",
+      "I",
+      "L"
+    ],
+    "F": [
+      "C",
+      "E",
       "H",
+      "K"
+    ],
+    "G": [
+      "A",
+      "C",
+      "L",
       "N",
       "O"
     ],
     "H": [
-      "G",
+      "A",
+      "B",
+      "F",
       "L"
     ],
     "I": [
+      "A",
       "E",
-      "K"
+      "M",
+      "O"
     ],
     "J": [
-      "E",
-      "K",
-      "L"
+      "A",
+      "C",
+      "M",
+      "N",
+      "O"
     ],
     "K": [
+      "F",
+      "L"
+    ],
+    "L": [
+      "B",
+      "C",
       "D",
       "E",
+      "G",
+      "H",
+      "K"
+    ],
+    "M": [
       "I",
       "J"
     ],
-    "L": [
-      "F",
-      "H",
+    "N": [
+      "C",
+      "G",
       "J"
     ],
-    "M": [
-      "C",
-      "D",
-      "E"
-    ],
-    "N": [
-      "G"
-    ],
     "O": [
-      "A",
-      "D",
-      "G"
+      "G",
+      "I",
+      "J"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 2,
+  "target_hop_distance": 3,
   "min_distance": 2,
-  "seed": 1789589766,
+  "seed": 1789593314,
   "nodes": 15,
-  "edges": 24,
+  "edges": 32,
   "resolution": "1920x1080",
   "fps": 30,
   "step_duration_seconds": 1.8,
@@ -96,11 +112,11 @@
       "algorithm": "bfs",
       "filename": "bfs_traversal.mp4",
       "title": "Target Search (Finding Node K): BFS Animation",
-      "description": "Breadth-first search originating from Node A seeking destination Node K (2 hops away), stopping upon discovery to reveal the optimal shortest path.",
+      "description": "Breadth-first search originating from Node A seeking destination Node K (3 hops away), stopping upon discovery to reveal the optimal shortest path.",
       "data_structure": "FIFO Queue",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
@@ -109,11 +125,11 @@
       "algorithm": "dfs",
       "filename": "dfs_traversal.mp4",
       "title": "Target Search (Finding Node K): DFS Animation",
-      "description": "Depth-first search originating from Node A seeking destination Node K (2 hops away), demonstrating deep exploration and backtracking until target reached.",
+      "description": "Depth-first search originating from Node A seeking destination Node K (3 hops away), demonstrating deep exploration and backtracking until target reached.",
       "data_structure": "LIFO Stack",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
@@ -122,11 +138,11 @@
       "algorithm": "comparison",
       "filename": "bfs_dfs_comparison.mp4",
       "title": "Target Search (Finding Node K): Comparative Traversal (BFS vs DFS)",
-      "description": "Synchronized search from Node A seeking destination Node K (2 hops away). Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
+      "description": "Synchronized search from Node A seeking destination Node K (3 hops away). Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
       "data_structure": "Queue vs Stack",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8

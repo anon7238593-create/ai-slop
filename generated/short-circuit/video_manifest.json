@@ -3,90 +3,106 @@
     "A": [
       "B",
       "C",
-      "E",
-      "O"
+      "D",
+      "G",
+      "H",
+      "I",
+      "J"
     ],
     "B": [
       "A",
-      "D"
+      "D",
+      "E",
+      "H",
+      "L"
     ],
     "C": [
       "A",
-      "E",
-      "M"
+      "F",
+      "G",
+      "J",
+      "L",
+      "N"
     ],
     "D": [
-      "B",
-      "G",
-      "K",
-      "M",
-      "O"
-    ],
-    "E": [
       "A",
-      "C",
-      "F",
-      "I",
-      "J",
-      "K",
-      "M"
-    ],
-    "F": [
-      "E",
+      "B",
       "L"
     ],
-    "G": [
-      "D",
+    "E": [
+      "B",
+      "F",
+      "I",
+      "L"
+    ],
+    "F": [
+      "C",
+      "E",
       "H",
+      "K"
+    ],
+    "G": [
+      "A",
+      "C",
+      "L",
       "N",
       "O"
     ],
     "H": [
-      "G",
+      "A",
+      "B",
+      "F",
       "L"
     ],
     "I": [
+      "A",
       "E",
-      "K"
+      "M",
+      "O"
     ],
     "J": [
-      "E",
-      "K",
-      "L"
+      "A",
+      "C",
+      "M",
+      "N",
+      "O"
     ],
     "K": [
+      "F",
+      "L"
+    ],
+    "L": [
+      "B",
+      "C",
       "D",
       "E",
+      "G",
+      "H",
+      "K"
+    ],
+    "M": [
       "I",
       "J"
     ],
-    "L": [
-      "F",
-      "H",
+    "N": [
+      "C",
+      "G",
       "J"
     ],
-    "M": [
-      "C",
-      "D",
-      "E"
-    ],
-    "N": [
-      "G"
-    ],
     "O": [
-      "A",
-      "D",
-      "G"
+      "G",
+      "I",
+      "J"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 2,
+  "target_hop_distance": 3,
   "min_distance": 2,
   "short_circuit": true,
-  "seed": 1789589766,
+  "seed": 1789593314,
   "nodes": 15,
-  "edges": 24,
+  "edges": 32,
   "resolution": "1920x1080",
   "fps": 30,
   "step_duration_seconds": 1.8,
@@ -98,11 +114,11 @@
       "filename": "bfs_traversal.mp4",
       "alias": "bfs_short_circuit.mp4",
       "title": "Short-Circuit Target Search (Finding Node K): BFS Animation",
-      "description": "Breadth-first search from Node A seeking Node K (2 hops away). Halts immediately upon discovery edge (u -> K) without waiting in FIFO Queue.",
+      "description": "Breadth-first search from Node A seeking Node K (3 hops away). Halts immediately upon discovery edge (u -> K) without waiting in FIFO Queue.",
       "data_structure": "FIFO Queue (Short-Circuited)",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "short_circuit": true,
       "scope": "short_circuit_target_K",
       "resolution": "1920x1080",
@@ -113,11 +129,11 @@
       "filename": "dfs_traversal.mp4",
       "alias": "dfs_short_circuit.mp4",
       "title": "Short-Circuit Target Search (Finding Node K): DFS Animation",
-      "description": "Depth-first search from Node A seeking Node K (2 hops away). Halts eagerly on finding K along active branch without waiting in LIFO Stack.",
+      "description": "Depth-first search from Node A seeking Node K (3 hops away). Halts eagerly on finding K along active branch without waiting in LIFO Stack.",
       "data_structure": "LIFO Stack (Short-Circuited)",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "short_circuit": true,
       "scope": "short_circuit_target_K",
       "resolution": "1920x1080",
@@ -128,11 +144,11 @@
       "filename": "bfs_dfs_comparison.mp4",
       "alias": "bfs_dfs_short_circuit_comparison.mp4",
       "title": "Short-Circuit Target Search (Finding Node K): Comparative Traversal (BFS vs DFS)",
-      "description": "Synchronized eager search from Node A seeking Node K (2 hops away). Contrasts BFS eager level-by-level discovery vs DFS eager branch discovery.",
+      "description": "Synchronized eager search from Node A seeking Node K (3 hops away). Contrasts BFS eager level-by-level discovery vs DFS eager branch discovery.",
       "data_structure": "Queue vs Stack (Short-Circuited)",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 2,
+      "target_hop_distance": 3,
       "short_circuit": true,
       "scope": "short_circuit_target_K",
       "resolution": "1920x1080",
