@@ -2,7 +2,7 @@ graph traversal {
   graph [layout=dot, rankdir=TB, bgcolor="#FFFFFF", pad="0.35", nodesep="0.65", ranksep="0.8", fontname="Arial"];
   node [shape=circle, style="filled", fontname="Arial Bold", fontsize=18, width=0.72, fixedsize=true, penwidth=2.4];
   edge [color="#94A3B8", penwidth=2.0];
-  label=<<B>DFS Traversal</B><BR/><FONT POINT-SIZE="16">Step 3: Discover L, J, E, D, B from A</FONT>>; labelloc="t"; fontsize=26; fontname="Arial"; fontcolor="#0F172A";
+  label=<<B>DFS Traversal</B><BR/><FONT POINT-SIZE="16">Step 3: Discover O, M, L, I, G, D, C, B from A</FONT>>; labelloc="t"; fontsize=26; fontname="Arial"; fontcolor="#0F172A";
   subgraph cluster_legend { label="Legend"; color="#CBD5E1"; penwidth=1.2; style="rounded"; fontsize=14; fontname="Arial Bold";
     key_unseen [label="Unseen", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", fontsize=12, width=0.82];
     key_frontier [label="Discovered", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", fontsize=12, width=0.95];
@@ -12,50 +12,61 @@ graph traversal {
   }
   A [label="A", fillcolor="#DCFCE7", color="#16A34A", fontcolor="#14532D", peripheries=1, penwidth=2.4];
   B [label="B", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
-  C [label="C", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  C [label="C", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
   D [label="D", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
-  E [label="E", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
+  E [label="E", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
   F [label="F", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
-  G [label="G", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  G [label="G", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
   H [label="H", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
-  I [label="I", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
-  J [label="J", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
+  I [label="I", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
+  J [label="J", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
   K [label="K\n(TARGET)", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=2, penwidth=3.2, fontsize=11, width=0.85, height=0.85];
   L [label="L", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
-  M [label="M", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  M [label="M", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
   N [label="N", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
-  O [label="O", fillcolor="#F8FAFC", color="#94A3B8", fontcolor="#334155", peripheries=1, penwidth=2.4];
+  O [label="O", fillcolor="#DBEAFE", color="#2563EB", fontcolor="#1E3A8A", peripheries=1, penwidth=2.4];
   A -- B [color="#7C3AED", penwidth=3.8];
+  A -- C [color="#7C3AED", penwidth=3.8];
   A -- D [color="#7C3AED", penwidth=3.8];
-  A -- E [color="#7C3AED", penwidth=3.8];
-  A -- J [color="#7C3AED", penwidth=3.8];
+  A -- G [color="#7C3AED", penwidth=3.8];
+  A -- I [color="#7C3AED", penwidth=3.8];
   A -- L [color="#7C3AED", penwidth=3.8];
-  B -- C;
-  B -- F;
+  A -- M [color="#7C3AED", penwidth=3.8];
+  A -- O [color="#7C3AED", penwidth=3.8];
+  B -- D;
+  B -- E;
   B -- G;
+  B -- H;
   B -- I;
+  B -- J;
+  B -- M;
   C -- F;
-  C -- M;
+  C -- I;
+  C -- J;
+  C -- L;
+  D -- G;
   D -- H;
-  D -- I;
-  D -- K;
+  D -- N;
   E -- G;
+  E -- H;
   E -- I;
-  E -- K;
   E -- N;
+  F -- K;
   G -- H;
-  G -- K;
-  G -- N;
+  G -- I;
+  G -- J;
+  G -- L;
   H -- J;
   H -- K;
-  I -- L;
-  J -- K;
+  I -- O;
+  J -- L;
+  J -- M;
+  J -- N;
   K -- L;
-  L -- O;
-  N -- O;
+  K -- O;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
-      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> L  |  J  |  E  |  D  |  B</TD></TR>
+      <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> O  |  M  |  L  |  I  |  G  |  D  |  C  |  B</TD></TR>
       <TR><TD ALIGN="LEFT"><B>Visited:</B> A</TD></TR>
     </TABLE>
   >];
