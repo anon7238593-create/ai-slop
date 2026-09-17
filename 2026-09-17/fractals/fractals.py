@@ -248,13 +248,13 @@ def register(
     difficulty="easy",
     dimension_formula="log(2)/log(3)",
     dimension_val="0.6309",
-    default_depth=6,
+    default_depth=8,
     description="Triadic Cantor set formed by iteratively removing the open middle third from line segments.",
 )
 def generate_cantor_set(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 6,
+    depth: int = 8,
     seed: int = 42,
     palette_name: str = "sunset",
 ) -> str:
@@ -266,13 +266,13 @@ def generate_cantor_set(
     margin_bottom = 80
     usable_h = height - margin_top - margin_bottom
     row_height = usable_h / max(1, depth + 1)
-    bar_thickness = max(6.0, row_height * 0.45)
+    bar_thickness = max(4.0, row_height * 0.45)
 
     def draw_cantor(level: int, x1: float, x2: float) -> None:
         y = margin_top + level * row_height
         color = get_gradient_color(palette, level / max(1, depth))
         canvas.add_element(
-            f'    <rect x="{x1:.2f}" y="{y:.2f}" width="{(x2 - x1):.2f}" height="{bar_thickness:.2f}" rx="{bar_thickness / 3:.2f}" fill="{color}" opacity="0.95" />'
+            f'    <rect x="{x1:.2f}" y="{y:.2f}" width="{(x2 - x1):.2f}" height="{bar_thickness:.2f}" rx="{min(bar_thickness / 3, (x2 - x1) / 2):.2f}" fill="{color}" opacity="0.95" />'
         )
         if level < depth:
             third = (x2 - x1) / 3.0
@@ -289,13 +289,13 @@ def generate_cantor_set(
     difficulty="easy",
     dimension_formula="log(4)/log(3)",
     dimension_val="1.2619",
-    default_depth=4,
+    default_depth=6,
     description="Continuous fractal boundary with infinite perimeter enclosing a finite planar area.",
 )
 def generate_koch_snowflake(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 4,
+    depth: int = 6,
     seed: int = 42,
     palette_name: str = "neon",
 ) -> str:
@@ -348,7 +348,7 @@ def generate_koch_snowflake(
 
     stroke_color = palette[1] if len(palette) > 1 else "#00f0ff"
     canvas.add_element(
-        f'    <path d="{d_str}" fill="url(#koch-grad)" stroke="{stroke_color}" stroke-width="1.8" stroke-linejoin="round" />'
+        f'    <path d="{d_str}" fill="url(#koch-grad)" stroke="{stroke_color}" stroke-width="1.0" stroke-linejoin="round" />'
     )
     return canvas.render()
 
@@ -359,13 +359,13 @@ def generate_koch_snowflake(
     difficulty="easy",
     dimension_formula="log(3)/log(2)",
     dimension_val="1.5850",
-    default_depth=6,
+    default_depth=8,
     description="Subdivision of equilateral triangle with central inverted cutout yielding a zero-measure area.",
 )
 def generate_sierpinski_triangle(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 6,
+    depth: int = 8,
     seed: int = 42,
     palette_name: str = "cyberpunk",
 ) -> str:
@@ -389,7 +389,7 @@ def generate_sierpinski_triangle(
         if level == depth:
             color = get_gradient_color(palette, (a[1] - (cy - h / 2.0)) / max(1.0, h))
             canvas.add_element(
-                f'    <polygon points="{a[0]:.2f},{a[1]:.2f} {b[0]:.2f},{b[1]:.2f} {c[0]:.2f},{c[1]:.2f}" fill="{color}" fill-opacity="0.9" stroke="{color}" stroke-width="0.75" />'
+                f'    <polygon points="{a[0]:.2f},{a[1]:.2f} {b[0]:.2f},{b[1]:.2f} {c[0]:.2f},{c[1]:.2f}" fill="{color}" fill-opacity="0.9" stroke="{color}" stroke-width="0.25" />'
             )
             return
 
@@ -411,13 +411,13 @@ def generate_sierpinski_triangle(
     difficulty="easy",
     dimension_formula="log(8)/log(3)",
     dimension_val="1.8928",
-    default_depth=4,
+    default_depth=5,
     description="Planar fractal obtained by cutting out the center sub-square from a 3x3 grid repeatedly.",
 )
 def generate_sierpinski_carpet(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 4,
+    depth: int = 5,
     seed: int = 42,
     palette_name: str = "ocean",
 ) -> str:
@@ -461,13 +461,13 @@ def generate_sierpinski_carpet(
     difficulty="easy",
     dimension_formula="log(5)/log(3)",
     dimension_val="1.4650",
-    default_depth=4,
+    default_depth=5,
     description="Cross-type decomposition fractal keeping 5 of 9 equal sub-squares per iteration.",
 )
 def generate_vicsek_fractal(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 4,
+    depth: int = 5,
     seed: int = 42,
     palette_name: str = "emerald",
 ) -> str:
@@ -482,7 +482,7 @@ def generate_vicsek_fractal(
         if level == depth:
             color = get_gradient_color(palette, (x - x0) / max(1.0, size))
             canvas.add_element(
-                f'    <rect x="{x:.2f}" y="{y:.2f}" width="{s:.2f}" height="{s:.2f}" fill="{color}" rx="{s * 0.1:.2f}" />'
+                f'    <rect x="{x:.2f}" y="{y:.2f}" width="{s:.2f}" height="{s:.2f}" fill="{color}" rx="{min(1.0, s * 0.1):.2f}" />'
             )
             return
 
@@ -512,13 +512,13 @@ def generate_vicsek_fractal(
     difficulty="medium",
     dimension_formula="log(2)/log(sqrt(2))",
     dimension_val="2.0000",
-    default_depth=10,
+    default_depth=13,
     description="Harmonic branching fractal formed by erecting right triangles on top of recursive squares.",
 )
 def generate_pythagoras_tree(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 10,
+    depth: int = 13,
     seed: int = 42,
     palette_name: str = "emerald",
 ) -> str:
@@ -538,7 +538,7 @@ def generate_pythagoras_tree(
     def draw_square(
         x: float, y: float, size: float, angle: float, level: int
     ) -> None:
-        if level > depth or size < 1.2:
+        if level > depth or size < 0.6:
             return
 
         color = get_gradient_color(palette, level / max(1, depth))
@@ -552,7 +552,7 @@ def generate_pythagoras_tree(
         p4 = (p1[0] - size * sin_ang, p1[1] - size * cos_ang)
 
         canvas.add_element(
-            f'    <polygon points="{p1[0]:.2f},{p1[1]:.2f} {p2[0]:.2f},{p2[1]:.2f} {p3[0]:.2f},{p3[1]:.2f} {p4[0]:.2f},{p4[1]:.2f}" fill="{color}" fill-opacity="0.8" stroke="#111827" stroke-width="0.5" />'
+            f'    <polygon points="{p1[0]:.2f},{p1[1]:.2f} {p2[0]:.2f},{p2[1]:.2f} {p3[0]:.2f},{p3[1]:.2f} {p4[0]:.2f},{p4[1]:.2f}" fill="{color}" fill-opacity="0.8" stroke="#111827" stroke-width="0.2" />'
         )
 
         s_left = size * cos_a
@@ -578,13 +578,13 @@ def generate_pythagoras_tree(
     difficulty="medium",
     dimension_formula="dim_boundary",
     dimension_val="1.5236",
-    default_depth=13,
+    default_depth=16,
     description="Paper-folding sequence turning 90° alternating left and right, tiling the plane without overlapping.",
 )
 def generate_dragon_curve(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 13,
+    depth: int = 16,
     seed: int = 42,
     palette_name: str = "neon",
 ) -> str:
@@ -630,7 +630,7 @@ def generate_dragon_curve(
             for j, p in enumerate(sub_pts)
         )
         canvas.add_element(
-            f'    <path d="{d_str}" fill="none" stroke="{color}" stroke-width="1.8" stroke-linecap="round" />'
+            f'    <path d="{d_str}" fill="none" stroke="{color}" stroke-width="1.0" stroke-linecap="round" />'
         )
 
     return canvas.render()
@@ -642,13 +642,13 @@ def generate_dragon_curve(
     difficulty="medium",
     dimension_formula="log(4)/log(2)",
     dimension_val="2.0000",
-    default_depth=6,
+    default_depth=7,
     description="Locality-preserving continuous fractal mapping a 1D line segment into the 2D unit square.",
 )
 def generate_hilbert_curve(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 6,
+    depth: int = 7,
     seed: int = 42,
     palette_name: str = "sunset",
 ) -> str:
@@ -692,7 +692,7 @@ def generate_hilbert_curve(
             for j, p in enumerate(sub_pts)
         )
         canvas.add_element(
-            f'    <path d="{d_str}" fill="none" stroke="{color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />'
+            f'    <path d="{d_str}" fill="none" stroke="{color}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />'
         )
 
     return canvas.render()
@@ -704,13 +704,13 @@ def generate_hilbert_curve(
     difficulty="medium",
     dimension_formula="da Vinci Taper",
     dimension_val="1.8400",
-    default_depth=10,
+    default_depth=13,
     description="Harmonic botanical tree branching with Leonardo da Vinci thickness conservation: d² = d₁² + d₂².",
 )
 def generate_fractal_canopy(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 10,
+    depth: int = 13,
     seed: int = 42,
     palette_name: str = "emerald",
 ) -> str:
@@ -726,7 +726,7 @@ def generate_fractal_canopy(
     def branch(
         x: float, y: float, length: float, angle: float, thickness: float, level: int
     ) -> None:
-        if level > depth or length < 2.0:
+        if level > depth or length < 0.8:
             return
 
         nx = x + length * math.sin(angle)
@@ -737,7 +737,7 @@ def generate_fractal_canopy(
             f'    <line x1="{x:.2f}" y1="{y:.2f}" x2="{nx:.2f}" y2="{ny:.2f}" stroke="{color}" stroke-width="{thickness:.2f}" stroke-linecap="round" />'
         )
 
-        new_thick = max(1.0, thickness * 0.72)
+        new_thick = max(0.4, thickness * 0.72)
         spread1 = math.radians(24.0 + (rng.random() - 0.5) * 6.0)
         spread2 = math.radians(24.0 + (rng.random() - 0.5) * 6.0)
         ratio1 = 0.74 + (rng.random() - 0.5) * 0.06
@@ -756,13 +756,13 @@ def generate_fractal_canopy(
     difficulty="medium",
     dimension_formula="log(2)/log(sqrt(2))",
     dimension_val="1.9340",
-    default_depth=12,
+    default_depth=15,
     description="Isosceles right-triangle folding yielding an intricate self-similar coastal perimeter.",
 )
 def generate_levy_c_curve(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 12,
+    depth: int = 15,
     seed: int = 42,
     palette_name: str = "fire",
 ) -> str:
@@ -798,7 +798,7 @@ def generate_levy_c_curve(
             (f"M" if j == 0 else "L") + f" {p[0]:.2f} {p[1]:.2f}" for j, p in enumerate(sub_pts)
         )
         canvas.add_element(
-            f'    <path d="{d_str}" fill="none" stroke="{color}" stroke-width="1.6" stroke-linecap="round" />'
+            f'    <path d="{d_str}" fill="none" stroke="{color}" stroke-width="0.9" stroke-linecap="round" />'
         )
 
     return canvas.render()
@@ -814,13 +814,13 @@ def generate_levy_c_curve(
     difficulty="hard",
     dimension_formula="IFS Invariant Measure",
     dimension_val="1.8600",
-    default_depth=35000,
+    default_depth=120000,
     description="Iterated Function System (IFS) affine transformations simulating natural biological self-similarity.",
 )
 def generate_barnsley_fern(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 35000,
+    depth: int = 120000,
     seed: int = 42,
     palette_name: str = "emerald",
 ) -> str:
@@ -866,7 +866,7 @@ def generate_barnsley_fern(
         color = get_gradient_color(palette, b_idx / num_buckets)
         d_chunks = " ".join(f"M {p[0]:.1f} {p[1]:.1f} l 0.01 0" for p in pt_list)
         canvas.add_element(
-            f'    <path d="{d_chunks}" fill="none" stroke="{color}" stroke-width="1.3" stroke-linecap="round" opacity="0.82" />'
+            f'    <path d="{d_chunks}" fill="none" stroke="{color}" stroke-width="1.0" stroke-linecap="round" opacity="0.80" />'
         )
 
     return canvas.render()
@@ -878,13 +878,13 @@ def generate_barnsley_fern(
     difficulty="hard",
     dimension_formula="log(7)/log(sqrt(7))",
     dimension_val="2.0000",
-    default_depth=4,
+    default_depth=5,
     description="Hexagonal space-filling curve with non-trivial L-system rules, yielding a fractal boundary.",
 )
 def generate_gosper_curve(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 4,
+    depth: int = 5,
     seed: int = 42,
     palette_name: str = "neon",
 ) -> str:
@@ -939,7 +939,7 @@ def generate_gosper_curve(
             for j, p in enumerate(sub_pts)
         )
         canvas.add_element(
-            f'    <path d="{d_str}" fill="none" stroke="{color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />'
+            f'    <path d="{d_str}" fill="none" stroke="{color}" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" />'
         )
 
     return canvas.render()
@@ -951,21 +951,21 @@ def generate_gosper_curve(
     difficulty="hard",
     dimension_formula="dim(boundary)",
     dimension_val="2.0000",
-    default_depth=64,
+    default_depth=128,
     description="Boundary isolines and escape contours of the quadratic complex iteration z_{n+1} = z_n² + c.",
 )
 def generate_mandelbrot_set(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 64,
+    depth: int = 128,
     seed: int = 42,
     palette_name: str = "sunset",
 ) -> str:
     palette = PALETTES.get(palette_name, PALETTES["sunset"])
     canvas = SvgCanvas(width, height, "Mandelbrot Boundary Contours", "Complex Polynomial Escape Dynamics", "hard", "2.0000")
 
-    grid_cols = 160
-    grid_rows = 160
+    grid_cols = 260
+    grid_rows = 260
     c_real_min, c_real_max = -2.1, 0.7
     c_imag_min, c_imag_max = -1.4, 1.4
 
@@ -1020,21 +1020,21 @@ def generate_mandelbrot_set(
     difficulty="hard",
     dimension_formula="dim(boundary)",
     dimension_val="1.4100",
-    default_depth=64,
+    default_depth=128,
     description="Filled Julia set for c = -0.123 + 0.745i, exhibiting 3-fold rotational dendritic symmetry.",
 )
 def generate_julia_set(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 64,
+    depth: int = 128,
     seed: int = 42,
     palette_name: str = "cyberpunk",
 ) -> str:
     palette = PALETTES.get(palette_name, PALETTES["cyberpunk"])
     canvas = SvgCanvas(width, height, "Julia Set (Douady's Rabbit)", "Quadratic Julia Dynamics: c = -0.123 + 0.745i", "hard", "1.4100")
 
-    grid_cols = 160
-    grid_rows = 160
+    grid_cols = 260
+    grid_rows = 260
     c_const = complex(-0.123, 0.745)
     r_min, r_max = -1.4, 1.4
     i_min, i_max = -1.4, 1.4
@@ -1082,13 +1082,13 @@ def generate_julia_set(
     difficulty="hard",
     dimension_formula="dim(boundary)",
     dimension_val="2.0000",
-    default_depth=35,
+    default_depth=60,
     description="Julia boundary separating the basins of attraction for the cube roots of unity (z³ - 1 = 0).",
 )
 def generate_newton_fractal(
     width: int = 1200,
     height: int = 1200,
-    depth: int = 35,
+    depth: int = 60,
     seed: int = 42,
     palette_name: str = "neon",
 ) -> str:
@@ -1102,8 +1102,8 @@ def generate_newton_fractal(
     ]
     root_colors = [palette[0], palette[2 % len(palette)], palette[4 % len(palette)]]
 
-    grid_cols = 160
-    grid_rows = 160
+    grid_cols = 260
+    grid_rows = 260
     span = 1.8
     cell_w = width / grid_cols
     cell_h = height / grid_rows
@@ -1141,7 +1141,6 @@ def generate_newton_fractal(
         canvas.add_element(
             f'    <path d="{d_combined}" fill="{color}" fill-opacity="0.82" stroke="{color}" stroke-width="0.3" />'
         )
-
     return canvas.render()
 
 
