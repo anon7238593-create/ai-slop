@@ -38,7 +38,9 @@ A dependency-free Python suite for generating scalable vector graphics (SVG) of 
 
 The word **fractal** was coined by mathematician **Benoît Mandelbrot** in 1975 from the Latin *fractus* ("broken" or "fractured"). A fractal is a subset of Euclidean space whose topological dimension is strictly exceeded by its Hausdorff dimension:
 
-$$\dim_{\text{top}}(E) < \dim_H(E)$$
+$$
+\dim_{\text{top}}(E) < \dim_H(E)
+$$
 
 Unlike smooth Euclidean shapes (lines, circles, polyhedra) whose scaling behavior is integer-dimensional, fractals possess fine structure at arbitrarily small scales and exhibit **exact**, **quasi-**, or **statistical self-similarity**.
 
@@ -46,31 +48,41 @@ Unlike smooth Euclidean shapes (lines, circles, polyhedra) whose scaling behavio
 
 For a strictly self-similar fractal constructed by replacing an initial geometric shape with $N$ non-overlapping copies, each scaled by a factor of $s < 1$, the **similarity dimension** $D$ satisfies:
 
-$$N \cdot s^D = 1 \implies D = \frac{\log N}{\log(1/s)}$$
+$$
+N \cdot s^D = 1 \implies D = \frac{\log N}{\log(1/s)}
+$$
 
 For arbitrary geometric sets $E \subset \mathbb{R}^n$, the **Hausdorff dimension** $\dim_H(E)$ is defined via the $d$-dimensional Hausdorff outer measure:
 
-$$\mathcal{H}^d(E) = \lim_{\delta \to 0} \inf \left\lbrace \sum_{i=1}^\infty (\operatorname{diam}(U_i))^d : E \subseteq \bigcup_{i=1}^\infty U_i, \quad \operatorname{diam}(U_i) \le \delta \right\rbrace$$
+$$
+\mathcal{H}^d(E) = \lim_{\delta \to 0} \inf \left[ \sum_{i=1}^\infty (\operatorname{diam} U_i)^d : E \subseteq \bigcup_{i=1}^\infty U_i, \quad \operatorname{diam} U_i \le \delta \right]
+$$
 
 The critical exponent at which $\mathcal{H}^d(E)$ drops from $\infty$ to $0$ is $\dim_H(E)$:
 
-$$\dim_H(E) = \inf \left\lbrace d \ge 0 : \mathcal{H}^d(E) = 0 \right\rbrace = \sup \left\lbrace d \ge 0 : \mathcal{H}^d(E) = \infty \right\rbrace$$
+$$
+\dim_H(E) = \inf [ d \ge 0 : \mathcal{H}^d(E) = 0 ] = \sup [ d \ge 0 : \mathcal{H}^d(E) = \infty ]
+$$
 
 ### The Contraction Mapping Principle
 
-An **Iterated Function System (IFS)** consists of a finite collection of contraction mappings $\lbrace f_1, f_2, \dots, f_m \rbrace$ on a complete metric space $(X, d)$, where each mapping has Lipschitz constant $c_i < 1$:
+An **Iterated Function System (IFS)** consists of a finite collection of contraction mappings $\{f_1, f_2, \dots, f_m\}$ on a complete metric space $(X, d)$, where each mapping has Lipschitz constant $c_i < 1$:
 
-$$d(f_i(x), f_i(y)) \le c_i \cdot d(x, y) \quad \forall x, y \in X$$
+$$
+d(f_i(x), f_i(y)) \le c_i \cdot d(x, y) \quad \text{for all } x, y \in X
+$$
 
-By **Hutchinson's Theorem (1981)**, there exists a unique non-empty compact attractor $K \subset X$ such that:
+By **Hutchinson's Theorem (1981)**, there exists a unique non-empty compact attractor $K \subset X$ satisfying:
 
-$$K = \bigcup_{i=1}^m f_i(K)$$
+$$
+K = \bigcup_{i=1}^m f_i(K)
+$$
 
 ### Difficulty Classification Taxonomy
 
 | Tier | Characteristics | Mathematical Complexity | Memory & Recursion Pattern |
 |---|---|---|---|
-| **Level 1: Easy** | Exact self-similarity, fixed-ratio planar subdivisions, segment excision | Direct geometric substitution, simple logarithmic ratios | Depth-first or breadth-first tree recursion ($O(b^d)$ nodes) |
+| **Level 1: Easy** | Exact self-similarity, fixed-ratio planar subdivisions, segment excision | Direct geometric substitution, logarithmic dimension ratios | Depth-first or breadth-first tree recursion ($O(b^d)$ nodes) |
 | **Level 2: Medium** | Rotation matrices, stateful angle tracking, space-filling continuity, paper folding | Orthogonal transformations $SO(2)$, continuous surjections $\mathbb{R} \to \mathbb{R}^2$, bit-interleaving | Lindenmayer grammars, quadrant mapping bit-shifts |
 | **Level 3: Hard** | Non-linear complex mapping $z \mapsto z^2 + c$, affine probability distributions, multi-root convergence basins | Quadratic Julia sets, Fatou sets, Chaos Game invariant measures, Newton-Raphson vector fields | Adaptive grid sampling, iterative floating-point dynamics, contour grouping |
 
@@ -88,11 +100,10 @@ $$K = \bigcup_{i=1}^m f_i(K)$$
 1. Let $C_0 = [0, 1]$.
 2. At step 1, remove the open middle third: $C_1 = [0, 1/3] \cup [2/3, 1]$.
 3. At step $n$, remove the open middle third of each of the $2^{n-1}$ remaining intervals:
-   $$C_n = \frac{C_{n-1}}{3} \cup \left(\frac{C_{n-1}}{3} + \frac{2}{3}\right)$$
+   $C_n = \frac{1}{3} C_{n-1} \cup \left(\frac{1}{3} C_{n-1} + \frac{2}{3}\right)$.
 4. The limiting Cantor set $C_\infty = \bigcap_{n=0}^\infty C_n$ is:
-   - **Uncountable** (has cardinality $2^{\aleph_0}$, identical to the continuum $\mathbb{R}$).
-   - **Zero Lebesgue Measure**:
-     $$\mu(C_\infty) = 1 - \sum_{k=1}^\infty \frac{2^{k-1}}{3^k} = 1 - \frac{1/3}{1 - 2/3} = 0$$
+   - **Uncountable**: Has cardinality $2^{\aleph_0}$, identical to the real continuum $\mathbb{R}$.
+   - **Zero Lebesgue Measure**: $\mu(C_\infty) = 1 - \sum_{k=1}^\infty \frac{2^{k-1}}{3^k} = 1 - \frac{1/3}{1 - 2/3} = 0$.
    - **Nowhere Dense**: Contains no isolated points and no open intervals.
 
 ---
@@ -107,12 +118,10 @@ $$K = \bigcup_{i=1}^m f_i(K)$$
 1. Each straight line segment of length $L$ is divided into 3 equal sub-segments of length $L/3$.
 2. An outward-pointing equilateral triangle of side $L/3$ is constructed over the middle third.
 3. The original base segment is removed, yielding 4 new segments each scaled by factor $s = 1/3$.
-4. **Perimeter Divergence**:
-   $$P_n = P_0 \left(\frac{4}{3}\right)^n \xrightarrow{n \to \infty} \infty$$
-5. **Bounded Area**:
-   Each iteration adds $3 \cdot 4^{n-1}$ smaller triangles of area $A_n = A_0 / 9^n$. Summing the geometric series:
-   $$A_\infty = A_0 \left(1 + \frac{1}{3} \sum_{k=1}^\infty \left(\frac{4}{9}\right)^k\right) = \frac{8}{5} A_0$$
-   The Koch snowflake proves that a curve of **infinite length** can enclose a **strictly finite area**.
+4. **Perimeter Divergence**: The perimeter at step $n$ satisfies $P_n = P_0 \left(\frac{4}{3}\right)^n \to \infty$ as $n \to \infty$.
+5. **Bounded Area**: Each iteration adds $3 \cdot 4^{n-1}$ smaller triangles of area $A_n = A_0 / 9^n$. Summing the geometric series yields:
+   $A_\infty = A_0 \left(1 + \frac{1}{3} \sum_{k=1}^\infty \left(\frac{4}{9}\right)^k\right) = \frac{8}{5} A_0$.
+   The Koch snowflake demonstrates that a curve of **infinite perimeter** can enclose a **strictly finite area**.
 
 ---
 
@@ -124,14 +133,11 @@ $$K = \bigcup_{i=1}^m f_i(K)$$
 
 #### How It Works
 1. Connect the midpoints of the three edges of triangle $T$.
-2. Remove the central inverted triangle of area $1/4 \cdot \text{Area}(T)$.
+2. Remove the central inverted triangle of area $\frac{1}{4} \cdot \text{Area}(T)$.
 3. Recursively apply the same procedure to the remaining 3 corner triangles:
-   $$N = 3, \quad s = \frac{1}{2} \implies D = \frac{\log 3}{\log 2} \approx 1.5850$$
-4. **Lebesgue Measure**:
-   $$\text{Area}(T_n) = A_0 \left(\frac{3}{4}\right)^n \xrightarrow{n \to \infty} 0$$
-   The Sierpiński gasket is also isomorphic to:
-   - Pascal's triangle modulo 2 (odd binomial coefficients $\binom{n}{k} \equiv 1 \pmod 2$).
-   - Cellular automaton Rule 90.
+   $N = 3, \quad s = \frac{1}{2} \implies D = \frac{\log 3}{\log 2} \approx 1.5850$.
+4. **Lebesgue Measure**: $\text{Area}(T_n) = A_0 \left(\frac{3}{4}\right)^n \to 0$ as $n \to \infty$.
+   The Sierpiński gasket is isomorphic to Pascal's triangle modulo 2 (odd binomial coefficients $\binom{n}{k} \equiv 1 \pmod 2$) and cellular automaton Rule 90.
 
 ---
 
@@ -144,10 +150,9 @@ $$K = \bigcup_{i=1}^m f_i(K)$$
 #### How It Works
 1. Divide the square into a $3 \times 3$ grid of 9 identical sub-squares of side $s = 1/3$.
 2. Cut out the open central square $(1/3, 2/3) \times (1/3, 2/3)$.
-3. Repeat recursively on the remaining 8 squares:
-   $$N = 8, \quad s = \frac{1}{3} \implies D = \frac{\log 8}{\log 3} \approx 1.8928$$
-4. **Universal Curve Property**:
-   By Menger's universal curve theorem, the 3D Menger sponge (and its 2D cross-section, the Sierpiński carpet) can embed any 1-dimensional compact metric space topologically!
+3. Repeat recursively on the remaining 8 sub-squares:
+   $N = 8, \quad s = \frac{1}{3} \implies D = \frac{\log 8}{\log 3} \approx 1.8928$.
+4. **Universal Curve Property**: By Karl Menger's universal curve theorem (1926), the 3D Menger sponge (and its 2D planar section, the Sierpiński carpet) topologically embeds any 1-dimensional compact metric space.
 
 ---
 
@@ -158,11 +163,11 @@ $$K = \bigcup_{i=1}^m f_i(K)$$
 - **Axiom**: Solid square $[0, 1] \times [0, 1]$
 
 #### How It Works
-1. Subdivide the square into a $3 \times 3$ grid of 9 congruent squares.
-2. Retain only 5 squares: the central square and the 4 orthogonal edge/corner squares (forming a plus/cross symbol).
+1. Subdivide the square into a $3 \times 3$ grid of 9 congruent sub-squares.
+2. Retain only 5 squares: the central square and the 4 orthogonal edge squares (forming a plus/cross symbol).
 3. The remaining 4 corner squares are removed:
-   $$N = 5, \quad s = \frac{1}{3} \implies D = \frac{\log 5}{\log 3} \approx 1.4650$$
-4. Widely used in antenna engineering to construct compact multiband electromagnetic resonators.
+   $N = 5, \quad s = \frac{1}{3} \implies D = \frac{\log 5}{\log 3} \approx 1.4650$.
+4. Extensively utilized in electromagnetic antenna design to construct compact multiband resonators.
 
 ---
 
@@ -171,7 +176,7 @@ $$K = \bigcup_{i=1}^m f_i(K)$$
 ### 6. Pythagoras Tree
 - **ID**: `pythagoras_tree`
 - **Difficulty**: Medium
-- **Hausdorff Dimension**: $D = 2.0000$ (with boundary self-intersections)
+- **Hausdorff Dimension**: $D = 2.0000$ (with overlapping boundaries)
 - **Axiom**: Base square on the horizontal axis
 
 #### How It Works
@@ -179,31 +184,27 @@ $$K = \bigcup_{i=1}^m f_i(K)$$
 2. On its top edge, erect a right-angled triangle with acute angles $\alpha$ and $90^\circ - \alpha$.
 3. Construct two new squares on the catheti (legs) of lengths $s \cos \alpha$ and $s \sin \alpha$.
 4. By the Pythagorean theorem:
-   $$(s \cos \alpha)^2 + (s \sin \alpha)^2 = s^2 (\cos^2 \alpha + \sin^2 \alpha) = s^2$$
-   The total area of the two new squares precisely equals the area of the parent square!
-5. In symmetric mode ($\alpha = 45^\circ$), each step scales by factor $1/\sqrt{2}$.
+   $(s \cos \alpha)^2 + (s \sin \alpha)^2 = s^2 (\cos^2 \alpha + \sin^2 \alpha) = s^2$.
+   The total area of the two child squares equals the area of the parent square at every recursion step.
+5. In symmetric mode ($\alpha = 45^\circ$), each generation scales by $1/\sqrt{2}$.
 
 ---
 
 ### 7. Heighway Dragon Curve
 - **ID**: `dragon_curve`
 - **Difficulty**: Medium
-- **Hausdorff Dimension**:
-  - Full curve dimension: $D = 2$ (fills a planar tile)
-  - Boundary fractal dimension: $D = \frac{\log \lambda}{\log \sqrt{2}} \approx 1.5236$ (where $\lambda \approx 1.6956$ is the real root of $x^3 - x^2 - 2 = 0$)
+- **Hausdorff Dimension**: $D = 2.0000$ (fractal boundary dimension $D \approx 1.5236$)
 
 #### How It Works
 1. Repeatedly fold a strip of paper in half in the same direction $n$ times.
-2. Unfold every fold to a right angle ($90^\circ$).
+2. Unfold every crease to a right angle ($90^\circ$).
 3. **Lindenmayer Rewrite Grammar**:
-   - Variables: $X, Y$
-   - Constants: $F, +, -$
-   - Axiom: $FX$
+   - Axiom: `FX`
    - Rules:
-     $$X \to X + YF +$$
-     $$Y \to - FX - Y$$
-   Here $+$ denotes turn $+90^\circ$, $-$ denotes turn $-90^\circ$, and $F$ denotes step forward.
-4. Four copies of the Heighway dragon curve meet at a central point and tile the entire 2D plane without any gaps or overlaps.
+     - $X \to X + YF +$
+     - $Y \to - FX - Y$
+   where $+$ denotes turn $+90^\circ$, $-$ denotes turn $-90^\circ$, and $F$ denotes step forward.
+4. Four copies of the dragon curve meet at a central point and tile the 2D plane without overlaps.
 
 ---
 
@@ -214,13 +215,10 @@ $$K = \bigcup_{i=1}^m f_i(K)$$
 - **Axiom**: Unit square $[0, 1] \times [0, 1]$
 
 #### How It Works
-1. Discovered by David Hilbert in 1891, it is a continuous mapping $h: [0, 1] \to [0, 1]^2$ whose image is the entire unit square.
-2. At order $k$, the curve partitions the square into $2^k \times 2^k$ grid cells and threads a continuous path through all $4^k$ cell centers.
-3. **Locality-Preserving Property**:
-   Points close in 1D along the curve remain close in 2D space.
-4. **Computational Applications**:
-   - Spatial database R-trees and geo-indexing (Geohash / Uber H3).
-   - CPU memory layout cache optimization for multidimensional matrices.
+1. Discovered by David Hilbert in 1891, it is a continuous surjective mapping $h: [0, 1] \to [0, 1]^2$.
+2. At order $k$, the curve partitions the square into $2^k \times 2^k$ grid cells and threads a continuous path through all $4^k$ cells.
+3. **Locality-Preserving Property**: Points close in 1D along the curve remain close in 2D space.
+4. Essential in spatial database indexing (R-trees, Geohash, Uber H3) and CPU memory cache layout optimization.
 
 ---
 
@@ -235,24 +233,24 @@ $$K = \bigcup_{i=1}^m f_i(K)$$
 2. Branch lengths shrink by ratio $r \approx 0.74$: $L_{\text{child}} = r \cdot L_{\text{parent}}$.
 3. Child angles diverge symmetrically by $\pm \theta$ (typically $\theta \approx 25^\circ \dots 35^\circ$).
 4. **Leonardo da Vinci's Branching Law (1500)**:
-   All the branches of a tree at every stage of its height when put together are equal in thickness to the trunk:
-   $$d_{\text{parent}}^2 = d_{\text{left}}^2 + d_{\text{right}}^2 \implies d_{\text{child}} = \frac{d_{\text{parent}}}{\sqrt{2}}$$
-   This minimizes hydrodynamic fluid resistance according to the Hagen-Poiseuille law for sap flow.
+   All branches at each height stage have combined cross-sectional area equal to the trunk:
+   $d_{\text{parent}}^2 = d_{\text{left}}^2 + d_{\text{right}}^2 \implies d_{\text{child}} = \frac{d_{\text{parent}}}{\sqrt{2}}$.
+   This minimizes hydrodynamic fluid resistance according to the Hagen-Poiseuille law for vascular sap transport.
 
 ---
 
 ### 10. Lévy C Curve
 - **ID**: `levy_c_curve`
 - **Difficulty**: Medium
-- **Hausdorff Dimension**: $D = \frac{\log 2}{\log \sqrt{2}} = 2$ (curve boundary $D \approx 1.934$)
+- **Hausdorff Dimension**: $D = \frac{\log 2}{\log \sqrt{2}} = 2$ (curve boundary $D \approx 1.9340$)
 - **Axiom**: Line segment connecting $(x_1, y_1)$ to $(x_2, y_2)$
 
 #### How It Works
-1. Given a segment $AB$, construct an isosceles right triangle with hypotenuse $AB$.
+1. Given segment $AB$, construct an isosceles right triangle ($45^\circ-90^\circ-45^\circ$) with hypotenuse $AB$.
 2. Replace segment $AB$ with the two legs $AC$ and $CB$.
-3. The coordinates of apex $C$ rotated $45^\circ$:
-   $$x_C = \frac{x_A + x_B}{2} - \frac{y_B - y_A}{2}, \quad y_C = \frac{y_A + y_B}{2} + \frac{x_B - x_A}{2}$$
-4. Iterating recursively produces an intricate shoreline fractal with internal self-similar spiral chambers.
+3. The coordinates of apex $C$ rotated $45^\circ$ are:
+   $x_C = \frac{x_A + x_B}{2} - \frac{y_B - y_A}{2}, \quad y_C = \frac{y_A + y_B}{2} + \frac{x_B - x_A}{2}$.
+4. Iterating recursively produces a self-similar coastal perimeter with internal spiral chambers.
 
 ---
 
@@ -267,7 +265,9 @@ $$K = \bigcup_{i=1}^m f_i(K)$$
 #### How It Works
 Michael Barnsley described this Iterated Function System in 1988 to model the natural black spleenwort fern (*Asplenium adiantum-nigrum*). It uses 4 affine transformations $f_i(\mathbf{x}) = A_i \mathbf{x} + \mathbf{b}_i$:
 
-$$\begin{bmatrix} x_{n+1} \\ y_{n+1} \end{bmatrix} = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \begin{bmatrix} x_n \\ y_n \end{bmatrix} + \begin{bmatrix} e \\ f \end{bmatrix}$$
+$$
+\begin{bmatrix} x_{n+1} \\ y_{n+1} \end{bmatrix} = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \begin{bmatrix} x_n \\ y_n \end{bmatrix} + \begin{bmatrix} e \\ f \end{bmatrix}
+$$
 
 | Transformation | $a$ | $b$ | $c$ | $d$ | $e$ | $f$ | Probability $p$ | Anatomical Feature |
 |---|---|---|---|---|---|---|---|---|
@@ -276,7 +276,7 @@ $$\begin{bmatrix} x_{n+1} \\ y_{n+1} \end{bmatrix} = \begin{bmatrix} a & b \\ c 
 | $f_3$ | $0.20$ | $-0.26$ | $0.23$ | $0.22$ | $0$ | $1.60$ | $0.07$ | Largest left leaflet |
 | $f_4$ | $-0.15$ | $0.28$ | $0.26$ | $0.24$ | $0$ | $0.44$ | $0.07$ | Largest right leaflet |
 
-By playing the **Chaos Game**, a random sequence of transformations is selected according to probabilities $p_i$. The trajectory asymptotically visits the unique invariant measure supported on the fractal fern attractor.
+By playing the **Chaos Game**, a random sequence of transformations is selected according to probabilities $p_i$. The trajectory asymptotically samples the unique invariant measure supported on the fractal fern attractor.
 
 ---
 
@@ -284,14 +284,14 @@ By playing the **Chaos Game**, a random sequence of transformations is selected 
 - **ID**: `gosper_curve`
 - **Difficulty**: Hard
 - **Hausdorff Dimension**: $D = \frac{\log 7}{\log \sqrt{7}} = 2.0000$ (Fractal boundary $D = \frac{\log 3}{\log \sqrt{7}} \approx 1.129$)
-- **Axiom**: $A$
+- **Axiom**: `A`
 
 #### How It Works
-A hexagonal space-filling curve discovered by Bill Gosper. It uses an L-system alphabet where the angle increment is $\delta = 60^\circ$:
-- **Grammar**:
-  $$A \to A - B - - B + A + + A A + B -$$
-  $$B \to + A - B B - - B - A + + A + B$$
-- Fills a regular hexagon-like region called the **Gosper island** or **flowsnake**.
+A hexagonal space-filling curve discovered by Bill Gosper. It uses an L-system alphabet with angle increment $\delta = 60^\circ$:
+- **L-System Rewrite Grammar**:
+  - $A \to A - B - - B + A + + A A + B -$
+  - $B \to + A - B B - - B - A + + A + B$
+- Fills a regular hexagon-like tile known as the **Gosper island** or **flowsnake**.
 - Seven Gosper flakes tile together to form an exact scaled-up replica of the island.
 
 ---
@@ -301,15 +301,18 @@ A hexagonal space-filling curve discovered by Bill Gosper. It uses an L-system a
 - **Difficulty**: Hard
 - **Hausdorff Dimension**: $\dim_H(\partial M) = 2.0000$ (proved by Mitsuhiro Shishikura, 1998)
 - **Definition**: The set of complex parameters $c \in \mathbb{C}$ for which the orbit of 0 under $f_c(z) = z^2 + c$ remains bounded:
-  $$M = \left\lbrace c \in \mathbb{C} : \lim_{n \to \infty} |f_c^{(n)}(0)| \ne \infty \right\rbrace$$
+
+$$
+M = [ c \in \mathbb{C} : \lim_{n \to \infty} |f_c^{(n)}(0)| < \infty ]
+$$
 
 #### How It Works
 1. For each point $c = x + iy$, initialize $z_0 = 0$.
-2. Compute recurrence:
-   $$z_{n+1} = z_n^2 + c \implies \begin{cases} x_{n+1} = x_n^2 - y_n^2 + x_0 \\ y_{n+1} = 2 x_n y_n + y_0 \end{cases}$$
-3. If $|z_n|^2 = x_n^2 + y_n^2 > 4$, the point is guaranteed to escape to $\infty$.
+2. Compute recurrence in Cartesian coordinates:
+   $x_{n+1} = x_n^2 - y_n^2 + x_0, \quad y_{n+1} = 2 x_n y_n + y_0$.
+3. If $|z_n|^2 = x_n^2 + y_n^2 > 4$, the orbit escapes to $\infty$.
 4. **Smooth Fractional Escape Time**:
-   $$\nu(c) = n + 1 - \frac{\ln(\ln |z_n|)}{\ln 2}$$
+   $\nu(c) = n + 1 - \frac{\ln(\ln |z_n|)}{\ln 2}$.
 5. The generator extracts vector isoline contours grouping points by escape rates, revealing the main cardioid, period bulbs, and antenna filaments.
 
 ---
@@ -321,9 +324,9 @@ A hexagonal space-filling curve discovered by Bill Gosper. It uses an L-system a
 - **Parameter**: $c = -0.123 + 0.745i$
 
 #### How It Works
-1. Unlike the Mandelbrot set (where $c$ varies and $z_0 = 0$), a **Julia set** fixes $c \in \mathbb{C}$ and varies the initial starting value $z_0 \in \mathbb{C}$:
-   $$z_{n+1} = z_n^2 + c$$
-2. The Julia set $J(f_c)$ is the boundary between points whose orbits escape to $\infty$ and points whose orbits remain bounded.
+1. Unlike the Mandelbrot set (where $c$ varies and $z_0 = 0$), a **Julia set** fixes $c \in \mathbb{C}$ and varies the initial value $z_0 \in \mathbb{C}$:
+   $z_{n+1} = z_n^2 + c$.
+2. The Julia set $J(f_c)$ is the boundary between orbits that escape to $\infty$ and orbits that remain bounded.
 3. For $c = -0.123 + 0.745i$, the parameter lies inside a period-3 bulb of the Mandelbrot set, yielding a filled Julia set known as **Douady's Rabbit** with 3-fold rotational dendritic ears.
 
 ---
@@ -336,12 +339,12 @@ A hexagonal space-filling curve discovered by Bill Gosper. It uses an L-system a
 
 #### How It Works
 1. The Newton-Raphson method finds roots of $p(z)$ by iterating:
-   $$z_{n+1} = z_n - \frac{p(z_n)}{p'(z_n)} = z_n - \frac{z_n^3 - 1}{3 z_n^2} = \frac{2 z_n^3 + 1}{3 z_n^2}$$
+   $z_{n+1} = z_n - \frac{p(z_n)}{p'(z_n)} = \frac{2 z_n^3 + 1}{3 z_n^2}$.
 2. The three roots of unity in the complex plane are:
-   $$\xi_1 = 1, \quad \xi_2 = e^{i 2\pi/3} = -\frac{1}{2} + i \frac{\sqrt{3}}{2}, \quad \xi_3 = e^{i 4\pi/3} = -\frac{1}{2} - i \frac{\sqrt{3}}{2}$$
-3. Every point $z_0 \in \mathbb{C}$ converges to one of these three roots.
-4. The boundary separating the three basins of attraction is a **Julia set**: any neighborhood of a boundary point intersects **all three** basins simultaneously!
-5. This demonstrates deterministic chaos in simple polynomial root finding.
+   $\xi_1 = 1, \quad \xi_2 = e^{i 2\pi/3} = -\frac{1}{2} + i \frac{\sqrt{3}}{2}, \quad \xi_3 = e^{i 4\pi/3} = -\frac{1}{2} - i \frac{\sqrt{3}}{2}$.
+3. Every initial point $z_0 \in \mathbb{C}$ converges to one of these three roots.
+4. The boundary separating the three basins of attraction is a **Julia set**: any open neighborhood of a boundary point intersects **all three** basins simultaneously!
+5. This demonstrates deterministic chaos in standard polynomial root finding.
 
 ---
 
@@ -397,7 +400,7 @@ python3 fractals.py --fractal fractal_canopy --seed 12345 --palette emerald -o t
 ## Color Palettes & SVG Design Principles
 
 All generated SVGs follow clean, modern visualization standards:
-1. **Responsive Viewports**: Configured with `viewBox="0 0 W H"` and `style="max-width: 100%; height: auto;"` for flawless rendering on any mobile, tablet, or desktop screen.
+1. **Responsive Viewports**: Configured with `viewBox="0 0 W H"` and `style="max-width: 100%; height: auto;"` for flawless rendering on any screen.
 2. **Dark Theme Architecture**: Dark `#0b0f19` canvas background with radial ambient vignettes `#1f293d` to make vector curves glow.
 3. **Typography & Info Badges**: Each SVG includes an integrated header badge detailing the fractal title, difficulty tier, and Hausdorff dimension.
 4. **Vibrant Palettes**:
