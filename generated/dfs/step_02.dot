@@ -28,31 +28,29 @@ graph traversal {
   A -- B;
   A -- C;
   A -- D;
-  A -- H;
+  A -- I;
+  A -- J;
   A -- M;
-  B -- C;
-  B -- K;
+  B -- E;
+  B -- F;
+  B -- H;
+  B -- I;
+  B -- L;
+  B -- M;
   B -- O;
-  C -- D;
-  C -- L;
   C -- N;
-  D -- E;
-  D -- F;
-  E -- I;
-  E -- J;
-  E -- L;
-  F -- G;
-  F -- I;
-  F -- J;
-  F -- M;
-  H -- M;
-  I -- N;
+  D -- I;
+  D -- L;
+  E -- G;
+  E -- K;
+  E -- M;
+  G -- L;
+  I -- J;
+  I -- L;
   I -- O;
-  J -- L;
-  J -- M;
   K -- M;
+  L -- N;
   M -- N;
-  M -- O;
   status [shape=plain, fixedsize=false, width=0, height=0, margin=0, label=<
     <TABLE BORDER="0" CELLBORDER="0" CELLPADDING="7" BGCOLOR="#F1F5F9">
       <TR><TD ALIGN="LEFT"><B>Stack (top at right):</B> (empty)</TD></TR>
