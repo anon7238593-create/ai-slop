@@ -2,103 +2,113 @@
   "graph": {
     "A": [
       "B",
-      "D",
+      "C",
+      "E",
       "F",
-      "G"
+      "G",
+      "I",
+      "J"
     ],
     "B": [
       "A",
       "C",
-      "J",
-      "N"
+      "D",
+      "E",
+      "H"
     ],
     "C": [
+      "A",
       "B",
-      "J",
-      "K",
-      "L"
+      "F",
+      "L",
+      "O"
     ],
     "D": [
-      "A",
-      "E",
-      "F"
+      "B",
+      "E"
     ],
     "E": [
+      "A",
+      "B",
       "D",
-      "F",
-      "I",
+      "K",
+      "M",
       "O"
     ],
     "F": [
       "A",
-      "D",
-      "E",
-      "I",
-      "J",
-      "M"
-    ],
-    "G": [
-      "A",
+      "C",
       "H",
-      "M"
-    ],
-    "H": [
-      "G"
-    ],
-    "I": [
-      "E",
-      "F",
+      "I",
       "K",
       "L",
       "N"
     ],
-    "J": [
-      "B",
-      "C",
-      "F",
-      "K",
+    "G": [
+      "A",
+      "I",
       "M",
-      "N",
       "O"
     ],
-    "K": [
-      "C",
-      "I",
+    "H": [
+      "B",
+      "F",
       "J",
-      "L",
+      "K"
+    ],
+    "I": [
+      "A",
+      "F",
+      "G",
+      "M",
       "O"
+    ],
+    "J": [
+      "A",
+      "H",
+      "M",
+      "N"
+    ],
+    "K": [
+      "E",
+      "F",
+      "H",
+      "M"
     ],
     "L": [
       "C",
-      "I",
-      "K"
-    ],
-    "M": [
       "F",
-      "G",
-      "J",
+      "N",
       "O"
     ],
-    "N": [
-      "B",
+    "M": [
+      "E",
+      "G",
       "I",
-      "J"
+      "J",
+      "K"
+    ],
+    "N": [
+      "F",
+      "J",
+      "L"
     ],
     "O": [
+      "C",
       "E",
-      "J",
-      "K",
-      "M"
+      "G",
+      "I",
+      "L"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 3,
+  "target_hop_distance": 2,
   "min_distance": 2,
-  "random_seed": 1789636581,
+  "random_seed": 1789640132,
   "edge_probability": null,
   "nodes": 15,
-  "edges": 30,
+  "edges": 35,
   "step_duration_seconds": 1.8,
   "scope": "particular_node"
 }
