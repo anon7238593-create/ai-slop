@@ -3,92 +3,90 @@
     "A": [
       "B",
       "C",
-      "E"
+      "D",
+      "I",
+      "M"
     ],
     "B": [
       "A",
-      "C",
+      "D",
       "E"
     ],
     "C": [
       "A",
-      "B",
-      "D",
       "G",
+      "H",
       "N",
       "O"
     ],
     "D": [
-      "C",
-      "F",
-      "H",
-      "J",
-      "L",
-      "O"
-    ],
-    "E": [
       "A",
       "B",
-      "O"
+      "G",
+      "K",
+      "M",
+      "N"
+    ],
+    "E": [
+      "B",
+      "F",
+      "H",
+      "I",
+      "K"
     ],
     "F": [
-      "D",
-      "N"
+      "E",
+      "J",
+      "L"
     ],
     "G": [
       "C",
-      "K"
+      "D"
     ],
     "H": [
-      "D",
-      "I",
-      "M"
+      "C",
+      "E",
+      "N",
+      "O"
     ],
     "I": [
-      "H",
-      "L",
-      "M"
+      "A",
+      "E"
     ],
     "J": [
-      "D",
-      "M",
-      "O"
+      "F"
     ],
     "K": [
-      "G",
-      "O"
+      "D",
+      "E"
     ],
     "L": [
-      "D",
-      "I"
+      "F",
+      "M"
     ],
     "M": [
-      "H",
-      "I",
-      "J"
+      "A",
+      "D",
+      "L"
     ],
     "N": [
       "C",
-      "F",
-      "O"
+      "D",
+      "H"
     ],
     "O": [
       "C",
-      "D",
-      "E",
-      "J",
-      "K",
-      "N"
+      "H"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 3,
+  "target_hop_distance": 2,
   "min_distance": 2,
   "short_circuit": true,
-  "seed": 1789658155,
+  "seed": 1789661779,
   "nodes": 15,
-  "edges": 25,
+  "edges": 24,
   "resolution": "1920x1080",
   "fps": 30,
   "step_duration_seconds": 1.8,
@@ -100,11 +98,11 @@
       "filename": "bfs_traversal.mp4",
       "alias": "bfs_short_circuit.mp4",
       "title": "Short-Circuit Target Search (Finding Node K): BFS Animation",
-      "description": "Breadth-first search from Node A seeking Node K (3 hops away). Halts immediately upon discovery edge (u -> K) without waiting in FIFO Queue.",
+      "description": "Breadth-first search from Node A seeking Node K (2 hops away). Halts immediately upon discovery edge (u -> K) without waiting in FIFO Queue.",
       "data_structure": "FIFO Queue (Short-Circuited)",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 3,
+      "target_hop_distance": 2,
       "short_circuit": true,
       "scope": "short_circuit_target_K",
       "resolution": "1920x1080",
@@ -115,11 +113,11 @@
       "filename": "dfs_traversal.mp4",
       "alias": "dfs_short_circuit.mp4",
       "title": "Short-Circuit Target Search (Finding Node K): DFS Animation",
-      "description": "Depth-first search from Node A seeking Node K (3 hops away). Halts eagerly on finding K along active branch without waiting in LIFO Stack.",
+      "description": "Depth-first search from Node A seeking Node K (2 hops away). Halts eagerly on finding K along active branch without waiting in LIFO Stack.",
       "data_structure": "LIFO Stack (Short-Circuited)",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 3,
+      "target_hop_distance": 2,
       "short_circuit": true,
       "scope": "short_circuit_target_K",
       "resolution": "1920x1080",
@@ -130,11 +128,11 @@
       "filename": "bfs_dfs_comparison.mp4",
       "alias": "bfs_dfs_short_circuit_comparison.mp4",
       "title": "Short-Circuit Target Search (Finding Node K): Comparative Traversal (BFS vs DFS)",
-      "description": "Synchronized eager search from Node A seeking Node K (3 hops away). Contrasts BFS eager level-by-level discovery vs DFS eager branch discovery.",
+      "description": "Synchronized eager search from Node A seeking Node K (2 hops away). Contrasts BFS eager level-by-level discovery vs DFS eager branch discovery.",
       "data_structure": "Queue vs Stack (Short-Circuited)",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 3,
+      "target_hop_distance": 2,
       "short_circuit": true,
       "scope": "short_circuit_target_K",
       "resolution": "1920x1080",

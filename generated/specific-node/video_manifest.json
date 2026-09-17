@@ -3,91 +3,89 @@
     "A": [
       "B",
       "C",
-      "E"
+      "D",
+      "I",
+      "M"
     ],
     "B": [
       "A",
-      "C",
+      "D",
       "E"
     ],
     "C": [
       "A",
-      "B",
-      "D",
       "G",
+      "H",
       "N",
       "O"
     ],
     "D": [
-      "C",
-      "F",
-      "H",
-      "J",
-      "L",
-      "O"
-    ],
-    "E": [
       "A",
       "B",
-      "O"
+      "G",
+      "K",
+      "M",
+      "N"
+    ],
+    "E": [
+      "B",
+      "F",
+      "H",
+      "I",
+      "K"
     ],
     "F": [
-      "D",
-      "N"
+      "E",
+      "J",
+      "L"
     ],
     "G": [
       "C",
-      "K"
+      "D"
     ],
     "H": [
-      "D",
-      "I",
-      "M"
+      "C",
+      "E",
+      "N",
+      "O"
     ],
     "I": [
-      "H",
-      "L",
-      "M"
+      "A",
+      "E"
     ],
     "J": [
-      "D",
-      "M",
-      "O"
+      "F"
     ],
     "K": [
-      "G",
-      "O"
+      "D",
+      "E"
     ],
     "L": [
-      "D",
-      "I"
+      "F",
+      "M"
     ],
     "M": [
-      "H",
-      "I",
-      "J"
+      "A",
+      "D",
+      "L"
     ],
     "N": [
       "C",
-      "F",
-      "O"
+      "D",
+      "H"
     ],
     "O": [
       "C",
-      "D",
-      "E",
-      "J",
-      "K",
-      "N"
+      "H"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 3,
+  "target_hop_distance": 2,
   "min_distance": 2,
-  "seed": 1789658155,
+  "seed": 1789661779,
   "nodes": 15,
-  "edges": 25,
+  "edges": 24,
   "resolution": "1920x1080",
   "fps": 30,
   "step_duration_seconds": 1.8,
@@ -98,11 +96,11 @@
       "algorithm": "bfs",
       "filename": "bfs_traversal.mp4",
       "title": "Target Search (Finding Node K): BFS Animation",
-      "description": "Breadth-first search originating from Node A seeking destination Node K (3 hops away), stopping upon discovery to reveal the optimal shortest path.",
+      "description": "Breadth-first search originating from Node A seeking destination Node K (2 hops away), stopping upon discovery to reveal the optimal shortest path.",
       "data_structure": "FIFO Queue",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 3,
+      "target_hop_distance": 2,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
@@ -111,11 +109,11 @@
       "algorithm": "dfs",
       "filename": "dfs_traversal.mp4",
       "title": "Target Search (Finding Node K): DFS Animation",
-      "description": "Depth-first search originating from Node A seeking destination Node K (3 hops away), demonstrating deep exploration and backtracking until target reached.",
+      "description": "Depth-first search originating from Node A seeking destination Node K (2 hops away), demonstrating deep exploration and backtracking until target reached.",
       "data_structure": "LIFO Stack",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 3,
+      "target_hop_distance": 2,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
@@ -124,11 +122,11 @@
       "algorithm": "comparison",
       "filename": "bfs_dfs_comparison.mp4",
       "title": "Target Search (Finding Node K): Comparative Traversal (BFS vs DFS)",
-      "description": "Synchronized search from Node A seeking destination Node K (3 hops away). Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
+      "description": "Synchronized search from Node A seeking destination Node K (2 hops away). Demonstrates how BFS finds the minimal-hop shortest path while DFS explores deep branches.",
       "data_structure": "Queue vs Stack",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 3,
+      "target_hop_distance": 2,
       "scope": "target_K",
       "resolution": "1920x1080",
       "step_duration": 1.8
