@@ -1,0 +1,89 @@
+name: Generate Fractal SVGs
+
+on:
+  workflow_dispatch:
+  push:
+    # This workflow writes to artifacts; ignoring it prevents a trigger loop.
+    branches-ignore:
+      - artifacts
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run unit test suite
+        run: |
+          python3 -m unittest discover -s 2026-09-17/fractals -p "test_*.py"
+
+      - name: Generate Fractal SVGs collection
+        env:
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/fractals
+        run: |
+          mkdir -p "$ARTIFACT_DIRECTORY"
+          seed="$(date -u +%s)"
+          python3 2026-09-17/fractals/fractals.py \
+            --all \
+            --seed "$seed" \
+            --palette neon \
+            --output-dir "$ARTIFACT_DIRECTORY" \
+            --manifest
+
+          python3 - << 'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          out = Path(os.environ["ARTIFACT_DIRECTORY"])
+          manifest_path = out / "manifest.json"
+          if manifest_path.exists():
+              manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+              rows = "\n".join(
+                  f"| `{f['file']}` | **{f['title']}** | {f['difficulty'].upper()} | {f['dimension_val']} (`{f.get('dimension_formula','')}`) | {f['depth']} |"
+                  for f in manifest.get("fractals", [])
+              )
+              (out / "README.md").write_text(
+                  "# Mathematical Fractal SVG Visualizations\n\n"
+                  "High-resolution vector fractals categorized across three difficulty tiers (Easy, Medium, Hard).\n"
+                  f"Generated at: {manifest.get('generated_at', '')}\n\n"
+                  "| File | Name | Tier | Dimension | Depth |\n"
+                  "| --- | --- | --- | --- | --- |\n"
+                  f"{rows}\n",
+                  encoding="utf-8",
+              )
+          PY
+
+      - name: Create GitHub Release for Fractal SVGs
+        env:
+          TARGET_DIR: fractals
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/fractals
+          RELEASE_TITLE: "Generate Mathematical Fractals SVG Showcase"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export COMMIT_DESCRIPTION="Generated $(jq -r '.total // (.fractals | length)' "$ARTIFACT_DIRECTORY"/manifest.json) mathematical fractal SVGs across Easy, Medium, and Hard tiers. Seed: $(jq -r .seed "$ARTIFACT_DIRECTORY"/manifest.json)"
+          bash .github/scripts/create_release.sh
+
+      - name: Commit and push SVGs to the artifacts branch
+        env:
+          TARGET_DIR: fractals
+          ARTIFACT_DIRECTORY: ${{ runner.temp }}/fractals
+          COMMIT_TITLE: "Generate Mathematical Fractals SVG Showcase"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          export COMMIT_DESCRIPTION="Generated $(jq -r '.total // (.fractals | length)' "$ARTIFACT_DIRECTORY"/manifest.json) mathematical fractal SVGs across Easy, Medium, and Hard tiers. Seed: $(jq -r .seed "$ARTIFACT_DIRECTORY"/manifest.json)"
+          bash .github/scripts/push_artifacts.sh

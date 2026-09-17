@@ -362,6 +362,11 @@
       opacity: 0.4;
       cursor: not-allowed;
     }
+    .btn-filter.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
 
     /* Voronoi Quick Jump Buttons */
     .num-bar {
@@ -548,6 +553,10 @@
         <button class="tab-link" data-tab="rsa">
           RSA Cryptosystem
           <span class="count-tag" id="badge-rsa">__RSA_TOTAL__</span>
+        </button>
+        <button class="tab-link" data-tab="fractals">
+          Fractals
+          <span class="count-tag" id="badge-fractals">__FRACTALS_TOTAL__</span>
         </button>
       </nav>
     </div>
@@ -829,6 +838,50 @@
       <div class="grid grid-2" id="rsa-video-grid" style="margin-bottom: 2rem;"></div>
     </section>
 
+    <!-- 8. Mathematical Fractals -->
+    <section id="tab-fractals" class="tab-content">
+      <div class="section-intro">
+        <h2>🌀 Mathematical Fractal Geometry Explorer</h2>
+        <p>
+          High-resolution scalable vector graphics (SVG) of mathematical fractals categorized from easy to hard across three distinct tiers: Elementary Recursive Geometry (Cantor, Koch, Sierpiński, Vicsek), Branching Trees & Space-Filling Curves (Pythagoras, Heighway Dragon, Hilbert, Canopy, Lévy C), and Iterated Function Systems & Complex Dynamics (Barnsley Fern, Gosper Flowsnake, Mandelbrot, Julia, Newton-Raphson).
+        </p>
+      </div>
+
+      <!-- Controls & Filter Toolbar -->
+      <div class="controls-bar" style="display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 1.5rem;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="fractal-tier-filters">
+          <button class="btn btn-filter active" data-filter="all" style="cursor: pointer;">All</button>
+          <button class="btn btn-filter" data-filter="easy" style="cursor: pointer;">Level 1: Easy</button>
+          <button class="btn btn-filter" data-filter="medium" style="cursor: pointer;">Level 2: Medium</button>
+          <button class="btn btn-filter" data-filter="hard" style="cursor: pointer;">Level 3: Hard</button>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <input type="text" id="fractal-search" placeholder="Search fractals..." class="search-input" style="padding: 0.45rem 0.85rem; border-radius: 6px; background: #111827; border: 1px solid #1f2937; color: #f9fafb; font-size: 0.9rem;">
+        </div>
+      </div>
+
+      <!-- Spotlight Interactive Viewer -->
+      <div class="viewer" id="fractals-viewer" style="margin-bottom: 2rem;">
+        <div class="viewer-display" style="background: #0b0f19; min-height: 480px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 8px;">
+          <img id="fractals-main-img" src="" alt="Fractal SVG" style="max-height: 560px; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        </div>
+        <div class="viewer-info">
+          <div>
+            <div class="viewer-title" id="spotlight-fractal-title" style="font-size: 1.3rem; font-weight: 700;">Koch Snowflake</div>
+            <div class="viewer-meta" id="spotlight-fractal-meta" style="margin-top: 0.25rem;"></div>
+            <div id="spotlight-fractal-desc" style="color: #9ca3af; font-size: 0.9rem; margin-top: 0.5rem; line-height: 1.4;"></div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <a id="spotlight-fractal-link" href="#" target="_blank" class="btn" style="white-space: nowrap;">Open Raw SVG &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fractals Grid -->
+      <h3 style="margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.1rem; color: var(--text-heading);">Fractal Gallery</h3>
+      <div class="grid grid-3" id="fractals-grid" style="margin-bottom: 2rem;"></div>
+    </section>
+
   </main>
 
   <footer>
@@ -865,7 +918,7 @@
 
     if (window.location.hash) {
       const hash = window.location.hash.replace('#', '');
-      if (['collision', 'gcd', 'voronoi', 'traversal', 'matrix', 'probability', 'rsa'].includes(hash)) {
+      if (['collision', 'gcd', 'voronoi', 'traversal', 'matrix', 'probability', 'rsa', 'fractals'].includes(hash)) {
         selectTab(hash);
       }
     }
@@ -1543,6 +1596,106 @@
       }
     }
 
+    // =========================================================================
+    // 8. Mathematical Fractals
+    // =========================================================================
+    const fractalsList = (DATA.fractals && DATA.fractals.fractals) || [];
+    let currentFractalFilter = 'all';
+    let currentFractalSearch = '';
+
+    function showFractalSpotlight(item) {
+      if (!item) return;
+      document.getElementById('spotlight-fractal-title').textContent = item.title;
+      const diffLabel = (item.difficulty || 'medium').toUpperCase();
+      document.getElementById('spotlight-fractal-meta').textContent =
+        `Tier: ${diffLabel} | Dimension: D \u2248 ${item.dimension_val || '1.5'} (${item.dimension_formula || ''}) | Depth: ${item.depth || ''} | Size: ${item.size_kb || 0} KB`;
+      document.getElementById('spotlight-fractal-desc').textContent = item.description || '';
+      
+      const imgPath = item.filename;
+      const imgElem = document.getElementById('fractals-main-img');
+      imgElem.src = imgPath;
+      imgElem.alt = item.title;
+      
+      const linkElem = document.getElementById('spotlight-fractal-link');
+      linkElem.href = imgPath;
+    }
+
+    function renderFractals() {
+      const grid = document.getElementById('fractals-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      let filtered = fractalsList.filter(f => {
+        const matchesTier = currentFractalFilter === 'all' || f.difficulty === currentFractalFilter;
+        const matchesSearch = !currentFractalSearch ||
+          f.title.toLowerCase().includes(currentFractalSearch) ||
+          f.id.toLowerCase().includes(currentFractalSearch) ||
+          (f.description && f.description.toLowerCase().includes(currentFractalSearch));
+        return matchesTier && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">No fractals match the selected filter.</div>';
+        return;
+      }
+
+      filtered.forEach((f, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const diffBadgeColors = {
+          easy: '#10b981',
+          medium: '#f59e0b',
+          hard: '#ef4444'
+        };
+        const badgeColor = diffBadgeColors[f.difficulty] || '#6366f1';
+        card.innerHTML = `
+          <div style="background: #080c14; border-radius: 6px; overflow: hidden; height: 180px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; border: 1px solid #1f2937;">
+            <img src="${f.filename}" alt="${f.title}" style="max-height: 170px; max-width: 95%; object-fit: contain;">
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; margin-bottom: 0.25rem;">
+            <div class="card-title" style="margin: 0; font-size: 1rem;">${f.title}</div>
+            <span style="font-size: 0.7rem; font-weight: 700; color: ${badgeColor}; text-transform: uppercase; background: ${badgeColor}22; padding: 2px 6px; border-radius: 4px; border: 1px solid ${badgeColor}44;">${f.difficulty}</span>
+          </div>
+          <div class="card-desc" style="font-size: 0.85rem; line-height: 1.35; margin-bottom: 0.5rem;">${f.description || ''}</div>
+          <div class="card-meta" style="font-family: monospace; color: var(--accent);">D \u2248 ${f.dimension_val} &middot; Depth ${f.depth}</div>
+          <div style="margin-top: 0.75rem; display: flex; gap: 8px;">
+            <button class="btn btn-view" style="flex: 1;">Inspect</button>
+            <a href="${f.filename}" class="btn" target="_blank">Raw SVG</a>
+          </div>
+        `;
+        card.querySelector('.btn-view').addEventListener('click', () => {
+          showFractalSpotlight(f);
+          document.getElementById('fractals-viewer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function initFractals() {
+      const filterBtns = document.querySelectorAll('#fractal-tier-filters .btn-filter');
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          filterBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFractalFilter = btn.getAttribute('data-filter');
+          renderFractals();
+        });
+      });
+
+      const searchInput = document.getElementById('fractal-search');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          currentFractalSearch = e.target.value.trim().toLowerCase();
+          renderFractals();
+        });
+      }
+
+      if (fractalsList.length > 0) {
+        showFractalSpotlight(fractalsList[0]);
+        renderFractals();
+      }
+    }
+
     // Generic Pagination Helper
     function renderPagination(containerId, currentPage, totalPages, onSelect) {
       const container = document.getElementById(containerId);
@@ -1595,6 +1748,7 @@
       renderTraversals();
       renderMatrix();
       renderRsa();
+      initFractals();
     });
   </script>
 </body>

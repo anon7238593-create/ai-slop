@@ -27,6 +27,7 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
         "traversal": {"files": [], "videos": [], "graph": {}, "total": 0},
         "matrix": {"videos": [], "configuration": {}, "total": 0},
         "rsa": {"videos": [], "total": 0, "topic": ""},
+        "fractals": {"fractals": [], "total": 0, "generated_at": "", "palette": "neon", "seed": 42},
     }
 
     # 1. Collision Videos
@@ -440,6 +441,65 @@ def discover_artifacts(artifacts_dir: str) -> Dict[str, Any]:
         data["rsa"]["videos"] = rsa_vids
         data["rsa"]["total"] = len(rsa_vids)
 
+    # 7. Mathematical Fractals
+    frac_dir = os.path.join(artifacts_dir, "fractals")
+    if not os.path.exists(frac_dir) or not os.listdir(frac_dir):
+        for cand in [
+            os.path.join(repo_root, "2026-09-17", "fractals", "examples"),
+            os.path.join(repo_root, "2026-09-17", "fractals"),
+        ]:
+            if os.path.exists(cand) and any(f.endswith(".svg") for f in os.listdir(cand)):
+                frac_dir = cand
+                break
+
+    if frac_dir and os.path.exists(frac_dir):
+        frac_manifest = os.path.join(frac_dir, "manifest.json")
+        manifest_items: Dict[str, Dict[str, Any]] = {}
+        if os.path.exists(frac_manifest):
+            try:
+                with open(frac_manifest, "r", encoding="utf-8") as f:
+                    f_data = json.load(f)
+                    data["fractals"]["generated_at"] = f_data.get("generated_at", "")
+                    data["fractals"]["seed"] = f_data.get("seed", 42)
+                    data["fractals"]["palette"] = f_data.get("palette", "neon")
+                    data["fractals"]["release_tag"] = f_data.get("release_tag")
+                    data["fractals"]["release_url"] = f_data.get("release_url")
+                    for item in f_data.get("fractals", []):
+                        manifest_items[item.get("file", "")] = item
+            except Exception as e:
+                print(f"Warning loading fractals manifest: {e}", file=sys.stderr)
+
+        frac_items = []
+        svgs = sorted([f for f in os.listdir(frac_dir) if f.endswith(".svg")])
+        for s in svgs:
+            fpath = os.path.join(frac_dir, s)
+            meta = manifest_items.get(s, {})
+            title = meta.get("title") or s.replace(".svg", "").replace("_", " ").title()
+            difficulty = meta.get("difficulty", "medium")
+            dimension = meta.get("dimension_val", "1.5")
+            formula = meta.get("dimension_formula", "")
+            depth = meta.get("depth", 6)
+            desc = meta.get("description", "Mathematical fractal SVG visualization.")
+            size_kb = round(os.path.getsize(fpath) / 1024, 1)
+
+            frac_items.append({
+                "id": meta.get("id", s.replace(".svg", "")),
+                "title": title,
+                "difficulty": difficulty,
+                "dimension_formula": formula,
+                "dimension_val": dimension,
+                "depth": depth,
+                "filename": f"fractals/{s}",
+                "file": s,
+                "description": desc,
+                "size_kb": size_kb,
+            })
+
+        diff_order = {"easy": 1, "medium": 2, "hard": 3}
+        frac_items.sort(key=lambda x: (diff_order.get(x["difficulty"], 99), x["title"]))
+        data["fractals"]["fractals"] = frac_items
+        data["fractals"]["total"] = len(frac_items)
+
     return data
 
 
@@ -458,6 +518,7 @@ def generate_html(data: Dict[str, Any], template_path: str) -> str:
         + data["traversal"]["total"]
         + data["matrix"]["total"]
         + data["rsa"]["total"]
+        + data.get("fractals", {}).get("total", 0)
     )
 
     replacements = {
@@ -470,6 +531,7 @@ def generate_html(data: Dict[str, Any], template_path: str) -> str:
         "__TRAVERSAL_TOTAL__": str(data["traversal"]["total"]),
         "__MATRIX_TOTAL__": str(data["matrix"]["total"]),
         "__RSA_TOTAL__": str(data["rsa"]["total"]),
+        "__FRACTALS_TOTAL__": str(data.get("fractals", {}).get("total", 0)),
     }
 
     for token, val in replacements.items():
@@ -500,9 +562,10 @@ def build_site(artifacts_dir: str, output_dir: str):
     print(f"  - Traversal Assets: {data['traversal']['total']} items ({len(data['traversal']['videos'])} videos, {len(data['traversal']['files'])} PDFs)")
     print(f"  - Matrix Videos:    {data['matrix']['total']} items")
     print(f"  - RSA Videos:       {data['rsa']['total']} items")
+    print(f"  - Fractals SVGs:    {data['fractals']['total']} items")
 
     # 2. Copy media directories to output_dir
-    subdirs = ["collision-videos", "gcd-grids", "voronoi", "generated", "matrix-animations", "rsa-animations"]
+    subdirs = ["collision-videos", "gcd-grids", "voronoi", "generated", "matrix-animations", "rsa-animations", "fractals"]
     for sub in subdirs:
         src_path = os.path.join(artifacts_dir, sub)
         dst_path = os.path.join(output_dir, sub)
@@ -511,6 +574,23 @@ def build_site(artifacts_dir: str, output_dir: str):
             if os.path.exists(dst_path):
                 shutil.rmtree(dst_path)
             shutil.copytree(src_path, dst_path)
+
+    dst_frac = os.path.join(output_dir, "fractals")
+    if not os.path.exists(dst_frac) or not os.listdir(dst_frac):
+        os.makedirs(dst_frac, exist_ok=True)
+        for cand in [
+            os.path.join(artifacts_dir, "fractals"),
+            os.path.join(repo_root, "2026-09-17", "fractals", "examples"),
+            os.path.join(repo_root, "2026-09-17", "fractals"),
+        ]:
+            if os.path.exists(cand) and any(f.endswith(".svg") for f in os.listdir(cand)):
+                print(f"Copying fractals from {cand} -> {dst_frac}...")
+                for f in os.listdir(cand):
+                    s = os.path.join(cand, f)
+                    d = os.path.join(dst_frac, f)
+                    if os.path.isfile(s):
+                        shutil.copy2(s, d)
+                break
 
     dst_mat = os.path.join(output_dir, "matrix-animations")
     if not os.path.exists(dst_mat) or not os.listdir(dst_mat):

@@ -377,3 +377,35 @@ artifacts
       - Refactored into clean modular files in `2026-09-12/rsa_key_generation_manim/scenes/` (`scene1_fermat.py`, `scene2_bezout.py`, `scene3_euler.py`, `scene4_inverse.py`, `scene5_rsa.py`).
       - All 5 scenes verified and rendered locally at 720p30 in 22.3s, packaged into `rendered_animations/` with updated `rsa_manifest.json`.
       - Verified full GitHub Actions workflow compatibility and static website generation via `build_pages.py`.
+
+20. **Mathematical Fractals SVG Suite & Interactive Showcase (`2026-09-17`)**:
+    - **Project Creation**: Built [`2026-09-17/fractals/`](2026-09-17/fractals/) with a dependency-free, high-performance Python generator ([`fractals.py`](2026-09-17/fractals/fractals.py)) creating scalable vector graphics (SVG) of 15 classic and modern fractals categorized from easy to hard across three distinct tiers:
+      1. **Level 1: Easy (Elementary Recursive Geometry & Excision)**:
+         - **Cantor Set Ladder (`cantor_set`)**: Iterative removal of open middle-third segments ($D = \frac{\log 2}{\log 3} \approx 0.6309$).
+         - **Koch Snowflake (`koch_snowflake`)**: Infinite perimeter curve enclosing a finite planar area ($D = \frac{\log 4}{\log 3} \approx 1.2619$).
+         - **Sierpiński Triangle (`sierpinski_triangle`)**: Equilateral triangle with central inverted cutouts ($D = \frac{\log 3}{\log 2} \approx 1.5850$).
+         - **Sierpiński Carpet (`sierpinski_carpet`)**: 9-square grid central excision ($D = \frac{\log 8}{\log 3} \approx 1.8928$).
+         - **Vicsek Box Fractal (`vicsek_fractal`)**: Cross decomposition retaining 5 of 9 sub-squares ($D = \frac{\log 5}{\log 3} \approx 1.4650$).
+      2. **Level 2: Medium (Branching Trees, L-Systems & Space-Filling Curves)**:
+         - **Pythagoras Tree (`pythagoras_tree`)**: Harmonic branching tree of recursive squares demonstrating the Pythagorean theorem ($D = 2.0000$).
+         - **Heighway Dragon Curve (`dragon_curve`)**: 90° paper-folding sequence with non-overlapping plane tiling ($D = 2.0000$, boundary $D \approx 1.5236$).
+         - **Hilbert Space-Filling Curve (`hilbert_curve`)**: Continuous locality-preserving 1D-to-2D surjection ($D = 2.0000$).
+         - **Fractal Binary Canopy (`fractal_canopy`)**: Natural botanical tree branching obeying Leonardo da Vinci's vascular conservation law ($d^2 = d_1^2 + d_2^2$, $D \approx 1.84$).
+         - **Lévy C Curve (`levy_c_curve`)**: Isosceles right-triangle folding yielding an intricate self-similar shoreline fractal ($D = 1.9340$).
+      3. **Level 3: Hard (Iterated Function Systems & Complex Dynamics)**:
+         - **Barnsley Fern (`barnsley_fern`)**: Iterated Function System (IFS) affine transformations via Chaos Game dynamics ($D \approx 1.8600$).
+         - **Gosper Curve / Flowsnake (`gosper_curve`)**: Hexagonal space-filling curve with non-trivial L-system grammar ($D = 2.0000$, boundary $D \approx 1.129$).
+         - **Mandelbrot Boundary Contours (`mandelbrot_set`)**: Escape-time dynamics of $z_{n+1} = z_n^2 + c$ with vector level isolines ($D = 2.0000$).
+         - **Julia Set (`julia_set`)**: Douady's rabbit quadratic polynomial iteration for $c = -0.123 + 0.745i$ ($D \approx 1.4100$).
+         - **Newton-Raphson Basins (`newton_fractal`)**: Basins of attraction and Julia boundaries for the roots of $z^3 - 1 = 0$ ($D = 2.0000$).
+    - **In-Depth Mathematical Documentation**:
+      - Comprehensive [`README.md`](2026-09-17/fractals/README.md) detailing Hausdorff and similarity dimensions, the Banach-Hutchinson contraction mapping principle, exact formulas, step-by-step construction algorithms, geometric invariants, and CLI usage.
+    - **Unit Test Coverage & Verification**:
+      - Full unit test suite in [`test_fractals.py`](2026-09-17/fractals/test_fractals.py) (12 tests passing) validating XML compliance, viewBox scaling, seed determinism, difficulty classifications, palette interpolation, and CLI interfaces.
+    - **CI/CD Automation & GitHub Actions Pipeline**:
+      - Created [`.github/workflows/generate_fractals.yml`](.github/workflows/generate_fractals.yml) to run test suites, generate SVGs, publish to GitHub Releases via `create_release.sh`, and commit to the `artifacts` branch via `push_artifacts.sh`.
+      - Updated [`.github/workflows/deploy_pages.yml`](.github/workflows/deploy_pages.yml) to automatically deploy GitHub Pages on fractal workflow completion.
+    - **Interactive Web Showcase & GitHub Pages Explorer**:
+      - Integrated fractal discovery and fallback asset loading into [`.github/scripts/build_pages.py`](.github/scripts/build_pages.py).
+      - Added dedicated **Fractals** navigation tab, spotlight inspection viewer, tier filter buttons (All, Easy, Medium, Hard), search bar, and interactive gallery cards in [`.github/scripts/template.html`](.github/scripts/template.html).
+
