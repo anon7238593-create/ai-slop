@@ -50,15 +50,15 @@ $$N \cdot s^D = 1 \implies D = \frac{\log N}{\log(1/s)}$$
 
 For arbitrary geometric sets $E \subset \mathbb{R}^n$, the **Hausdorff dimension** $\dim_H(E)$ is defined via the $d$-dimensional Hausdorff outer measure:
 
-$$\mathcal{H}^d(E) = \lim_{\delta \to 0} \inf \left\{ \sum_{i=1}^\infty (\text{diam}\, U_i)^d : E \subseteq \bigcup_{i=1}^\infty U_i,\; \text{diam}\, U_i \le \delta \right\}$$
+$$\mathcal{H}^d(E) = \lim_{\delta \to 0} \inf \left\lbrace \sum_{i=1}^\infty (\operatorname{diam}(U_i))^d : E \subseteq \bigcup_{i=1}^\infty U_i, \quad \operatorname{diam}(U_i) \le \delta \right\rbrace$$
 
 The critical exponent at which $\mathcal{H}^d(E)$ drops from $\infty$ to $0$ is $\dim_H(E)$:
 
-$$\dim_H(E) = \inf \{ d \ge 0 : \mathcal{H}^d(E) = 0 \} = \sup \{ d \ge 0 : \mathcal{H}^d(E) = \infty \}$$
+$$\dim_H(E) = \inf \left\lbrace d \ge 0 : \mathcal{H}^d(E) = 0 \right\rbrace = \sup \left\lbrace d \ge 0 : \mathcal{H}^d(E) = \infty \right\rbrace$$
 
 ### The Contraction Mapping Principle
 
-An **Iterated Function System (IFS)** consists of a finite collection of contraction mappings $\{f_1, f_2, \dots, f_m\}$ on a complete metric space $(X, d)$, where each mapping has Lipschitz constant $c_i < 1$:
+An **Iterated Function System (IFS)** consists of a finite collection of contraction mappings $\lbrace f_1, f_2, \dots, f_m \rbrace$ on a complete metric space $(X, d)$, where each mapping has Lipschitz constant $c_i < 1$:
 
 $$d(f_i(x), f_i(y)) \le c_i \cdot d(x, y) \quad \forall x, y \in X$$
 
@@ -301,7 +301,7 @@ A hexagonal space-filling curve discovered by Bill Gosper. It uses an L-system a
 - **Difficulty**: Hard
 - **Hausdorff Dimension**: $\dim_H(\partial M) = 2.0000$ (proved by Mitsuhiro Shishikura, 1998)
 - **Definition**: The set of complex parameters $c \in \mathbb{C}$ for which the orbit of 0 under $f_c(z) = z^2 + c$ remains bounded:
-  $$M = \{ c \in \mathbb{C} : \lim_{n \to \infty} |f_c^{(n)}(0)| \not= \infty \}$$
+  $$M = \left\lbrace c \in \mathbb{C} : \lim_{n \to \infty} |f_c^{(n)}(0)| \ne \infty \right\rbrace$$
 
 #### How It Works
 1. For each point $c = x + iy$, initialize $z_0 = 0$.
