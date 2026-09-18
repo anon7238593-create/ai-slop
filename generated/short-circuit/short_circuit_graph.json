@@ -2,110 +2,104 @@
   "graph": {
     "A": [
       "B",
-      "C",
       "D",
-      "H",
-      "J",
-      "M"
+      "F",
+      "N"
     ],
     "B": [
       "A",
-      "F",
-      "I",
-      "J"
+      "C",
+      "E",
+      "H"
     ],
     "C": [
-      "A",
+      "B",
       "D",
-      "E",
       "F",
       "G",
-      "H",
-      "K"
+      "K",
+      "N"
     ],
     "D": [
       "A",
       "C",
-      "K"
+      "E",
+      "F",
+      "M"
     ],
     "E": [
-      "C",
-      "F",
-      "H",
-      "J",
-      "N",
-      "O"
-    ],
-    "F": [
       "B",
-      "C",
-      "E",
-      "H",
-      "I",
+      "D",
+      "G",
       "K"
     ],
-    "G": [
-      "C"
-    ],
-    "H": [
+    "F": [
       "A",
+      "C",
+      "D",
+      "G",
+      "I",
+      "N"
+    ],
+    "G": [
       "C",
       "E",
       "F",
-      "I",
-      "K",
-      "M",
-      "O"
-    ],
-    "I": [
-      "B",
-      "F",
-      "H",
-      "M"
-    ],
-    "J": [
-      "A",
-      "B",
-      "E"
-    ],
-    "K": [
-      "C",
-      "D",
-      "F",
-      "H",
-      "L"
-    ],
-    "L": [
-      "K",
-      "M"
-    ],
-    "M": [
-      "A",
       "H",
       "I",
       "L",
+      "N"
+    ],
+    "H": [
+      "B",
+      "G",
+      "I",
+      "J"
+    ],
+    "I": [
+      "F",
+      "G",
+      "H",
       "N",
       "O"
     ],
-    "N": [
+    "J": [
+      "H",
+      "O"
+    ],
+    "K": [
+      "C",
       "E",
-      "M"
+      "O"
+    ],
+    "L": [
+      "G"
+    ],
+    "M": [
+      "D"
+    ],
+    "N": [
+      "A",
+      "C",
+      "F",
+      "G",
+      "I"
     ],
     "O": [
-      "E",
-      "H",
-      "M"
+      "I",
+      "J",
+      "K"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 2,
+  "target_hop_distance": 3,
   "min_distance": 2,
   "short_circuit": true,
-  "random_seed": 1789744486,
+  "random_seed": 1789748046,
   "edge_probability": null,
   "nodes": 15,
-  "edges": 33,
+  "edges": 30,
   "step_duration_seconds": 1.8,
   "scope": "short_circuit_target_K"
 }
