@@ -1,4 +1,4 @@
-> 📦 **GitHub Release**: [`fractals-20260918-170925-run35372635681`](https://github.com/anon7238593-create/ai-slop/releases/tag/fractals-20260918-170925-run35372635681) &middot; **Full Bundle**: [`fractals-20260918-170925-run35372635681.zip`](https://github.com/anon7238593-create/ai-slop/releases/download/fractals-20260918-170925-run35372635681/fractals-20260918-170925-run35372635681.zip)
+> 📦 **GitHub Release**: [`fractals-20260918-181116-run35378681124`](https://github.com/anon7238593-create/ai-slop/releases/tag/fractals-20260918-181116-run35378681124) &middot; **Full Bundle**: [`fractals-20260918-181116-run35378681124.zip`](https://github.com/anon7238593-create/ai-slop/releases/download/fractals-20260918-181116-run35378681124/fractals-20260918-181116-run35378681124.zip)
 # Mathematical Fractal SVG Visualizations
 
 High-resolution vector fractals categorized across three difficulty tiers (Easy, Medium, Hard).
