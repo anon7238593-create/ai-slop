@@ -2,111 +2,101 @@
   "graph": {
     "A": [
       "B",
-      "C",
-      "D",
-      "F",
-      "H",
-      "M"
+      "C"
     ],
     "B": [
       "A",
-      "C",
+      "D",
       "E",
-      "I",
-      "L",
+      "N",
       "O"
     ],
     "C": [
       "A",
-      "B",
-      "D",
-      "E",
-      "G",
-      "I",
-      "J",
-      "K"
+      "H",
+      "L",
+      "M",
+      "O"
     ],
     "D": [
-      "A",
-      "C",
-      "G",
-      "J"
+      "B",
+      "E",
+      "F",
+      "H",
+      "J",
+      "L"
     ],
     "E": [
       "B",
-      "C",
+      "D",
       "G",
-      "M",
-      "N",
-      "O"
+      "I",
+      "J",
+      "M"
     ],
     "F": [
-      "A",
-      "I",
-      "K",
-      "L",
-      "O"
+      "D"
     ],
     "G": [
-      "C",
-      "D",
       "E",
-      "J"
-    ],
-    "H": [
-      "A",
-      "I",
+      "J",
       "L",
       "M"
     ],
-    "I": [
-      "B",
+    "H": [
       "C",
-      "F",
-      "H",
-      "O"
+      "D",
+      "L",
+      "N"
+    ],
+    "I": [
+      "E",
+      "M"
     ],
     "J": [
+      "D",
+      "E",
+      "G",
+      "K",
+      "M"
+    ],
+    "K": [
+      "J",
+      "O"
+    ],
+    "L": [
       "C",
       "D",
       "G",
-      "O"
-    ],
-    "K": [
-      "C",
-      "F"
-    ],
-    "L": [
-      "B",
-      "F",
-      "H",
-      "O"
-    ],
-    "M": [
-      "A",
-      "E",
       "H"
     ],
+    "M": [
+      "C",
+      "E",
+      "G",
+      "I",
+      "J",
+      "O"
+    ],
     "N": [
-      "E"
+      "B",
+      "H"
     ],
     "O": [
       "B",
-      "E",
-      "F",
-      "I",
-      "J",
-      "L"
+      "C",
+      "K",
+      "M"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 2,
+  "target_hop_distance": 3,
   "min_distance": 2,
-  "random_seed": 1789787669,
+  "random_seed": 1789791307,
   "edge_probability": null,
   "nodes": 15,
-  "edges": 34,
+  "edges": 29,
   "step_duration_seconds": 1.8,
   "scope": "particular_node"
 }
