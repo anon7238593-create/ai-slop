@@ -2,101 +2,119 @@
   "graph": {
     "A": [
       "B",
-      "C"
+      "C",
+      "F",
+      "G",
+      "J",
+      "M"
     ],
     "B": [
       "A",
-      "D",
       "E",
-      "N",
-      "O"
+      "G",
+      "L",
+      "M"
     ],
     "C": [
       "A",
-      "H",
-      "L",
-      "M",
+      "D",
+      "E",
+      "F",
+      "I",
+      "K",
       "O"
     ],
     "D": [
-      "B",
+      "C",
       "E",
-      "F",
       "H",
-      "J",
+      "I",
       "L"
     ],
     "E": [
       "B",
-      "D",
-      "G",
-      "I",
-      "J",
-      "M"
-    ],
-    "F": [
-      "D"
-    ],
-    "G": [
-      "E",
-      "J",
-      "L",
-      "M"
-    ],
-    "H": [
       "C",
       "D",
-      "L",
+      "F",
+      "G",
+      "J"
+    ],
+    "F": [
+      "A",
+      "C",
+      "E",
+      "H",
+      "J",
+      "M",
       "N"
     ],
-    "I": [
+    "G": [
+      "A",
+      "B",
       "E",
+      "J",
+      "K"
+    ],
+    "H": [
+      "D",
+      "F",
+      "I",
       "M"
     ],
-    "J": [
+    "I": [
+      "C",
       "D",
+      "H",
+      "L"
+    ],
+    "J": [
+      "A",
       "E",
+      "F",
       "G",
       "K",
       "M"
     ],
     "K": [
+      "C",
+      "G",
       "J",
-      "O"
+      "L"
     ],
     "L": [
-      "C",
+      "B",
       "D",
-      "G",
-      "H"
-    ],
-    "M": [
-      "C",
-      "E",
-      "G",
       "I",
-      "J",
+      "K",
+      "M",
+      "N",
       "O"
     ],
-    "N": [
+    "M": [
+      "A",
       "B",
-      "H"
+      "F",
+      "H",
+      "J",
+      "L"
+    ],
+    "N": [
+      "F",
+      "L"
     ],
     "O": [
-      "B",
       "C",
-      "K",
-      "M"
+      "L"
     ]
   },
   "start_node": "A",
   "target_node": "K",
-  "target_hop_distance": 3,
+  "target_hop_distance": 2,
   "min_distance": 2,
   "short_circuit": true,
-  "seed": 1789791307,
+  "seed": 1789794815,
   "nodes": 15,
-  "edges": 29,
+  "edges": 38,
   "resolution": "1920x1080",
   "fps": 30,
   "step_duration_seconds": 1.8,
@@ -108,11 +126,11 @@
       "filename": "bfs_traversal.mp4",
       "alias": "bfs_short_circuit.mp4",
       "title": "Short-Circuit Target Search (Finding Node K): BFS Animation",
-      "description": "Breadth-first search from Node A seeking Node K (3 hops away). Halts immediately upon discovery edge (u -> K) without waiting in FIFO Queue.",
+      "description": "Breadth-first search from Node A seeking Node K (2 hops away). Halts immediately upon discovery edge (u -> K) without waiting in FIFO Queue.",
       "data_structure": "FIFO Queue (Short-Circuited)",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 3,
+      "target_hop_distance": 2,
       "short_circuit": true,
       "scope": "short_circuit_target_K",
       "resolution": "1920x1080",
@@ -123,11 +141,11 @@
       "filename": "dfs_traversal.mp4",
       "alias": "dfs_short_circuit.mp4",
       "title": "Short-Circuit Target Search (Finding Node K): DFS Animation",
-      "description": "Depth-first search from Node A seeking Node K (3 hops away). Halts eagerly on finding K along active branch without waiting in LIFO Stack.",
+      "description": "Depth-first search from Node A seeking Node K (2 hops away). Halts eagerly on finding K along active branch without waiting in LIFO Stack.",
       "data_structure": "LIFO Stack (Short-Circuited)",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 3,
+      "target_hop_distance": 2,
       "short_circuit": true,
       "scope": "short_circuit_target_K",
       "resolution": "1920x1080",
@@ -138,11 +156,11 @@
       "filename": "bfs_dfs_comparison.mp4",
       "alias": "bfs_dfs_short_circuit_comparison.mp4",
       "title": "Short-Circuit Target Search (Finding Node K): Comparative Traversal (BFS vs DFS)",
-      "description": "Synchronized eager search from Node A seeking Node K (3 hops away). Contrasts BFS eager level-by-level discovery vs DFS eager branch discovery.",
+      "description": "Synchronized eager search from Node A seeking Node K (2 hops away). Contrasts BFS eager level-by-level discovery vs DFS eager branch discovery.",
       "data_structure": "Queue vs Stack (Short-Circuited)",
       "start_node": "A",
       "target_node": "K",
-      "target_hop_distance": 3,
+      "target_hop_distance": 2,
       "short_circuit": true,
       "scope": "short_circuit_target_K",
       "resolution": "1920x1080",
